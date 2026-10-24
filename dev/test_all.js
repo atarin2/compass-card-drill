@@ -6,6 +6,12 @@ const errs=[];p.on('pageerror',e=>errs.push(e.message));let ng=0;
 const ok=(name,cond)=>{console.log((cond?'OK  ':'NG  ')+name);if(!cond)ng++};
 await p.goto(URL);await p.waitForTimeout(600);
 ok('ホーム表示',!!await p.$('#start'));
+ok('初めての人には更新のお知らせを出さない',!await p.$('#newUpd'));
+await p.evaluate(()=>localStorage.setItem('cdrill:updSeen','"2000/01/01"'));await p.reload();await p.waitForTimeout(400);
+ok('前から使っている人には更新のお知らせ',!!await p.$('#newUpd'));
+await p.click('#newUpd');await p.waitForTimeout(300);
+ok('見たらお知らせが消える',!await p.$('#newUpd')&&await p.$eval('#updBox',e=>e.open));
+await p.reload();await p.waitForTimeout(400);ok('開き直しても消えたまま',!await p.$('#newUpd'));
 // 秒数クイズ：正解・不正解・スキップ
 await p.click('#start');await p.waitForTimeout(200);
 const ct=await p.evaluate(()=>exact(game.qs[game.i]));

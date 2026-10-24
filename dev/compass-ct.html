@@ -144,6 +144,8 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .upd{font-size:12px;color:var(--muted);line-height:1.6;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.upd b{color:var(--ink)}.upd ul{margin:2px 0 0;padding-left:1.2em}
 .upd summary{display:flex;justify-content:space-between;align-items:center;gap:8px;list-style:none;cursor:pointer;font-size:13px}.upd summary::-webkit-details-marker{display:none}
 .upd .ul{color:var(--accent);font-weight:700;font-size:12px}.upd .ul::after{content:" ▼"}.upd[open] .ul::after{content:" ▲"}
+.newupd{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;text-align:left;padding:11px 14px;border-radius:12px;border:2px solid var(--water);background:color-mix(in srgb,var(--water) 10%,var(--surface));font-size:14px;font-weight:700}.newupd .go{color:var(--water);font-size:13px}
+.nb{display:inline-block;font-family:var(--f-num);font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 6px;border-radius:6px;background:var(--water);color:#fff;vertical-align:1px}
 .upd .ud{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
 .nxrow{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}.nxrow.one{grid-template-columns:1fr}
 .fdone{display:flex;flex-direction:column;gap:12px;text-align:center}
@@ -473,7 +475,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -486,6 +488,10 @@ const store={
 const esc=s=>String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
 const fmt=ms=>(ms/1000).toFixed(2);
 
+// 未確認の更新：初めて来た人には出さない（設定が保存済み＝前から使っている人だけ）
+if(!store.get("updSeen",null)&&!store.get("settings",null))store.set("updSeen",UPDATES[0][0]);
+const updNew=()=>(store.get("updSeen","")||"")<UPDATES[0][0];
+const markUpd=()=>store.set("updSeen",UPDATES[0][0]);
 let settings=Object.assign({range:30,count:10,se:1,bgm:1,bgmSrc:"built",bgmVol:30,seVol:60,fall:1,theme:"auto"},store.get("settings",{}));
 settings.mode="ct";
 let game=null, timerId=null;
@@ -513,6 +519,7 @@ function home(){
   const b=best[bk];
   const rs=resumeInfo();
   view.innerHTML=`
+    ${updNew()?`<button type="button" class="newupd" id="newUpd"><span class="nb">NEW</span><span>未確認の更新があります（${UPDATES[0][0]}）</span><span class="go">見る ›</span></button>`:""}
     ${rs?`<div class="resume"><button class="primary" id="resumeBtn" type="button">▶ 続きから<small>${rs.k==="flash"?`カード名を覚える ${rs.i+1} / ${rs.qs.length} 枚`:`秒数クイズ${rs.h?"（"+esc((HEROES.find(h=>h.id===rs.h)||{}).name||"")+"）":""} 第${rs.i+1}問 / ${rs.qs.length}問`}</small></button><button class="sub" id="resumeDel" type="button">破棄</button></div>`:""}
     <div class="field"><span class="label">範囲（大会使用率の上位から）</span>
       ${seg("range",[{v:30,t:"上位30"},{v:60,t:"上位60"},{v:CARDS.length,t:"全"+live().length+"枚"}].concat(imgCount()?[{v:-1,t:"画像あり",s:imgCount()+"枚"}]:[]),settings.range)}</div>
@@ -565,7 +572,7 @@ function home(){
         <p>自分で登録したカード画像やBGMの音源は、その端末のブラウザの中にだけ保存され、外には送られません。</p>
         <p class="env-claude">このページはclaude.ai上で公開しているため、ページの配信についてはclaude.ai（Anthropic）のプライバシーポリシーも適用されます。</p><p class="env-web">このページはGitHub Pagesで公開しているため、ページの配信についてはGitHubのプライバシーポリシーも適用されます。</p></div></details>
     </section>
-    <details class="upd" id="updBox"><summary><b>最終更新：${UPDATES[0][0]}</b><span class="ul">更新履歴を見る</span></summary>
+    <details class="upd" id="updBox"><summary><b>最終更新：${UPDATES[0][0]}${updNew()?' <span class="nb">NEW</span>':""}</b><span class="ul">更新履歴を見る</span></summary>
       ${UPDATES.map(([d,items])=>`<div class="ud"><b>${d}</b><ul>${items.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</details>
     <p class="note">CTはメダル補正なしの値です。<br>
     データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）、使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
@@ -587,6 +594,8 @@ function home(){
   const bd=$("#bgmDel");if(bd)bd.onclick=async()=>{SND.stopBgm();try{await DB.del("__bgm__")}catch(e){}SND.setOwn(null);settings.bgmSrc="built";save();SND.restart();home()};
   view.querySelectorAll("[data-precise]").forEach(x=>x.onclick=()=>{settings.precise=+x.dataset.precise;save();home()});
   if(rs){$("#resumeBtn").onclick=resume;$("#resumeDel").onclick=()=>{store.set("resume",null);home()}}
+  const nu=$("#newUpd");if(nu)nu.onclick=()=>{const u=$("#updBox");u.open=true;u.scrollIntoView({behavior:"smooth",block:"start"})};
+  $("#updBox").ontoggle=e=>{if(e.target.open&&updNew()){markUpd();const n=$("#newUpd");if(n)n.remove();e.target.querySelectorAll(".nb").forEach(x=>x.remove())}};
   $("#heroBox").ontoggle=e=>{heroOpen=e.target.open};
   view.querySelectorAll("[data-hero]").forEach(x=>x.onclick=()=>{settings.hero=x.dataset.hero;heroOpen=false;save();home()});
   view.querySelectorAll("[data-count]").forEach(x=>x.onclick=()=>{settings.count=+x.dataset.count;save();home()});
