@@ -55,6 +55,8 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .brand{font-family:var(--f-display);font-size:20px;letter-spacing:.02em;line-height:1.1}
 .brand small{display:block;font-family:var(--f-body);font-size:11px;color:var(--muted);letter-spacing:.12em;font-weight:500}
+.tops{display:flex;gap:8px;align-items:center}.mute{font-size:18px;line-height:1;padding:6px 10px!important;min-width:44px}.mute.on{border-color:var(--ng)!important;background:color-mix(in srgb,var(--ng) 12%,transparent)!important}
+.resume{display:grid;grid-template-columns:1fr auto;gap:8px}.resume .primary{font-size:16px;letter-spacing:.02em;text-align:left;padding:13px 16px}.resume .primary small{display:block;font-family:var(--f-body);font-size:12px;opacity:.85;letter-spacing:0}.resume .sub{font-size:13px;padding:8px 12px}
 .ghost{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px}
 .screen{display:flex;flex-direction:column;gap:14px;flex:1}
 h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wrap:balance}
@@ -247,7 +249,7 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 <div class="app" id="app">
   <header class="top">
     <div class="brand">カード秒数ドリル<small>#コンパス クールタイム</small></div>
-    <button class="ghost nav" id="navBtn" type="button">📋 カード一覧</button>
+    <div class="tops"><button class="ghost mute" id="muteBtn" type="button" aria-label="音をミュート">🔊</button><button class="ghost nav" id="navBtn" type="button">📋 カード一覧</button></div>
   </header>
   <div id="a2hs"></div>
   <main id="view" class="screen"></main>
@@ -487,7 +489,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["右上に🔊ボタンを追加（タップでBGMと効果音をまとめてミュート）","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -524,7 +526,9 @@ function home(){
   const best=store.get("best",{});
   const hh=heroOf(); const bk=`${settings.mode}-${settings.range}${hh?"-"+hh.id+(settings.precise?"p":""):""}`;
   const b=best[bk];
+  const rs=resumeInfo();
   view.innerHTML=`
+    ${rs?`<div class="resume"><button class="primary" id="resumeBtn" type="button">▶ 続きから<small>${rs.k==="flash"?`カード名を覚える ${rs.i+1} / ${rs.qs.length} 枚`:`秒数クイズ${rs.h?"（"+esc((HEROES.find(h=>h.id===rs.h)||{}).name||"")+"）":""} 第${rs.i+1}問 / ${rs.qs.length}問`}</small></button><button class="sub" id="resumeDel" type="button">破棄</button></div>`:""}
     <div class="field"><span class="label">範囲（大会使用率の上位から）</span>
       ${seg("range",[{v:30,t:"上位30"},{v:60,t:"上位60"},{v:CARDS.length,t:"全"+live().length+"枚"}].concat(imgCount()?[{v:-1,t:"画像あり",s:imgCount()+"枚"}]:[]),settings.range)}</div>
     <section class="mode quiz"><h3>⏱ 秒数クイズ<small>カードを見てCTを数字で答える</small></h3>
@@ -597,6 +601,7 @@ function home(){
   const vs=$("#seVol");if(vs){vs.oninput=()=>{settings.seVol=+vs.value;vs.nextElementSibling.textContent=vs.value;save();SND.applyVol()};vs.onchange=()=>SND.ok()}
   const bd=$("#bgmDel");if(bd)bd.onclick=async()=>{SND.stopBgm();try{await DB.del("__bgm__")}catch(e){}SND.setOwn(null);settings.bgmSrc="built";save();SND.restart();home()};
   view.querySelectorAll("[data-precise]").forEach(x=>x.onclick=()=>{settings.precise=+x.dataset.precise;save();home()});
+  if(rs){$("#resumeBtn").onclick=resume;$("#resumeDel").onclick=()=>{store.set("resume",null);home()}}
   $("#heroBox").ontoggle=e=>{heroOpen=e.target.open};
   view.querySelectorAll("[data-hero]").forEach(x=>x.onclick=()=>{settings.hero=x.dataset.hero;heroOpen=false;save();home()});
   view.querySelectorAll("[data-count]").forEach(x=>x.onclick=()=>{settings.count=+x.dataset.count;save();home()});
@@ -615,9 +620,9 @@ const SND={ctx:null,bgmGain:null,timer:null,step:0,next:0,
   tone(f,t,d,type,v,dest){const c=this.ctx,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);
     g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
     o.connect(g).connect(dest||c.destination);o.start(t);o.stop(t+d+0.02)},
-  ok(){if(!settings.se||!this.ensure())return;const t=this.ctx.currentTime;this.tone(1318.5,t,0.12,"sine",0.5,this.seOut());this.tone(1760,t+0.09,0.45,"sine",0.5,this.seOut());this.tone(3520,t+0.09,0.25,"sine",0.08,this.seOut())},
-  ng(){if(!settings.se||!this.ensure())return;const t=this.ctx.currentTime;this.tone(150,t,0.2,"square",0.33,this.seOut());this.tone(150,t+0.24,0.32,"square",0.33,this.seOut());this.tone(143,t+0.24,0.32,"sawtooth",0.14,this.seOut())},
-  tap(){if(!settings.se||!this.ensure())return;this.tone(880,this.ctx.currentTime,0.06,"triangle",0.2,this.seOut())},
+  ok(){if(!settings.se||settings.mute||!this.ensure())return;const t=this.ctx.currentTime;this.tone(1318.5,t,0.12,"sine",0.5,this.seOut());this.tone(1760,t+0.09,0.45,"sine",0.5,this.seOut());this.tone(3520,t+0.09,0.25,"sine",0.08,this.seOut())},
+  ng(){if(!settings.se||settings.mute||!this.ensure())return;const t=this.ctx.currentTime;this.tone(150,t,0.2,"square",0.33,this.seOut());this.tone(150,t+0.24,0.32,"square",0.33,this.seOut());this.tone(143,t+0.24,0.32,"sawtooth",0.14,this.seOut())},
+  tap(){if(!settings.se||settings.mute||!this.ensure())return;this.tone(880,this.ctx.currentTime,0.06,"triangle",0.2,this.seOut())},
   // Am - F - C - G の4小節ループ（8分音符）
   song:{bass:[45,45,41,41,48,48,43,43],arp:[[57,60,64,69],[53,57,60,65],[48,52,55,60],[55,59,62,67]],bpm:112},
   seGain:null,
@@ -638,7 +643,7 @@ const SND={ctx:null,bgmGain:null,timer:null,step:0,next:0,
     if(this.mediaGain){this.mediaGain.gain.cancelScheduledValues(c.currentTime);this.mediaGain.gain.setValueAtTime(0.0001,c.currentTime);this.mediaGain.gain.exponentialRampToValueAtTime(this.bv()*0.9,c.currentTime+0.8)}
     this.media.play().catch(()=>{});this.ownPlaying=true},
   restart(){this.stopBgm();setTimeout(()=>{if(this.started)this.startBgm()},500)},
-  startBgm(){this.started=true;if(!settings.bgm)return;if(settings.bgmSrc==="own"&&this.ownUrl){this.startOwn(this.ownUrl);return}
+  startBgm(){this.started=true;if(!settings.bgm||settings.mute)return;if(settings.bgmSrc==="own"&&this.ownUrl){this.startOwn(this.ownUrl);return}
     this.startOwn(this.defUrl);return;
     if(this.timer||!this.ensure())return;const c=this.ctx;
     this.bgmGain=c.createGain();this.bgmGain.gain.value=0.0001;this.bgmGain.connect(c.destination);
@@ -656,12 +661,15 @@ const SND={ctx:null,bgmGain:null,timer:null,step:0,next:0,
     if(!this.timer)return;clearInterval(this.timer);this.timer=null;const g=this.bgmGain,c=this.ctx;
     try{g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(Math.max(g.gain.value,0.0001),c.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+0.4);setTimeout(()=>g.disconnect(),600)}catch(e){}}
 };
+function drawMute(){const b=$("#muteBtn");b.textContent=settings.mute?"🔇":"🔊";b.classList.toggle("on",!!settings.mute);b.setAttribute("aria-label",settings.mute?"ミュートを解除":"音をミュート");b.setAttribute("aria-pressed",!!settings.mute)}
+$("#muteBtn").onclick=()=>{settings.mute=settings.mute?0:1;save();drawMute();if(settings.mute)SND.stopBgm();else{SND.ensure();if(SND.started&&!SND.paused)SND.startBgm()}};
+drawMute();
 // iPhoneは「タップ完了（touchend/click）」の中でしか音を鳴らせないので、鳴るまで毎回試す
 const KEV=["touchend","click","keydown"];
 const kick=()=>{const c=SND.ensure();if(!c)return;
-  if(settings.bgm&&!SND.paused){if(SND.ownPlaying&&SND.media&&SND.media.paused){SND.media.play().catch(()=>{})}else if(!SND.ownPlaying&&!SND.timer)SND.startBgm()}
+  if(settings.bgm&&!settings.mute&&!SND.paused){if(SND.ownPlaying&&SND.media&&SND.media.paused){SND.media.play().catch(()=>{})}else if(!SND.ownPlaying&&!SND.timer)SND.startBgm()}
   const bt=$("#bgmTest");if(bt&&(SND.ownPlaying||SND.timer))bt.textContent="一時停止";
-  setTimeout(()=>{const ok=SND.unlocked()&&(!settings.bgm||SND.paused||SND.timer||(SND.media&&!SND.media.paused));if(ok)KEV.forEach(ev=>document.removeEventListener(ev,kick,true))},300)};
+  setTimeout(()=>{const ok=SND.unlocked()&&(!settings.bgm||settings.mute||SND.paused||SND.timer||(SND.media&&!SND.media.paused));if(ok)KEV.forEach(ev=>document.removeEventListener(ev,kick,true))},300)};
 const arm=()=>KEV.forEach(ev=>document.addEventListener(ev,kick,true));arm();
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&SND.ctx){SND.ctx.resume().catch(()=>{});if(SND.ownPlaying&&SND.media&&SND.media.paused)SND.media.play().catch(()=>{});arm()}});
 // ---- 背景でアイテムがゆっくり落ちる ----
@@ -706,7 +714,9 @@ function drawFlash(){
       <button class="primary" id="fAgain" type="button">もう一度</button>
       <button class="sub" id="fMada" type="button" ${left?"":"disabled"}>「あとで」のカードだけ（${left}枚）</button>
       <button class="sub" id="fHome" type="button">ホームへ</button></div>`;
+    store.set("resume",null);
     $("#fAgain").onclick=()=>startFlash(f.mada);$("#fMada").onclick=()=>startFlash(true);$("#fHome").onclick=home;return}
+  saveFlash();
   const c=f.deck[f.i];
   const nameHtml=f.edit
     ?`<div class="nickrow" id="fedit"><input id="fnk" type="text" maxlength="20" placeholder="短縮名" value="${esc(NICK[c.name]||"")}" autocomplete="off" enterkeyhint="done"><button class="primary" id="fnkSave" type="button">保存</button></div><small>${esc(c.name)}</small>`
@@ -777,6 +787,7 @@ function start(pool,isWeak){
 }
 
 function ask(){
+  saveQuiz(game.i);
   const c=game.qs[game.i];
   game.step=settings.mode==="act"?"act":"ct";
   game.input=""; game.t0=performance.now(); game.cur={card:c,ok:true,ms:0,ansCt:null,ansAct:null};
@@ -829,6 +840,15 @@ function submitCt(){
   if(settings.mode==="both"&&!ok){game.step="act";game.input="";render(`<div class="fb ng shake"><span class="big">×</span><span class="ans">CT は <b>${eff(c)}</b> 秒（入力 ${v}）　続けて発動時間</span></div>`);return}
   finish();
 }
+const byName=n=>CARDS.find(c=>c.name===n);
+function saveQuiz(i){if(!game)return;store.set("resume",{k:"quiz",q:game.qs.map(c=>c.name),i,log:game.log.map(x=>({n:x.card.name,ok:x.ok,ms:x.ms,ansCt:x.ansCt,ansAct:x.ansAct,later:!!x.later})),w:!!game.isWeak,h:game.hero?game.hero.id:"",p:!!game.precise,key:game.key,skip:game.skip||0})}
+function saveFlash(){const f=flash;if(!f)return;store.set("resume",{k:"flash",q:f.deck.map(c=>c.name),i:f.i,known:f.known,again:f.again,total:f.total,mada:f.mada})}
+function resumeInfo(){const r=store.get("resume",null);if(!r||!r.q)return null;const qs=r.q.map(byName);if(qs.some(c=>!c)||r.i>=qs.length)return null;return Object.assign({},r,{qs})}
+function resume(){const r=resumeInfo();if(!r){home();return}SND.startBgm();
+  if(r.k==="flash"){flash={hist:[],deck:r.qs,i:r.i,known:r.known,again:r.again,total:r.total,open:false,edit:false,mada:r.mada};$("#navBtn").textContent="やめる";$("#navBtn").onclick=home;drawFlash();return}
+  const hero=HEROES.find(h=>h.id===r.h)||null;
+  game={qs:r.qs,i:r.i,log:r.log.map(x=>Object.assign({},x,{card:byName(x.n)})).filter(x=>x.card),isWeak:r.w,hero,precise:!!(hero&&r.p),key:r.key,skip:r.skip||0};
+  $("#navBtn").textContent="やめる";$("#navBtn").onclick=home;ask()}
 function skip(){stopTimer();game.skip=(game.skip||0)+1;if(game.i>=game.qs.length-1){result();return}game.i++;ask()}
 function submitAct(a){game.cur.ansAct=a;if(a!==game.cur.card.act)game.cur.ok=false;finish()}
 
@@ -848,6 +868,7 @@ function finish(){
     :`<div class="fb ng shake"><span class="big">×</span><span class="ans">正解：${parts.join("　")}</span></div>`;
   const nm=$("#cname"); if(nm) nm.innerHTML=NICK[c.name]?`${esc(NICK[c.name])}<small class="full">${esc(c.name)}</small>`:esc(c.name);
   const last=game.i===game.qs.length-1;
+  if(last)store.set("resume",null);else saveQuiz(game.i+1);
   view.querySelector(".ask")?.remove(); (view.querySelector("#pad")||view.querySelector("#acts"))?.remove();
   view.querySelector(".fb")?.remove();
   view.querySelector(".card").insertAdjacentHTML("afterend",fb+`<div class="nxrow one"${game.cur.ok&&!game.cur.later?" style=\"display:none\"":""}><button class="primary" id="next" type="button">${last?"結果を見る":"次へ"}</button></div>`);
@@ -859,7 +880,7 @@ function finish(){
 }
 
 function result(){
-  clearTimeout(game.auto);
+  clearTimeout(game.auto);store.set("resume",null);
   if(!game.log.length){home();return}
   const L=game.log, ok=L.filter(x=>x.ok), pct=Math.round(ok.length/L.length*100);
   const avg=ok.length?ok.reduce((s,x)=>s+x.ms,0)/ok.length:0;
