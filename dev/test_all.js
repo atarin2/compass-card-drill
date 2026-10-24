@@ -26,8 +26,11 @@ for(let k=0;k<7;k++){await p.click('#skipBtn');await p.waitForTimeout(30)}
 ok('結果画面',(await p.textContent('#view')).includes('正解（'));
 await p.click('#back');ok('結果後は続きが消える',!await p.$('#resumeBtn'));
 // ミュート
+ok('ホームではミュート非表示',!await p.isVisible('#muteBtn'));
+await p.click('#start');ok('クイズ中はミュート表示',await p.isVisible('#muteBtn'));
 await p.click('#muteBtn');ok('ミュートON',(await p.textContent('#muteBtn')).includes('🔇'));
 await p.click('#muteBtn');ok('ミュートOFF',(await p.textContent('#muteBtn')).includes('🔊'));
+await p.click('#navBtn');await p.click('#resumeDel');
 // キャラ短縮
 await p.click('#heroBox summary');await p.click('[data-hero="archer"]');await p.waitForTimeout(100);
 await p.click('#start');ok('キャラ短縮クイズ',(await p.textContent('.hud')).includes('アーチャー'));

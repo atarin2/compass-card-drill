@@ -39,7 +39,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .brand{font-family:var(--f-display);font-size:20px;letter-spacing:.02em;line-height:1.1}
 .brand small{display:block;font-family:var(--f-body);font-size:11px;color:var(--muted);letter-spacing:.12em;font-weight:500}
-.tops{display:flex;gap:8px;align-items:center}.mute{font-size:18px;line-height:1;padding:6px 10px!important;min-width:44px}.mute.on{border-color:var(--ng)!important;background:color-mix(in srgb,var(--ng) 12%,transparent)!important}
+.tops{display:flex;gap:8px;align-items:center}.mute{font-size:22px;line-height:1;padding:6px 12px!important;min-width:52px;border:2px solid var(--accent)!important;background:var(--surface)!important;box-shadow:0 2px 8px color-mix(in srgb,var(--accent) 30%,transparent)}.mute.on{border-color:var(--muted)!important;border-style:dashed!important;background:color-mix(in srgb,var(--muted) 18%,var(--surface))!important;box-shadow:none}
 .resume{display:grid;grid-template-columns:1fr auto;gap:8px}.resume .primary{font-size:16px;letter-spacing:.02em;text-align:left;padding:13px 16px}.resume .primary small{display:block;font-family:var(--f-body);font-size:12px;opacity:.85;letter-spacing:0}.resume .sub{font-size:13px;padding:8px 12px}
 .ghost{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px}
 .screen{display:flex;flex-direction:column;gap:14px;flex:1}
@@ -473,7 +473,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["右上に🔊ボタンを追加（タップでBGMと効果音をまとめてミュート）","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -503,6 +503,7 @@ if(!IN_CLAUDE&&/github\.io$/.test(location.hostname)){const g=document.createEle
 function applyTheme(){const t=settings.theme;if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme")}
 applyTheme();
 function home(){
+  showMute(false);
   stopTimer(); game=null; listDraw=null; flash=null;
   $("#navBtn").textContent="📋 カード一覧"; $("#navBtn").onclick=list;
   const miss=getMiss();
@@ -533,7 +534,7 @@ function home(){
       <button class="primary learnbtn" id="flashBtn" type="button" ${imgCount()?"":"disabled"}>はじめる</button>
       <button class="sub" id="madaBtn" type="button" ${madaCards().length?"":"disabled"}>「あとで」のカードだけ（${madaCards().length}枚）</button>
     </section>
-    <details class="field snd" id="sndBox"${soundOpen?" open":""}><summary><span class="sic">🔊</span><b>サウンド・表示設定</b><span class="sum">${settings.fall?"":"背景OFF・"}効果音${settings.se?"ON":"OFF"}・BGM ${settings.bgm?(settings.bgmSrc==="own"&&SND.ownUrl?"自分の音源":"デフォルト音源"):"OFF"}</span></summary><div class="sndin">
+    <details class="field snd" id="sndBox"${soundOpen?" open":""}><summary><span class="sic">⚙️</span><b>サウンド・表示設定</b><span class="sum">${settings.fall?"":"背景OFF・"}効果音${settings.se?"ON":"OFF"}・BGM ${settings.bgm?(settings.bgmSrc==="own"&&SND.ownUrl?"自分の音源":"デフォルト音源"):"OFF"}</span></summary><div class="sndin">
       ${seg("theme",[{v:"auto",t:"自動",s:"端末の設定"},{v:"light",t:"ライト",s:"白い背景"},{v:"dark",t:"ダーク",s:"黒い背景"}],settings.theme||"auto")}
       ${seg("fall",[{v:1,t:"背景アイテム ON"},{v:0,t:"背景アイテム OFF"}],settings.fall)}
       ${seg("se",[{v:1,t:"効果音 ON"},{v:0,t:"効果音 OFF"}],settings.se)}${seg("bgm",[{v:1,t:"BGM ON"},{v:0,t:"BGM OFF"}],settings.bgm)}
@@ -648,6 +649,7 @@ const SND={ctx:null,bgmGain:null,timer:null,step:0,next:0,
 function drawMute(){const b=$("#muteBtn");b.textContent=settings.mute?"🔇":"🔊";b.classList.toggle("on",!!settings.mute);b.setAttribute("aria-label",settings.mute?"ミュートを解除":"音をミュート");b.setAttribute("aria-pressed",!!settings.mute)}
 $("#muteBtn").onclick=()=>{settings.mute=settings.mute?0:1;save();drawMute();if(settings.mute)SND.stopBgm();else{SND.ensure();if(SND.started&&!SND.paused)SND.startBgm()}};
 drawMute();
+const showMute=v=>{$("#muteBtn").style.display=v?"":"none"};
 // iPhoneは「タップ完了（touchend/click）」の中でしか音を鳴らせないので、鳴るまで毎回試す
 const KEV=["touchend","click","keydown"];
 const kick=()=>{const c=SND.ensure();if(!c)return;
@@ -687,6 +689,7 @@ function startFlash(onlyMada){
   else{pool=poolFor(true).filter(c=>IMG[c.name]);if(!pool.length)pool=live().filter(c=>IMG[c.name]&&!EXCL.has(c.name));}
   if(!pool.length){home();return}
   SND.startBgm();
+  showMute(true);
   flash={hist:[],deck:shuffle(pool),i:0,known:0,again:0,total:pool.length,open:false,edit:false,mada:onlyMada===true};
   $("#navBtn").textContent="やめる"; $("#navBtn").onclick=home;
   drawFlash();
@@ -765,6 +768,7 @@ function start(pool,isWeak){
   if(settings.count&&!isWeak) qs=qs.slice(0,settings.count);
   SND.startBgm();
   const hero=heroOf(); if(hero)qs=qs.filter(c=>hero.f(c)); if(!qs.length){home();return}
+  showMute(true);
   game={qs,i:0,log:[],isWeak,hero,precise:!!(hero&&settings.precise),key:`${settings.mode}-${settings.range}${hero?"-"+hero.id+(settings.precise?"p":""):""}`};
   $("#navBtn").textContent="やめる"; $("#navBtn").onclick=home;
   ask();
@@ -828,7 +832,7 @@ const byName=n=>CARDS.find(c=>c.name===n);
 function saveQuiz(i){if(!game)return;store.set("resume",{k:"quiz",q:game.qs.map(c=>c.name),i,log:game.log.map(x=>({n:x.card.name,ok:x.ok,ms:x.ms,ansCt:x.ansCt,ansAct:x.ansAct,later:!!x.later})),w:!!game.isWeak,h:game.hero?game.hero.id:"",p:!!game.precise,key:game.key,skip:game.skip||0})}
 function saveFlash(){const f=flash;if(!f)return;store.set("resume",{k:"flash",q:f.deck.map(c=>c.name),i:f.i,known:f.known,again:f.again,total:f.total,mada:f.mada})}
 function resumeInfo(){const r=store.get("resume",null);if(!r||!r.q)return null;const qs=r.q.map(byName);if(qs.some(c=>!c)||r.i>=qs.length)return null;return Object.assign({},r,{qs})}
-function resume(){const r=resumeInfo();if(!r){home();return}SND.startBgm();
+function resume(){const r=resumeInfo();if(!r){home();return}SND.startBgm();showMute(true);
   if(r.k==="flash"){flash={hist:[],deck:r.qs,i:r.i,known:r.known,again:r.again,total:r.total,open:false,edit:false,mada:r.mada};$("#navBtn").textContent="やめる";$("#navBtn").onclick=home;drawFlash();return}
   const hero=HEROES.find(h=>h.id===r.h)||null;
   game={qs:r.qs,i:r.i,log:r.log.map(x=>Object.assign({},x,{card:byName(x.n)})).filter(x=>x.card),isWeak:r.w,hero,precise:!!(hero&&r.p),key:r.key,skip:r.skip||0};
@@ -864,6 +868,7 @@ function finish(){
 }
 
 function result(){
+  showMute(false);
   clearTimeout(game.auto);store.set("resume",null);
   if(!game.log.length){home();return}
   const L=game.log, ok=L.filter(x=>x.ok), pct=Math.round(ok.length/L.length*100);
@@ -891,6 +896,7 @@ function rowHtml(c,showAns,x,extra){
 }
 
 function list(){
+  showMute(false);
   stopTimer(); game=null; flash=null;
   $("#navBtn").textContent="戻る"; $("#navBtn").onclick=home;
   const sort=store.get("sort","use"); const cat=store.get("cat",""), fel=store.get("fel",""), frar=store.get("frar","");
