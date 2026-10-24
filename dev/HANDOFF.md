@@ -5,6 +5,7 @@
 ## 公開場所
 - 公開サイト：https://atarin2.github.io/compass-card-drill/ （GitHub Pages、main ブランチの直下を配信）
 - 作者用ページ（claude.ai）：https://claude.ai/artifact/XSYvQXSJ5ysnwY56ZpU9Qz
+  - 更新するときは Artifact の publish に必ず url（上のURL）を付けること。付けないと別ページが新しくできてしまう
   - 同じ内容に加え、短縮名・チェック・削除・「あとで」を claude.ai アカウントで端末間同期する（db/user 機能）
 - アクセス解析：GoatCounter（https://atarin2.goatcounter.com）。github.io で開いたときだけ数える
 
