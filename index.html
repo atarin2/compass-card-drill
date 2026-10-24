@@ -153,6 +153,7 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .a2hs{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:10px 12px;border-radius:12px;border:2px solid var(--water);background:color-mix(in srgb,var(--water) 10%,var(--surface));font-size:13px;line-height:1.6}
 .a2hs p{margin:4px 0 0;color:var(--muted)}.a2x{border:0;background:none;color:var(--muted);font-size:20px;line-height:1;padding:2px 6px}
 .is-claude .env-web,.is-web .env-claude{display:none}
+.upd{font-size:12px;color:var(--muted);line-height:1.6}.upd b{color:var(--ink)}.upd ul{margin:4px 0 0;padding-left:1.2em}
 .nxrow{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}.nxrow.one{grid-template-columns:1fr}
 .fdone{display:flex;flex-direction:column;gap:12px;text-align:center}
 .cats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
@@ -419,7 +420,7 @@ const CARDS = [
 ["不思議の支配者「ハートの女王さま」", 40, "無", "UR", "水", "他", "前方1ﾏｽに幅6ﾏｽ 通過不可 接触時3秒スタンの壁を6.4秒間設置", 0],
 ["蜘蛛縫組 Ж 面従相談役 千切 常影", 42, "長", "UR", "水", "罠", "0.8秒毎に5.2%ダメージ(最大135.2%ダメージ)の毒範囲罠(20秒)", 0],
 ["//*#イレギュラードールズ#*//", 36, "無", "UR", "火", "他", "直線上に敵にダメージ", 0],
-["‡焼亡の森‡ 奴隷狩り密売団 ケルマト", 26, "長", "UR", "火", "罠", "敵に14秒間サイレントを与える単発罠(20秒)/発動後10秒間サイレントエリア展開", 0],
+["‡焼亡の森‡ 奴隷狩り密売団 ケルマト", 32, "長", "UR", "火", "罠", "敵に14秒間サイレントを与える単発罠(20秒)/発動後10秒間サイレントエリア展開", 0],
 ["せかいをはかい！恐怖の大魔王", 18, "無", "UR", "水", "近", "近距離の敵を7秒間ランダム状態異常付与", 0],
 ["【鋼の錬金術師FA】エルリック兄弟", 36, "無", "UR", "水", "近", "近距離の敵にダメージ+ショックウェーブ(前方10ﾏｽ)+ヒット時4秒間スタン", 0],
 ["【鋼の錬金術師FA】賢者の石", 30, "無", "UR", "火", "周", "周囲の敵を10秒間で50%ダメージの毒/毒ダメージの200％分吸収", 0],
@@ -565,6 +566,8 @@ function home(){
         <p>自分で登録したカード画像やBGMの音源は、その端末のブラウザの中にだけ保存され、外には送られません。</p>
         <p class="env-claude">このページはclaude.ai上で公開しているため、ページの配信についてはclaude.ai（Anthropic）のプライバシーポリシーも適用されます。</p><p class="env-web">このページはGitHub Pagesで公開しているため、ページの配信についてはGitHubのプライバシーポリシーも適用されます。</p></div></details>
     </section>
+    <div class="upd"><b>データ最終更新：2026/10/25</b>
+      <ul><li>超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正</li><li>奴隷狩り密売団 ケルマトのCTを32秒に修正</li></ul></div>
     <p class="note">CTはメダル補正なしの値です。<br>
     データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）、使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
   $("#cheer").onclick=async e=>{const b=e.currentTarget,sm=b.querySelector("small");let ok=false;
