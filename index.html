@@ -500,6 +500,8 @@ function seg(name,opts,cur){
 let soundOpen=false, heroOpen=false;
 const IN_CLAUDE=(()=>{try{return window.top!==window}catch(e){return true}})();
 document.documentElement.classList.add(IN_CLAUDE?"is-claude":"is-web");
+const track=(path,title)=>{try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path,title,event:true})}catch(e){}};
+document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("[data-ev]");if(a)track(a.dataset.ev,a.dataset.evt)},true);
 if(!IN_CLAUDE&&/github\.io$/.test(location.hostname)){const g=document.createElement("script");g.async=true;g.src="https://gc.zgo.at/count.js";g.dataset.goatcounter="https://atarin2.goatcounter.com/count";document.head.appendChild(g)}
 function applyTheme(){const t=settings.theme;if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme")}
 applyTheme();
@@ -543,13 +545,13 @@ function home(){
       ${settings.bgm?`<label class="sl vol">BGM<input type="range" id="bgmVol" min="0" max="100" value="${settings.bgmVol}"><span>${settings.bgmVol}</span></label>`:""}
       ${settings.se?`<label class="sl vol">効果音<input type="range" id="seVol" min="0" max="100" value="${settings.seVol}"><span>${settings.seVol}</span></label>`:""}</div></details>
     <section class="author"><h3>作った人</h3>
-      <div class="arow"><span class="al">X</span><a href="https://x.com/atr_d4c" target="_blank" rel="noopener">@atr_d4c</a></div>
-      <div class="arow"><span class="al">YouTube</span><a href="https://www.youtube.com/channel/UCbL3TFYjH_2jdBgsVaeWVDg" target="_blank" rel="noopener">あたりん</a></div>
+      <div class="arow"><span class="al">X</span><a href="https://x.com/atr_d4c" target="_blank" rel="noopener" data-ev="click-x" data-evt="Xのリンク">@atr_d4c</a></div>
+      <div class="arow"><span class="al">YouTube</span><a href="https://www.youtube.com/channel/UCbL3TFYjH_2jdBgsVaeWVDg" target="_blank" rel="noopener" data-ev="click-youtube" data-evt="YouTubeのリンク">あたりん</a></div>
       <div class="arow"><span class="al">応援コード</span><button type="button" class="code" id="cheer">C-orYP <small>タップでコピー</small></button></div>
     </section>
     <section class="legal">
       <details><summary>お問い合わせ</summary><div class="lg">
-        <p>不具合の報告やご意見は、X（<a href="https://x.com/atr_d4c" target="_blank" rel="noopener">@atr_d4c</a>）のDMまでお願いします。</p>
+        <p>不具合の報告やご意見は、X（<a href="https://x.com/atr_d4c" target="_blank" rel="noopener" data-ev="click-x-contact" data-evt="お問い合わせのXリンク">@atr_d4c</a>）のDMまでお願いします。</p>
         <p>個人で作っているため、返信やデータの更新にはお時間をいただくことがあります。</p></div></details>
       <details><summary>利用規約・注意事項</summary><div class="lg">
         <p><b>非公式のツールです。</b>#コンパス【戦闘摂理解析システム】の運営会社とは関係ありません。運営会社へのお問い合わせはご遠慮ください。</p>
@@ -567,7 +569,7 @@ function home(){
     データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）、使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
   $("#cheer").onclick=async e=>{const b=e.currentTarget,sm=b.querySelector("small");let ok=false;
     try{await navigator.clipboard.writeText("C-orYP");ok=true}catch(err){try{const t=document.createElement("textarea");t.value="C-orYP";document.body.appendChild(t);t.select();ok=document.execCommand("copy");t.remove()}catch(e2){}}
-    sm.textContent=ok?"コピーしました！":"長押しでコピーしてください";setTimeout(()=>{sm.textContent="タップでコピー"},1800)};
+    sm.textContent=ok?"コピーしました！":"長押しでコピーしてください";track("copy-cheer-code","応援コードのコピー");setTimeout(()=>{sm.textContent="タップでコピー"},1800)};
   view.querySelectorAll("[data-range]").forEach(x=>x.onclick=()=>{settings.range=+x.dataset.range;save();home()});
   view.querySelectorAll("[data-hide]").forEach(x=>x.onclick=()=>{settings.hide=+x.dataset.hide;save();home()});
   view.querySelectorAll("[data-theme]").forEach(x=>{if(x.tagName==="BUTTON")x.onclick=()=>{settings.theme=x.dataset.theme;save();applyTheme();home()}});
