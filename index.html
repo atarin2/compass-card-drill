@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="#コンパスのカードのクールタイム（CT）とカード名を覚える非公式ドリル">
+<meta name="theme-color" content="#10142a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CTドリル">
+<link rel="apple-touch-icon" href="fx/icon.png">
+<link rel="icon" href="fx/icon.png">
+<style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}</style>
+</head><body>
+<title>カード秒数ドリル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Chakra+Petch:wght@500;700&display=swap">
+<style>
+/* layout: one-screen drill app. top bar, card panel, answer pad pinned low for thumbs */
+:root{
+  --bg:#eef0f5; --surface:#ffffff; --ink:#18203a; --muted:#5d6681; --line:#d5d9e5;
+  --accent:#e0336f; --accent-ink:#ffffff; --ok:#16855a; --ng:#c8321f;
+  --fire:#e2483a; --water:#2f6fe0; --wood:#2b9a4b; --none:#6d7385;
+  --key:#ffffff; --key-shadow:#c4c9d8;
+  --f-display:"Dela Gothic One","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-num:"Chakra Petch","SF Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10142a; --surface:#1a2040; --ink:#e9ecf7; --muted:#9aa3c2; --line:#2c3460;
+  --accent:#ff5a8f; --accent-ink:#1a0a12; --ok:#3fcf8e; --ng:#ff6b57;
+  --fire:#ff6a5b; --water:#5b93ff; --wood:#4cc46d; --none:#8e95ab;
+  --key:#232a52; --key-shadow:#0b0e20; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10142a; --surface:#1a2040; --ink:#e9ecf7; --muted:#9aa3c2; --line:#2c3460;
+  --accent:#ff5a8f; --accent-ink:#1a0a12; --ok:#3fcf8e; --ng:#ff6b57;
+  --fire:#ff6a5b; --water:#5b93ff; --wood:#4cc46d; --none:#8e95ab;
+  --key:#232a52; --key-shadow:#0b0e20; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-tap-highlight-color:transparent;}
+#fall{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+#fall img{position:absolute;top:-90px;opacity:.22;will-change:transform;animation:fall linear forwards}
+@keyframes fall{from{transform:translate(0,0) rotate(var(--r0))}50%{transform:translate(var(--sx),55vh) rotate(var(--r1))}to{transform:translate(0,calc(100vh + 120px)) rotate(var(--r2))}}
+@media (prefers-reduced-motion:reduce){#fall{display:none}}
+.app{position:relative;z-index:1;max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-block:14px 18px;gap:14px}
+button{font-family:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-family:var(--f-display);font-size:20px;letter-spacing:.02em;line-height:1.1}
+.brand small{display:block;font-family:var(--f-body);font-size:11px;color:var(--muted);letter-spacing:.12em;font-weight:500}
+.ghost{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px}
+.screen{display:flex;flex-direction:column;gap:14px;flex:1}
+h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wrap:balance}
+.label{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:700}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.seg button{border:0;background:none;border-radius:9px;padding:10px 4px;font-weight:700;font-size:14px;line-height:1.25}
+.seg button small{display:block;font-weight:500;font-size:10.5px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.seg button[aria-pressed="true"] small{color:inherit;opacity:.75}
+.field{display:flex;flex-direction:column;gap:7px}
+.primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:16px;font-family:var(--f-display);font-size:19px;letter-spacing:.06em;box-shadow:0 4px 0 color-mix(in srgb,var(--accent) 60%,#000)}
+.primary:active{transform:translateY(3px);box-shadow:0 1px 0 color-mix(in srgb,var(--accent) 60%,#000)}
+.sub{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px;font-weight:700;font-size:15px}
+.sub:disabled{opacity:.45;cursor:default}
+.note{font-size:12px;color:var(--muted);line-height:1.7}
+.note a{color:inherit}
+.best{display:flex;gap:10px;flex-wrap:wrap}
+.best div{flex:1;min-width:120px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.best b{font-family:var(--f-num);font-size:22px;display:block}
+
+/* card */
+.card{position:relative;background:var(--surface);border-radius:16px;padding:16px 16px 14px 22px;border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;gap:10px}
+.card::before{content:"";position:absolute;inset:0 auto 0 0;width:8px;background:var(--el)}
+.card[data-el="火"]{--el:var(--fire)} .card[data-el="水"]{--el:var(--water)} .card[data-el="木"]{--el:var(--wood)} .card[data-el="無"]{--el:var(--none)}
+.meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.chip{font-size:11px;font-weight:700;border-radius:6px;padding:3px 7px;border:1px solid var(--line);color:var(--muted)}
+.chip.el{background:var(--el);color:#fff;border-color:transparent}
+.chip.type{font-family:var(--f-display);font-weight:400;font-size:13px;color:var(--ink);border-color:var(--ink);padding:1px 6px}
+.chip.use{margin-left:auto;font-family:var(--f-num)}
+.cname .full{display:block;font-family:inherit;font-size:12px;color:var(--muted);margin-top:2px}
+.nick{display:inline-block;margin-left:6px;padding:0 6px;border-radius:6px;background:var(--line);font-size:11px}
+.editor.inl{margin:2px 0 8px;padding:10px;gap:8px}
+.btns3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.btns3 button{font-size:12px;padding:8px 4px}
+.fl{display:grid;grid-template-columns:5.2em 1fr;align-items:center;gap:8px}
+.fls{display:flex;gap:6px}.fls button{flex:1;font-size:13px;padding:8px 2px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:inherit}
+.fls button[data-el="火"]{color:var(--fire)}.fls button[data-el="水"]{color:var(--water)}.fls button[data-el="木"]{color:var(--wood)}.fls button[data-el="無"]{color:var(--none)}
+.fls button.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.nkbulk{display:flex;flex-direction:column;gap:6px}
+.dconf{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:10px;border:2px solid var(--ng);font-size:14px;font-weight:700}
+.dhead{display:flex;justify-content:space-between;align-items:center}
+.drow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
+.drow small{display:block;font-size:11px;color:var(--muted)}
+.drow button,.dhead button{font-size:12px;padding:6px 12px;flex:none}
+.fcard{display:block;width:100%;padding:12px;border-radius:16px;border:1px solid var(--line);background:var(--surface);color:inherit;cursor:pointer;text-align:center}
+.fcard .art{height:min(50vh,118vw);max-height:none;width:100%;object-fit:contain}
+.fname{margin-top:10px;height:9em;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.fname b{font-family:var(--f-display);font-size:clamp(22px,7vw,30px);line-height:1.25}
+.fname small{font-size:12px;color:var(--muted)}
+.fname.hidden{visibility:hidden}
+.fedit{align-self:center;margin-top:4px;font-size:12px;color:var(--accent);text-decoration:underline;cursor:pointer}
+.fcard .nickrow{margin:0 auto;width:100%;max-width:340px}
+.btns.dim{opacity:.45}
+.fbtns{display:grid;grid-template-columns:.8fr 1fr 1.4fr;gap:8px}
+.fbtns button{padding-left:4px;padding-right:4px}
+.askl{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.tg{border:2px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:999px;padding:8px 18px;font-size:16px;font-weight:700;min-width:7.5em}
+.tg.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.tg.big{border-radius:12px;font-size:15px}
+.sl.vol{grid-template-columns:3.6em 1fr 2.4em;font-size:13px}.sl.vol span{text-align:right;font-family:var(--f-num)}
+.snd summary{display:flex;gap:8px;align-items:center;cursor:pointer;list-style:none;padding:13px 14px;border:2px solid var(--accent);border-radius:14px;background:var(--surface);font-size:15px}
+.snd summary b{font-weight:700}.snd .sic{font-size:18px}
+.snd summary::-webkit-details-marker{display:none}
+.snd summary .sum{font-size:13px;color:var(--muted)}.snd summary .sum::after{content:" ▼";color:var(--accent);font-size:14px}.snd[open] summary .sum::after{content:" ▲"}
+.snd .sum{margin-left:auto}.sndin{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.mode{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background:color-mix(in srgb,var(--accent) 7%,var(--surface));border:2px solid var(--accent);box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 22%,transparent)}
+.mode h3{margin:0 0 2px;font-size:17px;display:flex;flex-direction:column;gap:2px}.mode h3 small{font-size:12px;font-weight:400;color:var(--muted)}
+.mode.learn{border-color:var(--water);background:color-mix(in srgb,var(--water) 10%,var(--surface));box-shadow:0 4px 14px color-mix(in srgb,var(--water) 25%,transparent)}
+.mode.quiz h3{color:var(--accent)}.mode.learn h3{color:var(--water)}.mode h3 small{color:var(--muted)}
+.mode.learn .learnbtn{background:var(--water);box-shadow:0 3px 0 color-mix(in srgb,var(--water) 60%,#000);color:#fff}
+.mode .best{margin:0}
+.pad .go.wide{grid-column:1/-1}
+.pad.prec{gap:6px}.pad.prec button{padding:7px 0;font-size:21px}.pad.prec .go{font-size:17px}
+.hchip{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--accent);color:var(--accent-ink);margin-right:4px}
+.hbox summary{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:8px;list-style:none;cursor:pointer;padding:11px 12px;border:2px solid var(--accent);border-radius:12px;background:var(--surface)}
+.hbox summary::-webkit-details-marker{display:none}.hbox .hv{color:var(--accent);font-size:13px}.hbox[open] .hv{transform:rotate(180deg)}
+.hn{font-weight:700;font-size:15px}.hd{font-size:12px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hp{font-family:var(--f-num);font-size:17px;font-weight:800;color:var(--accent)}
+.hlist{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.hopt{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:inherit}
+.hopt.on{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.calc{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.author{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+.author h3{margin:0;font-size:14px;color:var(--muted)}
+.arow{display:grid;grid-template-columns:6.5em 1fr;align-items:center;gap:8px;font-size:15px}
+.arow .al{font-size:12px;color:var(--muted)}.arow a{color:var(--accent);font-weight:700}
+.code{justify-self:start;font-family:var(--f-num);font-size:16px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:8px;border:1.5px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);color:inherit;user-select:all}
+.code small{font-family:var(--f-body);font-size:10px;margin-left:4px;font-weight:400;letter-spacing:0;color:var(--muted)}
+.nav{font-weight:700;border:2px solid var(--accent)!important;color:var(--accent)!important;padding:7px 12px!important}
+.note.info{padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--accent) 8%,transparent);border-left:3px solid var(--accent)}
+.legal{border-top:1px solid var(--line)}
+.legal details{border-bottom:1px solid var(--line)}
+.legal summary{display:flex;justify-content:space-between;align-items:center;list-style:none;cursor:pointer;padding:14px 4px;font-weight:700;font-size:15px}
+.legal summary::-webkit-details-marker{display:none}.legal summary::after{content:"›";font-size:20px;color:var(--muted);transition:transform .2s}
+.legal details[open] summary::after{transform:rotate(90deg)}
+.lg{padding:0 4px 12px;font-size:13px;line-height:1.7;color:var(--muted)}.lg p{margin:0 0 8px}.lg b{color:var(--ink)}.lg a{color:var(--accent)}
+.a2hs{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:10px 12px;border-radius:12px;border:2px solid var(--water);background:color-mix(in srgb,var(--water) 10%,var(--surface));font-size:13px;line-height:1.6}
+.a2hs p{margin:4px 0 0;color:var(--muted)}.a2x{border:0;background:none;color:var(--muted);font-size:20px;line-height:1;padding:2px 6px}
+.is-claude .env-web,.is-web .env-claude{display:none}
+.nxrow{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}.nxrow.one{grid-template-columns:1fr}
+.fdone{display:flex;flex-direction:column;gap:12px;text-align:center}
+.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.cats button{font-size:13px;padding:9px 2px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:inherit;line-height:1.2}
+.cats button small{display:block;font-size:10px;color:var(--muted)}
+.cats button.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}.cats button.on small{color:inherit;opacity:.7}
+.cats button:first-child{grid-column:1/-1}
+.nickrow{display:flex;gap:8px}.nickrow input{flex:1;min-width:0;font-size:16px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:inherit}
+.cname{font-family:var(--f-display);font-size:clamp(19px,5.6vw,24px);line-height:1.3;text-wrap:balance;word-break:break-word}
+.ability{font-size:13px;color:var(--muted);line-height:1.6;min-height:1.6em}
+.ability button{border:1px dashed var(--line);background:none;border-radius:8px;padding:3px 9px;font-size:12px;color:var(--muted)}
+.hud{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted)}
+.hud .num{font-size:15px;color:var(--ink)}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+
+/* answer */
+.ask{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ask h2{font-size:16px}
+.readout{font-family:var(--f-num);font-size:44px;font-weight:700;line-height:1;min-width:3.2ch;text-align:right;border-bottom:3px solid var(--ink);padding:0 4px 2px}
+.readout span{font-size:16px;color:var(--muted);margin-left:3px;font-weight:500}
+.readout.empty{color:var(--line)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:auto}
+.pad button,.acts button{border:0;background:var(--key);border-radius:12px;box-shadow:0 3px 0 var(--key-shadow);font-family:var(--f-num);font-weight:700;font-size:24px;padding:12px 0;touch-action:manipulation}
+.pad button:active,.acts button:active{transform:translateY(2px);box-shadow:0 1px 0 var(--key-shadow)}
+.pad .go{background:var(--accent);color:var(--accent-ink);font-family:var(--f-display);font-size:18px;font-weight:400;box-shadow:0 3px 0 color-mix(in srgb,var(--accent) 60%,#000)}
+.pad .del{font-size:18px}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:auto}
+.acts button{font-family:var(--f-display);font-weight:400;font-size:30px;padding:22px 0}
+.acts button small{display:block;font-family:var(--f-body);font-size:11px;color:var(--muted);margin-top:4px;font-weight:500}
+
+/* feedback */
+.fb{border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;font-weight:700}
+.fb.ok{background:color-mix(in srgb,var(--ok) 14%,var(--surface));color:var(--ok)}
+.fb.ng{background:color-mix(in srgb,var(--ng) 14%,var(--surface));color:var(--ng)}
+.fb .big{font-family:var(--f-display);font-weight:400;font-size:26px}
+.fb .ans{color:var(--ink);font-weight:500;font-size:14px;line-height:1.5}
+.fb .ans b{font-family:var(--f-num);font-size:18px}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* result & list */
+.score{display:flex;align-items:baseline;gap:8px}
+.score b{font-family:var(--f-num);font-size:64px;line-height:1}
+.score span{color:var(--muted);font-size:15px}
+.stats{display:flex;gap:10px}
+.stats div{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--muted)}
+.stats b{display:block;font-family:var(--f-num);font-size:20px;color:var(--ink)}
+.rows{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:grid;grid-template-columns:6px 1fr auto;gap:10px;align-items:center;padding:10px 12px 10px 0;border-top:1px solid var(--line);font-size:13.5px}
+.row:first-child{border-top:0}
+.row i{align-self:stretch;background:var(--el)}
+.row[data-el="火"]{--el:var(--fire)} .row[data-el="水"]{--el:var(--water)} .row[data-el="木"]{--el:var(--wood)} .row[data-el="無"]{--el:var(--none)}
+.row .n{min-width:0;line-height:1.4}
+.row .n small{display:block;color:var(--muted);font-size:11px}
+.row .v{font-family:var(--f-num);font-weight:700;font-size:16px;text-align:right;min-width:3ch}
+.row .a{font-family:var(--f-display);font-size:15px;width:1.6em;text-align:center}
+.row .bad{color:var(--ng)}
+.art{width:100%;max-height:34vh;object-fit:contain;border-radius:8px;display:block}
+.card .art{height:34vh;max-height:none}
+.card.has-art{display:grid;grid-template-columns:47% 1fr;grid-template-rows:auto 1fr auto;gap:6px 12px;align-items:start;padding:12px 12px 12px 18px}
+.card.has-art .art{grid-column:1;grid-row:1/4;height:auto;aspect-ratio:480/661;max-height:38vh;object-fit:contain}
+.card.has-art .meta{grid-column:2;grid-row:1}
+.card.has-art .meta .use{display:none}
+.card.has-art .cname{grid-column:2;grid-row:2;font-size:clamp(16px,4.6vw,20px);align-self:center}
+.card.has-art .ability{grid-column:2;grid-row:3}
+@media (max-height:760px){.pad button{padding:9px 0;font-size:22px}.readout{font-size:38px}.screen{gap:10px}}
+.row .th{width:38px;height:52px;border-radius:5px;object-fit:cover;border:1px dashed var(--line);display:grid;place-items:center;font-size:16px;color:var(--muted);background:none;padding:0}
+.row.tap{cursor:pointer;grid-template-columns:6px auto 1fr auto auto}
+.row .ck{width:22px;height:22px;margin:0;accent-color:var(--accent,#3b82f6)}
+.row.off .n,.row.off .v,.row.off .th{opacity:.4}
+.exbar{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.exbar button{font-size:12px;padding:6px 10px}
+.editor{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.editor canvas{width:100%;max-height:46vh;object-fit:contain;border-radius:8px;background:var(--bg)}
+.sl{display:grid;grid-template-columns:2.4em 1fr;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.sl input{width:100%}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.danger{color:var(--ng)}
+.filter{display:flex;gap:8px}
+.filter input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:16px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div id="fall" aria-hidden="true"></div>
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">カード秒数ドリル<small>#コンパス クールタイム</small></div>
+    <button class="ghost nav" id="navBtn" type="button">📋 カード一覧</button>
+  </header>
+  <div id="a2hs"></div>
+  <main id="view" class="screen"></main>
+  <input type="file" id="file" accept="image/*" hidden>
+  <input type="file" id="bgmFile" accept="video/*,audio/*" hidden>
+</div>
+
+<script>
+const PRESET={"【SAO】朝露の少女と": "cimg/66b97d854f99.jpg", "【チェンソーマン】犬とチェンソー": "cimg/8e84d72ef0f0.jpg", "【ロックマンエグゼ】ダブルストリーム": "cimg/59933d3d89ef.jpg", "【超高校級の幸運】狛枝 凪斗": "cimg/fabcd5f0746b.jpg", "‡焼亡の森‡ 溺愛弟 ルー・メルク・シルワ": "cimg/6e444b5952af.jpg", "【空駆ける歌姫】初音 ミク": "cimg/02bf7b9e835c.jpg", "【ダンまち】恥じらいの疾風": "cimg/bbcc5736baae.jpg", "ジャック・オー": "cimg/7fd4f4186c4c.jpg", "【チェンソーマン】公安対魔特異4課": "cimg/73f0a07e81de.jpg", "【ロックマンエグゼ】アースブレイカー": "cimg/2064a0307a14.jpg", "【チェンソーマン】マキマ": "cimg/a51ee8bcc66b.jpg", "銀河防衛ロボ Unidoll-2525": "cimg/f53b292df6e9.jpg", "【チェンソーマン】早川アキ": "cimg/782972c75d62.jpg", "【ロックマンエグゼ】ショックウェーブ": "cimg/08e276b86f91.jpg", "【祝福する歌姫】初音 ミク": "cimg/b956948ae030.jpg", "【慈愛の貧乏リッチー】ウィズ": "cimg/d023b82133ab.jpg", "【超電磁砲】常盤台の超電磁砲（レールガン）": "cimg/b944064bf358.jpg", "【オーバーロード】英雄モモン&美姫ナーベ": "cimg/724ab4bdf6d5.jpg", "【ポプテピピック】POP TEAM EPIC": "cimg/3cc91ca6d30f.jpg", "【メイドインアビス】ナナチ＆ミーティ": "cimg/7f26e5cf3d4c.jpg", "【進撃の巨人】 超大型巨人襲来": "cimg/a2acecbae4af.jpg", "∗絢爛ノ美∗ ボラ＆アルヒコ＆アペイロン": "cimg/c36746128642.jpg", "‡滅国の城‡ 偽らざる鮮血の玉座": "cimg/3365bab1b30b.jpg", "【陰実】HIGHEST": "cimg/455e64d6d646.jpg", "【号令する歌姫】初音 ミク": "cimg/3f89ab91a245.jpg", "【禁書目録】未元物質（ダークマター）": "cimg/7f397fd7d4f0.jpg", "【NieR:Automata】戦いの始まり": "cimg/55c5b0ac35d9.jpg", "#夜光犯罪特区 #きてるちゃんライヴ": "cimg/cb6e6394593b.jpg", "【ライザのアトリエ2】ひと夏の思い出": "cimg/e64f06ff4d0d.jpg", "どこにでもいけるドア": "cimg/1a6a144b3026.jpg", "【ポプテピピック】万全のポプ子": "cimg/8aa486254826.jpg", "【スカイウォーカー】初音 ミク": "cimg/6d6e0989dfcc.jpg", "【夢超える共演】初音ミク&鏡音リンレン": "cimg/23db7c83ed02.jpg", "【Fate/strange Fake】To The City": "cimg/77117720d404.jpg", "【HUNTER×HUNTER】決意と覚悟の拳": "cimg/033b5e586a37.jpg", "【チェンソーマン】レゼ": "cimg/26e7a027b4b6.jpg", "帝皇機神 ケーニヒ・イェーガー": "cimg/acef2a546c52.jpg", "-蒼王宮-氷冠女王イデア=N=ユランブルク": "cimg/0ffd6850d2a7.jpg", "【幼女戦記】ラインの悪魔": "cimg/2a4e87ed22ac.jpg", "【FFXV】彼の者の物語": "cimg/a4cdcfbfb9c2.jpg", "//*#イレギュラー 戦闘摂理偽装システム#*//": "cimg/114e5ce7c73a.jpg", "【リゼロ】ひとときの団欒": "cimg/62b760b596f8.jpg", "不思議の王子様「白馬の晴斗くん」": "cimg/05fce6ccfac2.jpg", "【HUNTER×HUNTER】旅立ちと仲間たち": "cimg/08cddce2caa8.jpg", "【ダンまち】眷族の物語（ファミリア・ミィス）": "cimg/f61a02a21e1f.jpg", "【無職転生】すれ違う物語": "cimg/37f2c378ecde.jpg", "【ライザのアトリエ2】いざ！冒険の旅へ！": "cimg/53251f6cfa01.jpg", "【メイドインアビス】火葬砲": "cimg/40de044fbf22.jpg", "【爆裂アークウィザード】めぐみん": "cimg/348ee04e2fc4.jpg", "戦略の灯/ 国防長官フレイ": "cimg/632d0feeba45.jpg", "【超電磁砲】幻想殺し（イマジンブレイカー）": "cimg/a336ea3d634a.jpg", "【アニモエスティンギ】ラムレザル": "cimg/52eb7d7736f3.jpg", "【STEINS;GATE】黄昏の憩い": "cimg/8ec39c72a6c7.jpg", "【Fate/strange Fake】慢心無き戦": "cimg/5f4663f546c0.jpg", "【ダンまち】ソード・オラトリア": "cimg/fcd7bacd8ce2.jpg", "【Fate/stay night [HF]】激辛麻婆豆腐": "cimg/4007d586366f.jpg", "【チェンソーマン】チェンソーマン": "cimg/bde855f1e44e.jpg", "【超高校級のゲーマー】七海 千秋": "cimg/422b7ae10594.jpg", "【ダンまち】聖火の女神と宴": "cimg/f6a8b8adfe60.jpg", "【超歌舞伎】転生なしたる白狐": "cimg/da8c6048d3f8.jpg", "【画竜点睛】梅喧(ばいけん)": "cimg/5fef0cb82d58.jpg", "【HUNTER×HUNTER】ゾルディック家": "cimg/dea0f0cb16e4.jpg", "イータ": "cimg/468ffadbb815.jpg", "【禁書目録】聖人と天才": "cimg/4292cad65ea5.jpg", "【Fate/stay night [HF]】狂戦士の咆哮": "cimg/c03597717465.jpg", "せかいをまもる！守護星の女神": "cimg/7b286796cf99.jpg", "ミナ&ルナ&レナのバーゲンセール戦争": "cimg/986f47d0c727.jpg", "【FFXV】父子の絆": "cimg/45495d323e73.jpg", "-蒼王宮- 恩寵天使 ソーン=ユーリエフ": "cimg/e57c838d3fec.jpg", "【進撃の巨人】 小さな刃": "cimg/84c339fef219.jpg", "【オーバーロード】不死者の王 アインズ": "cimg/b4395f889179.jpg", "【口寄せ・大型神陣】アンサー": "cimg/d86268204e6e.jpg", "【NieR:Automata】交錯する運命": "cimg/fcdfa5a87df9.jpg", "【STEINS;GATE】時間跳躍の協力者": "cimg/9cbdd97d028c.jpg", "【ペルソナ5】TAKE YOUR HEART": "cimg/02e481f3df52.jpg", "全天首都防壁 Hum-Sphere LLIK": "cimg/b0e691c5e5ec.jpg", "おかあさん だーいすき": "cimg/06cf45ca824a.jpg", "【超電磁砲】超能力者（レベル5）の第一位": "cimg/95c1741dda51.jpg", "【陰実】七陰の頭脳": "cimg/ce52f8a6b775.jpg", "【雀魂】金と緋に浮かぶ": "cimg/a8e73e419248.jpg", "祭りの目玉！ドラゴン花火": "cimg/118696bdeeb6.jpg", "合体攻撃！ドリーム☆エンジェルズアロー": "cimg/1aa182c056da.jpg", "【ルナティック・アイズ】レイチェル": "cimg/ebf9bc141245.jpg", "【無職転生】無慈悲なる邂逅": "cimg/b7decd673444.jpg", "【リゼロ】絶望という病": "cimg/66db2d025777.jpg", "【SAO】旅路の果て": "cimg/0b2c229bf2ca.jpg", "【転スラ】受け継がれる想い": "cimg/2f3cf567eeca.jpg", "【HUNTER×HUNTER】奇術師 ヒソカ": "cimg/a5b4bb7e57df.jpg", "【ポプテピピック】たたかないで…": "cimg/aa1fb6afa8c9.jpg", "【アイアンメイデン】ミリア": "cimg/a15fb639c8de.jpg", "ライダー": "cimg/a598843e7453.jpg", "極悪！最低！悪人派遣会社社長 ベリバッド": "cimg/9a88bfb24057.jpg", "【熱狂する双演】鏡音リン&鏡音レン": "cimg/3ad38c27950b.jpg", "#夜光犯罪特区 #終夜の俺様賛美会": "cimg/84860bc330ed.jpg", "【無職転生】夕暮れのひと時": "cimg/8641342a7974.jpg", "【Fate/stay night [HF]】lost butterfly": "cimg/388e72812483.jpg", "【幼女戦記】神の恩寵": "cimg/4ea165d249c2.jpg", "【ライザのアトリエ2】夏だ！海だ！水着だ！": "cimg/912e7a5d16c0.jpg", "【STEINS;GATE】未来を司る女神作戦": "cimg/8e35b802a10d.jpg", "【幼女戦記】反撃の狼煙": "cimg/7298fe79ac79.jpg", "ドリーム☆マジカルスクエア": "cimg/7f8913c4531c.jpg", "【イカれた約束】ザック＆レイ": "cimg/65fe40140504.jpg", "【Fate/stay night [HF]】舞い散る桜": "cimg/b65e8096d4a8.jpg", "【転スラ】転生したらスライムだった件": "cimg/2afc9587202f.jpg", "Dr.ワイリー": "cimg/4b59a87efe5f.jpg", "【アイウォントアウト】ジャック・オー": "cimg/f8398d3a320e.jpg", "迅雷の科学者 アバカン": "cimg/f38a1fb7e938.jpg", "【文スト】双つの黒": "cimg/3e07a6be9433.jpg", "-蒼王宮- 終焉禁獣 グラナート": "cimg/2dbca9ddb7f9.jpg", "【雀魂】夏の誘い": "cimg/e54ae4039a13.jpg", "【進撃の巨人】 娘々ストレッチ": "cimg/99487e20c46c.jpg", "【Fate/strange Fake】造られし命達": "cimg/de872508df05.jpg", "【陰実】偽りの中の戯れ": "cimg/9c8437720b9a.jpg", "【ライディーン】シン": "cimg/3d856b73e9bc.jpg", "妖炎参謀 月夜叉": "cimg/d599b182feb0.jpg", "【超高校級の希望】苗木 誠": "cimg/db654756f109.jpg", "荒れ狂う天空王 ぶれいずどらごん": "cimg/033a7f927bd5.jpg", "創霊の加護 タイオワ": "cimg/135cab9b3331.jpg", "【千本桜】初音未來": "cimg/5333bc5d6339.jpg", "ハイカラ盟友忍者 -壬生咲みみみ-": "cimg/034eaffcf312.jpg", "蜘蛛縫組 Ж 面従相談役 千切 常影": "cimg/e189b6260c89.jpg", "ぶじゅつかの超速加速": "cimg/186a8b89ae9f.jpg", "学園の王者 生徒会執行部": "cimg/062a31b6f5b7.jpg", "【転スラ】集う者達": "cimg/69a82e1eb546.jpg", "【超歌舞伎】今昔饗宴千本桜": "cimg/8fa025855464.jpg", "‡滅国の城‡ 双生王 レヴィ・シュシュマルシュ": "cimg/08bbcfe0f75f.jpg", "江ノ島 盾子": "cimg/c35dbdebacaf.jpg", "【超電磁砲】とある少女たちの物語": "cimg/b0916b653662.jpg", "オールレンジアタック": "cimg/e9447f4a778f.jpg", "∗伝説ノ美∗ プロティバラリナ": "cimg/b7b1296392ed.jpg", "【文スト】武装探偵社": "cimg/e0906d896b54.jpg", "連合宇宙軍 シールドブレイカー": "cimg/66ccc65c7fe3.jpg", "【メイドインアビス】黎明卿": "cimg/c90f1d4d98a1.jpg", "¦¦¦狐ヶ咲¦¦¦ 祓三姉妹 夢色¦桃色": "cimg/d91c0031cd83.jpg", "不思議の支配者「ハートの女王さま」": "cimg/75b94243a364.jpg", "【文スト】ありふれた日常の幸せ": "cimg/6c5c823f63cf.jpg", "【SAO】氷の狙撃手": "cimg/992d652da88a.jpg", "¦¦¦狸ヶ原¦¦¦ 破戒怨士 喰色": "cimg/9f85cd5dc815.jpg", "【雀魂】一姫当千": "cimg/bdc3e4e15d1d.jpg", "紅薔薇の暗殺術 クルエルダー": "cimg/bcffebb97c97.jpg", "【SAO】妖精たちの国にて": "cimg/cb06566091c5.jpg", "絶夢の魔女 リベレーション★ルルカ": "cimg/dd84d504d3a0.jpg", "恒星間転送装置 Tele-Pass": "cimg/e5273a789964.jpg", "【Fate/strange Fake】時計塔の師弟": "cimg/9a67b42b9143.jpg", "楽団長 ドルケストル": "cimg/672ed54c591b.jpg", "【ラッシュ＆ブレイズ】ケン": "cimg/f3652de61ca2.jpg", "失われし呪物¦蛇神アペプ": "cimg/cc6fe4fa2e08.jpg", "雷霊の加護 ワキンヤン": "cimg/3868c5cd7787.jpg", "【FFXV】輝かしき未来へ": "cimg/ee8a2c7dc127.jpg", "【鋼の錬金術師FA】お父様と人造人間": "cimg/6e308a30324e.jpg", "【ワンショットワンキル】猫宮ひなた": "cimg/3b6609c0eaca.jpg", "蜘蛛縫組 Ж 三代目組長 蜘蛛縫 正太郎": "cimg/9a6845062f2c.jpg", "神技官 アンジュ・ソレイユ": "cimg/24c0a93c41ce.jpg", "【リゼロ】間断なき結束": "cimg/f72a892b6566.jpg", "【NieR:Automata】静寂の時": "cimg/0f2b151d2d80.jpg", "【鋼の錬金術師FA】エルリック兄弟": "cimg/ea4ebffba10f.jpg", "UMEEEEEE!!! ㌍伝道 通信教育カラァーテェ": "cimg/fce5fce5d19d.jpg", "//*#イレギュラードールズ#*//": "cimg/727911e33332.jpg", "【拳を極めし者】豪鬼": "cimg/05e81f72dec4.jpg", "【ダンまち】至福の一時": "cimg/7ad3c84b86d1.jpg", "【ペルソナ5】心の怪盗団": "cimg/db160223d5f6.jpg", "独災者 アングリフ・ギフト": "cimg/b3ed8364759d.jpg", "ライバル狂刃忍者 -幽々院ゆらら-": "cimg/92f302f32cab.jpg", "【デルミン】デビルミント始龍": "cimg/0ee2d3078084.jpg", "【鋼の錬金術師FA】賢者の石": "cimg/e4aca10cd258.jpg", "【ライジング・フォース】カイ": "cimg/664df19f9d27.jpg", "深淵より湧き上がるシャドウ": "cimg/8aba8d33744f.jpg", "ベータ": "cimg/b5d1bd413ed8.jpg", "電撃ロボ Eledoll-115": "cimg/28d69ce22185.jpg", "楽団姫 ディーバ": "cimg/a6c6fa1efd30.jpg", "祭りの真打ち！打ち上げ花火": "cimg/d1b2cb581000.jpg", "機航師弾 フルーク・ツォイク": "cimg/adbdd87f0a94.jpg", "反導砲 カノーネ・ファイエル": "cimg/f4590d31399e.jpg", "運命の女神 エボリューション☆リリカ": "cimg/b271720f7415.jpg", "とある家庭用メカの反乱": "cimg/412545a945a1.jpg", "チーちゃんのウワキオシオキ狙撃": "cimg/f760600f0ff5.jpg", "戦陣の灯/ VDN-93 強襲揚陸艦 ユグドラシル": "cimg/b6db1b288125.jpg", "究極系ノーガード戦法": "cimg/fd6df7bfd936.jpg", "革命の旗": "cimg/987e5d91d043.jpg", "背に負いし亡き妻の加護": "cimg/46773a220bde.jpg", "ガルガルのピカピカデコ戦車": "cimg/6f66540a4d23.jpg", "紅薔薇の副団長 アミスター": "cimg/b80b853ea236.jpg", "忘愛の長女 アレクサンドラ": "cimg/927d0a44709e.jpg", "モノリス Hum-Unknown": "cimg/5109cdc09ef1.jpg", "せかいをはかい！恐怖の大魔王": "cimg/61fd1c495d42.jpg", "【最終最凶】ベガ": "cimg/a48a9cff79d3.jpg", "【愉悦の一閃】アイザック": "cimg/b7e646e367cb.jpg", "【風呂上がりの休息】アクア＆めぐみん": "cimg/8d2b084e6d4b.jpg", "【駄女神’s】アクア＆めぐみん＆ダクネス": "cimg/e6157ef6c55e.jpg", "【最高にハイ!!!エナドリ】猫宮ひなた": "cimg/1d1817c05475.jpg", "【我羨惚(がせんこつ)】紗夢(じゃむ)": "cimg/0ec9ad2834fa.jpg", "デジタル堅牢忍具 -不可視金蔵-": "cimg/6a9f9e9646fe.jpg", "【ピースメーカー】初音 ミク": "cimg/11d8e62688ff.jpg", "八木唯": "cimg/3b4a82d314b7.jpg", "白井黒子": "cimg/928be0954801.jpg"};
+let IMG=Object.assign({},PRESET), listDraw=null;
+// [名前, CT秒, 発動, レア, 属性, タイプ, 効果, 大会使用率%]
+// CT・発動・効果: やぎシミュ（カードデータ 2026/9/28 アップデート適用）
+// 使用率: #コンパス大会データ管理室（2024/12/14〜2026/10/7）
+const CARDS = [
+["【SAO】朝露の少女と", 30, "無", "UR", "火", "防", "ダメージを10秒間60%カット", 82.4],
+["【チェンソーマン】犬とチェンソー", 26, "無", "UR", "木", "防", "ダメージを6秒間70%カット", 58.5],
+["【ロックマンエグゼ】ダブルストリーム", 36, "無", "UR", "火", "防", "ダメージを6秒間100%カット", 54.4],
+["【超高校級の幸運】狛枝 凪斗", 34, "無", "UR", "火", "周", "周囲の敵にガードブレイク", 38.8],
+["【チェンソーマン】公安対魔特異4課", 38, "長", "UR", "水", "癒", "4秒間で300%回復＋状態異常回復", 37.8],
+["ジャック・オー", 28, "無", "SR", "火", "防", "ダメージを10秒間50%カット", 34.0],
+["【ダンまち】恥じらいの疾風", 38, "無", "UR", "木", "他", "リング展開、接触した敵を4秒スタン", 33.4],
+["【空駆ける歌姫】初音 ミク", 65, "短", "UR", "木", "強", "味方全員の移動速度を15秒間1.4倍", 29.5],
+["‡焼亡の森‡ 溺愛弟 ルー・メルク・シルワ", 36, "無", "UR", "木", "連", "広範囲に連続貫通ダメージ", 28.8],
+["【ロックマンエグゼ】アースブレイカー", 34, "無", "UR", "木", "周", "周囲の敵にガードブレイク", 28.6],
+["【祝福する歌姫】初音 ミク", 50, "短", "UR", "火", "癒", "味方全員を10秒間で90%回復", 28.0],
+["【ロックマンエグゼ】ショックウェーブ", 26, "無", "UR", "水", "近", "近距離ダメージ＋ショックウェーブ", 22.1],
+["【チェンソーマン】早川アキ", 28, "無", "UR", "水", "近", "近距離の敵にガードブレイク", 20.3],
+["銀河防衛ロボ Unidoll-2525", 40, "短", "UR", "水", "癒", "味方全員の体力を60%回復", 18.7],
+["【チェンソーマン】マキマ", 32, "無", "UR", "火", "連", "4秒サイレントの連続ダメージ", 18.6],
+["【メイドインアビス】ナナチ＆ミーティ", 28, "短", "UR", "水", "癒", "10秒間で100%回復、触れた味方にも付与", 18.2],
+["【ポプテピピック】POP TEAM EPIC", 33, "無", "UR", "水", "癒", "40%回復＋前方に回復エリア", 17.8],
+["【オーバーロード】英雄モモン&美姫ナーベ", 42, "無", "UR", "水", "強", "9秒間 攻防移アップ、自身サイレント", 17.6],
+["【超電磁砲】常盤台の超電磁砲（レールガン）", 42, "無", "UR", "火", "遠", "遠距離の敵を4秒間スタン", 17.2],
+["【慈愛の貧乏リッチー】ウィズ", 32, "無", "UR", "水", "遠", "遠距離の敵に貫通ダメージ", 17.1],
+["【進撃の巨人】 超大型巨人襲来", 14, "無", "UR", "火", "周", "周囲の敵を12秒間サイレント", 16.6],
+["∗絢爛ノ美∗ ボラ＆アルヒコ＆アペイロン", 45, "無", "UR", "木", "周", "周囲の敵を5秒間スタン", 14.3],
+["‡滅国の城‡ 偽らざる鮮血の玉座", 30, "無", "UR", "水", "周", "周囲の敵に50%の割合吸収", 12.8],
+["#夜光犯罪特区 #きてるちゃんライヴ", 50, "無", "UR", "水", "他", "指定した敵の周囲に2秒スタン", 12.5],
+["【NieR:Automata】戦いの始まり", 27, "無", "UR", "水", "返", "カウンター／近距離の敵にダメージ", 12.5],
+["【禁書目録】未元物質（ダークマター）", 36, "無", "UR", "水", "強", "移動速度を18秒間1.4倍", 12.2],
+["【号令する歌姫】初音 ミク", 45, "無", "UR", "火", "周", "周囲の敵を5秒間スタン", 11.5],
+["【陰実】HIGHEST", 36, "無", "UR", "水", "周", "周囲にガードブレイク＋自傷25%", 11.3],
+["【ライザのアトリエ2】ひと夏の思い出", 21, "無", "UR", "木", "強", "防御力を6秒間10倍", 11.0],
+["【Fate/strange Fake】To The City", 36, "無", "UR", "水", "防", "ダメージを8秒間80%カット", 10.4],
+["【夢超える共演】初音ミク&鏡音リンレン", 40, "無", "UR", "水", "癒", "前方のポータルに回復エリア", 9.6],
+["【スカイウォーカー】初音 ミク", 60, "短", "SR", "水", "強", "味方全員の移動速度を12秒間1.3倍", 9.5],
+["【ポプテピピック】万全のポプ子", 36, "無", "UR", "木", "強", "12秒間 攻撃・防御・移動アップ", 9.5],
+["どこにでもいけるドア", 100, "長", "UR", "木", "移", "前方のポータルに移動", 9.4],
+["【HUNTER×HUNTER】決意と覚悟の拳", 26, "無", "UR", "無", "近", "ガードブレイク＋自傷25%", 9.3],
+["【FFXV】彼の者の物語", 42, "無", "UR", "火", "遠", "遠距離の敵を4秒間スタン", 9.2],
+["【幼女戦記】ラインの悪魔", 26, "無", "UR", "水", "近", "1000%吸収ダメージ＋自傷25%", 8.7],
+["-蒼王宮-氷冠女王イデア=N=ユランブルク", 42, "短", "UR", "水", "弱", "敵全員のバフと持続回復を打ち消す", 8.5],
+["帝皇機神 ケーニヒ・イェーガー", 28, "無", "SR", "水", "防", "ダメージを10秒間50%カット", 8.4],
+["【チェンソーマン】レゼ", 38, "無", "UR", "木", "周", "周囲にダメージ＋防御力16倍", 8.0],
+["//*#イレギュラー 戦闘摂理偽装システム#*//", 10, "無", "UR", "水", "他", "直前のカードをコピー（CT1.6倍）", 7.8],
+["【リゼロ】ひとときの団欒", 30, "無", "UR", "水", "強", "防御力を8秒間10倍", 7.7],
+["不思議の王子様「白馬の晴斗くん」", 30, "無", "UR", "火", "癒", "前方の味方を100%回復＋状態異常回復", 7.6],
+["【メイドインアビス】火葬砲", 30, "無", "UR", "火", "連", "連続ダメージ＋防御力10倍", 7.2],
+["【ライザのアトリエ2】いざ！冒険の旅へ！", 24, "無", "UR", "火", "弱", "前方の敵の防御力を12秒間0に", 7.2],
+["【無職転生】すれ違う物語", 27, "無", "UR", "水", "周", "周囲の敵に貫通ダメージ", 7.2],
+["【ダンまち】眷族の物語（ファミリア・ミィス）", 28, "短", "UR", "火", "癒", "10秒間で140%回復", 7.1],
+["【HUNTER×HUNTER】旅立ちと仲間たち", 27, "無", "UR", "火", "周", "周囲の敵にダウン付きダメージ", 6.8],
+["【爆裂アークウィザード】めぐみん", 24, "無", "UR", "火", "近", "近距離の敵にガードブレイク", 6.8],
+["戦略の灯/ 国防長官フレイ", 36, "短", "UR", "水", "癒", "味方全員45%回復＋状態異常回復", 6.6],
+["【超電磁砲】幻想殺し（イマジンブレイカー）", 24, "無", "UR", "火", "近", "近距離の敵に貫通ダメージ", 6.6],
+["【アニモエスティンギ】ラムレザル", 22, "無", "UR", "木", "連", "近距離の敵に連続ダメージ", 6.3],
+["【チェンソーマン】チェンソーマン", 27, "無", "UR", "火", "返", "カウンター／連続ダメージ", 5.9],
+["【Fate/stay night [HF]】激辛麻婆豆腐", 44, "無", "UR", "火", "弱", "前方の敵の行動速度を4秒間0.5倍", 5.8],
+["【ダンまち】ソード・オラトリア", 30, "無", "UR", "水", "連", "連打攻撃で敵を引き寄せる", 5.8],
+["【Fate/strange Fake】慢心無き戦", 28, "無", "UR", "無", "近", "近距離の敵に極大ダメージ", 5.8],
+["【STEINS;GATE】黄昏の憩い", 40, "短", "UR", "火", "癒", "味方全員の体力を60%回復", 5.8],
+["【超高校級のゲーマー】七海 千秋", 50, "短", "UR", "水", "癒", "味方全員を10秒間で90%回復", 5.6],
+["【禁書目録】聖人と天才", 24, "無", "UR", "木", "近", "残体力が少ないほど威力アップ", 5.3],
+["イータ", 28, "無", "SR", "水", "防", "ダメージを10秒間50%カット", 5.2],
+["【HUNTER×HUNTER】ゾルディック家", 27, "無", "UR", "木", "返", "カウンター／周囲にダメージ", 5.1],
+["【画竜点睛】梅喧(ばいけん)", 27, "無", "UR", "火", "返", "カウンター／近距離にダメージ", 5.0],
+["【超歌舞伎】転生なしたる白狐", 10, "無", "UR", "火", "防", "ダメージを3秒間90%カット", 5.0],
+["【ダンまち】聖火の女神と宴", 20, "無", "UR", "火", "近", "近距離の敵に50%の割合吸収", 4.9],
+["【Fate/stay night [HF]】狂戦士の咆哮", 14, "無", "UR", "木", "周", "周囲の敵にダメージ", 4.6],
+["【進撃の巨人】 小さな刃", 24, "無", "UR", "木", "連", "連続1000%吸収ダメージ", 4.5],
+["-蒼王宮- 恩寵天使 ソーン=ユーリエフ", 30, "短", "UR", "水", "移", "帰還＋100%回復＋移動アップ", 4.5],
+["【FFXV】父子の絆", 26, "短", "UR", "水", "癒", "味方全員の体力を40%回復", 4.4],
+["ミナ&ルナ&レナのバーゲンセール戦争", 27, "無", "UR", "木", "返", "カウンター／近距離にダメージ", 4.2],
+["せかいをまもる！守護星の女神", 15, "無", "UR", "木", "他", "他のカードのCTを5秒短縮", 4.2],
+["【オーバーロード】不死者の王 アインズ", 22, "無", "UR", "火", "近", "極大ダメージ＋自傷25%", 4.2],
+["【口寄せ・大型神陣】アンサー", 30, "長", "UR", "木", "罠", "ダメージを与える罠", 4.1],
+["おかあさん だーいすき", 24, "無", "UR", "木", "弱", "前方の敵の防御力を12秒間0に", 4.1],
+["全天首都防壁 Hum-Sphere LLIK", 30, "短", "UR", "木", "防", "ダメージを6秒間100%カット", 3.9],
+["【ペルソナ5】TAKE YOUR HEART", 36, "無", "UR", "火", "移", "前方の敵の背後からダメージ", 3.8],
+["【STEINS;GATE】時間跳躍の協力者", 40, "無", "UR", "木", "強", "25秒間 通常攻撃で150%吸収", 3.7],
+["【NieR:Automata】交錯する運命", 26, "無", "UR", "火", "近", "ガードブレイク＋自傷25%", 3.6],
+["【超電磁砲】超能力者（レベル5）の第一位", 27, "無", "UR", "水", "返", "カウンター／周囲にダメージ", 3.6],
+["【陰実】七陰の頭脳", 15, "無", "UR", "火", "癒", "30%回復（孤立時は70%）", 3.6],
+["【無職転生】無慈悲なる邂逅", 30, "無", "UR", "木", "弱", "前方の敵の行動速度を3秒間0.5倍", 3.5],
+["【ルナティック・アイズ】レイチェル", 35, "短", "UR", "火", "弱", "敵全員の防御力を20秒間65%減", 3.5],
+["合体攻撃！ドリーム☆エンジェルズアロー", 32, "無", "UR", "木", "遠", "遠距離の敵に貫通ダメージ", 3.3],
+["祭りの目玉！ドラゴン花火", 30, "長", "UR", "火", "罠", "ダメージを与える罠", 3.3],
+["【雀魂】金と緋に浮かぶ", 34, "無", "UR", "木", "近", "ガードブレイク（成功でCT短縮）", 3.3],
+["【リゼロ】絶望という病", 24, "無", "UR", "木", "近", "近距離の敵にガードブレイク", 3.3],
+["【SAO】旅路の果て", 32, "無", "UR", "木", "連", "近距離の敵に連続貫通ダメージ", 3.3],
+["【転スラ】受け継がれる想い", 27, "無", "UR", "木", "遠", "遠距離の敵に吸血ポイズン", 3.3],
+["極悪！最低！悪人派遣会社社長 ベリバッド", 40, "無", "UR", "木", "他", "ガードブレイク＋バフ打ち消し", 3.2],
+["ライダー", 60, "短", "SR", "木", "強", "味方全員の移動速度を12秒間1.3倍", 3.2],
+["【アイアンメイデン】ミリア", 14, "無", "UR", "水", "周", "周囲の敵を12秒間サイレント", 3.2],
+["【ポプテピピック】たたかないで…", 26, "無", "UR", "火", "強", "自分と周囲の味方の防御力10倍", 3.2],
+["【HUNTER×HUNTER】奇術師 ヒソカ", 36, "無", "UR", "水", "他", "指定範囲の敵に2秒スタン", 3.1],
+["【熱狂する双演】鏡音リン&鏡音レン", 20, "短", "UR", "火", "周", "周囲の敵に600%吸収ダメージ", 3.1],
+["【ライザのアトリエ2】夏だ！海だ！水着だ！", 18, "無", "UR", "水", "周", "周囲の敵を20秒間ポイズン", 3.1],
+["【幼女戦記】神の恩寵", 30, "無", "UR", "火", "強", "攻撃力1.55倍＋自傷25%", 3.0],
+["【Fate/stay night [HF]】lost butterfly", 30, "短", "UR", "水", "防", "ダメージを6秒間100%カット", 2.9],
+["【無職転生】夕暮れのひと時", 30, "短", "UR", "火", "癒", "70%回復＋10秒間で90%回復", 2.9],
+["#夜光犯罪特区 #終夜の俺様賛美会", 30, "無", "UR", "木", "他", "ポータル周囲をサイレント", 2.9],
+["ドリーム☆マジカルスクエア", 44, "無", "UR", "水", "弱", "前方の敵の行動速度を4秒間0.5倍", 2.8],
+["【幼女戦記】反撃の狼煙", 32, "無", "UR", "木", "他", "スモークエリアを展開", 2.8],
+["迅雷の科学者 アバカン", 32, "短", "UR", "木", "遠", "遠距離の敵を4秒間スタン", 2.1],
+["創霊の加護 タイオワ", 50, "短", "UR", "火", "強", "味方全員の攻撃力を9秒間1.5倍", 1.8],
+["ぶじゅつかの超速加速", 40, "無", "UR", "木", "強", "移動速度を22秒間1.4倍", 1.4],
+["ハイカラ盟友忍者 -壬生咲みみみ-", 12, "無", "UR", "火", "癒", "体力を30%回復", 1.3],
+["【Fate/stay night [HF]】舞い散る桜", 26, "無", "UR", "木", "癒", "体力を80%回復", 2.5],
+["祭りの真打ち！打ち上げ花火", 28, "短", "UR", "木", "癒", "10秒間で140%回復", 0.1],
+["機航師弾 フルーク・ツォイク", 20, "無", "UR", "火", "近", "近距離の敵にダメージ", 0.1],
+["反導砲 カノーネ・ファイエル", 24, "無", "UR", "水", "近", "近距離の敵にガードブレイク", 0.1],
+["楽団姫 ディーバ", 21, "無", "UR", "水", "防", "ダメージを3秒間100%カット", 0.1],
+["魂を司る聖天使 ガブリエル", 26, "短", "UR", "水", "癒", "体力を100%回復", 0],
+["究極系ノーガード戦法", 30, "短", "UR", "火", "防", "ダメージを8秒間80%カット", 0],
+["楽団長 ドルケストル", 30, "無", "UR", "火", "強", "防御力を8秒間1000%(10倍)に上昇", 0],
+["対消滅ロングレンジライフルHum-Buster", 20, "無", "UR", "水", "遠", "遠距離の敵にダメージ", 0],
+["名門サッカー部 イナズマシュート", 20, "無", "UR", "木", "遠", "遠距離の敵にダメージ", 0],
+["妖炎参謀 月夜叉", 26, "短", "UR", "火", "癒", "味方全員の体力を40%回復", 0],
+["UMEEEEEE!!! ㌍伝道 通信教育カラァーテェ", 21, "無", "UR", "木", "近", "近距離の敵を弾き飛ばす", 0],
+["荒れ狂う天空王 ぶれいずどらごん", 20, "無", "UR", "木", "近", "近距離の敵に貫通ダメージ", 0],
+["闘魂！注入！受け継がれし魂 ゲームバズーカ", 36, "無", "UR", "火", "遠", "遠距離の敵を弾き飛ばす", 0],
+["連合宇宙軍 強襲制圧型 装甲多脚戦車", 28, "無", "UR", "水", "周", "周囲の敵を弾き飛ばす", 0],
+["【天罰の熾天使】†ファースト†", 24, "無", "UR", "火", "近", "近距離の敵にダメージ＋敵を撃破時100%回復", 0],
+["∗伝説ノ美∗ プロティバラリナ", 60, "短", "SR", "火", "強", "味方全員の移動速度を12秒間130%(1.3倍)に上昇", 0],
+["妖軍一統 ゲネラール", 14, "無", "UR", "火", "周", "周囲の敵にダメージ", 0],
+["連合宇宙軍 シールドブレイカー", 35, "短", "UR", "木", "弱", "敵全員の防御力を20秒間65%(0.35倍)減少", 0],
+["恒星間転送装置 Tele-Pass", 70, "長", "UR", "水", "移", "一番近くの敵の背後からダメージ", 0],
+["おとうさん あそんであそんでー", 37, "短", "UR", "水", "弱", "敵全員の攻撃力を4秒間99%(0.01倍)減少", 0],
+["-蒼王宮- 聖歌連隊 ミローディア", 40, "無", "UR", "火", "癒", "前方のポータルに回復エリア展開(12秒 8.33%/0.75秒)", 0],
+["【デルミン】デビルミント始龍", 24, "無", "UR", "水", "近", "近距離の敵に200%吸収ダメージ", 0],
+["UMEEEEEE!!! ㌍覇王 プニャトフスキ一族", 32, "長", "UR", "火", "罠", "敵を弾き飛ばす単発罠(20秒)", 0],
+["¦¦¦狐ヶ咲¦¦¦ 祓三姉妹 夢色¦桃色", 27, "無", "UR", "火", "返", "カウンター/攻撃した周囲の敵にダメージ", 0],
+["戦陣の灯/ VDN-93 強襲揚陸艦 ユグドラシル", 25, "短", "UR", "木", "遠", "遠距離の敵に貫通ダメージ", 0],
+["蜘蛛縫組 Ж 三代目組長 蜘蛛縫 正太郎", 32, "長", "UR", "火", "罠", "敵の5秒間中心に引き寄せる範囲罠(20秒)", 0],
+["失われし呪物¦蛇神アペプ", 28, "無", "UR", "火", "近", "近距離の敵を10秒間で70%ダメージの毒", 0],
+["学園の王者 生徒会執行部", 22, "無", "UR", "水", "連", "近距離の敵に連続ダメージ", 0],
+["オールレンジアタック", 24, "無", "UR", "水", "周", "周囲の敵に貫通ダメージ", 0],
+["連合宇宙軍 サテライトキャノン", 18, "無", "UR", "水", "周", "周囲の敵にダメージ", 0],
+["全員集合！魔法少女リリカ☆ルルカ", 27, "無", "UR", "火", "遠", "遠距離の敵のHSゲージを25%吸収", 0],
+["狂愛の次女 ヴァルヴァラ", 20, "短", "UR", "水", "周", "周囲の敵に600%吸収ダメージ", 0],
+["紅薔薇の暗殺術 クルエルダー", 42, "無", "UR", "木", "遠", "遠距離の敵を引き寄せる", 0],
+["チーちゃんのウワキオシオキ狙撃", 28, "無", "UR", "木", "遠", "遠距離の敵に500%吸収ダメージ", 0],
+["∗真実ノ美∗ ジョバンニ", 25, "無", "UR", "水", "返", "カウンター/攻撃した敵の背後からダメージ", 0],
+["【デルミン】デビルミント鬼龍パパミン", 16, "無", "UR", "木", "周", "周囲の敵を10秒間で30%ダメージの毒", 0],
+["絶夢の魔女 リベレーション★ルルカ", 34, "無", "UR", "火", "周", "周囲の敵を引き寄せる", 0],
+["¦¦¦狸ヶ原¦¦¦ 破戒怨士 喰色", 16, "無", "UR", "水", "近", "近距離の敵を13秒間サイレント", 0],
+["‡滅国の城‡ 双生王 レヴィ・シュシュマルシュ", 24, "無", "UR", "水", "近", "近距離の敵を10秒間で50%ダメージの毒/毒ダメージ分吸収", 0],
+["失われし血族¦カティーア大盗賊団", 30, "無", "UR", "木", "癒", "体力を60%回復/周囲の味方の体力を50%回復+状態異常回復", 0],
+["とある家庭用メカの反乱", 20, "無", "UR", "火", "連", "近距離の敵に連続貫通ダメージ", 0],
+["運命の女神 エボリューション☆リリカ", 18, "無", "UR", "水", "遠", "遠距離の敵を10秒間サイレント", 0],
+["革命の旗", 30, "短", "UR", "火", "周", "周囲の敵のHSゲージを40%吸収", 0],
+["深淵より湧き上がるシャドウ", 20, "無", "UR", "火", "遠", "遠距離の敵を10秒間で45%ダメージの毒", 0],
+["祭りの粋！オトコの手筒花火", 45, "無", "UR", "火", "他", "周囲の敵の視界を8秒間奪う", 0],
+["モノリス Hum-Unknown", 75, "長", "UR", "水", "罠", "制圧済ポータルをダミーで守る(7秒)", 0],
+["神技官 アンジュ・ソレイユ", 36, "短", "UR", "火", "癒", "体力を20秒間120%回復", 0],
+["独災者 アングリフ・ギフト", 30, "無", "UR", "木", "遠", "遠距離の敵を20秒間で65%ダメージの毒", 0],
+["忘愛の長女 アレクサンドラ", 34, "長", "UR", "火", "罠", "敵に5秒間スタンを与える単発罠(20秒)", 0],
+["紅薔薇の副団長 アミスター", 34, "無", "UR", "火", "他", "前方のポータル周囲の敵を4秒間スタン", 0],
+["ガルガルのピカピカデコ戦車", 18, "無", "UR", "火", "他", "前方のポータル周囲の敵を弾き飛ばす", 0],
+["雷霊の加護 ワキンヤン", 24, "無", "UR", "木", "近", "近距離の敵を4秒間スタン", 0],
+["ライバル狂刃忍者 -幽々院ゆらら-", 20, "無", "UR", "木", "連", "近距離の敵に連続貫通ダメージ", 0],
+["-蒼王宮- 終焉禁獣 グラナート", 34, "無", "UR", "水", "周", "周囲の敵にガードブレイク/ブレイク成功時", 0],
+["背に負いし亡き妻の加護", 26, "無", "UR", "火", "防", "ダメージを3秒間200%体力に変換する", 0],
+["不思議の支配者「ハートの女王さま」", 40, "無", "UR", "水", "他", "前方1ﾏｽに幅6ﾏｽ 通過不可 接触時3秒スタンの壁を6.4秒間設置", 0],
+["蜘蛛縫組 Ж 面従相談役 千切 常影", 42, "長", "UR", "水", "罠", "0.8秒毎に5.2%ダメージ(最大135.2%ダメージ)の毒範囲罠(20秒)", 0],
+["//*#イレギュラードールズ#*//", 36, "無", "UR", "火", "他", "直線上に敵にダメージ", 0],
+["‡焼亡の森‡ 奴隷狩り密売団 ケルマト", 26, "長", "UR", "火", "罠", "敵に14秒間サイレントを与える単発罠(20秒)/発動後10秒間サイレントエリア展開", 0],
+["せかいをはかい！恐怖の大魔王", 18, "無", "UR", "水", "近", "近距離の敵を7秒間ランダム状態異常付与", 0],
+["【鋼の錬金術師FA】エルリック兄弟", 36, "無", "UR", "水", "近", "近距離の敵にダメージ+ショックウェーブ(前方10ﾏｽ)+ヒット時4秒間スタン", 0],
+["【鋼の錬金術師FA】賢者の石", 30, "無", "UR", "火", "周", "周囲の敵を10秒間で50%ダメージの毒/毒ダメージの200％分吸収", 0],
+["【鋼の錬金術師FA】お父様と人造人間", 30, "無", "UR", "木", "防", "ダメージを10秒間60%カット", 0],
+["【雀魂】一姫当千", 36, "無", "UR", "火", "遠", "遠距離の敵に貫通ダメージ", 0],
+["【雀魂】夏の誘い", 38, "無", "UR", "水", "弱", "敵の行動速度を35%(0.65倍)減少+防御力を85%(0.15倍)減少するデバフエリアを自身周囲半径3ﾏｽに6秒間展開", 0],
+["【Fate/strange Fake】造られし命達", 45, "無", "UR", "木", "連", "近距離の敵に連続ダメージ＋2秒間スタン", 0],
+["【Fate/strange Fake】時計塔の師弟", 20, "無", "UR", "火", "癒", "体力を50%回復+状態異常回復", 0],
+["【陰実】偽りの中の戯れ", 30, "無", "UR", "木", "周", "周囲の敵にダメージ", 0],
+["【メイドインアビス】黎明卿", 18, "無", "UR", "無", "遠", "遠距離の敵を10秒間サイレント", 0],
+["Dr.ワイリー", 32, "無", "SR", "水", "他", "周囲に7秒間リング展開(発生1.5秒)/初回接触時10秒間で30%ダメージの毒/ワープ時1秒機能停止", 0],
+["【超電磁砲】とある少女たちの物語", 26, "無", "UR", "木", "癒", "体力を80%回復", 0],
+["【転スラ】転生したらスライムだった件", 32, "短", "UR", "水", "防", "ダメージを8秒間200%体力に変換する", 0],
+["【転スラ】集う者達", 23, "無", "UR", "火", "周", "周囲の敵に600%吸収ダメージ", 0],
+["【NieR:Automata】静寂の時", 24, "無", "UR", "木", "近", "近距離の敵に200%吸収ダメージ", 0],
+["【SAO】氷の狙撃手", 42, "無", "UR", "火", "遠", "遠距離の敵を引き寄せる", 0],
+["【SAO】妖精たちの国にて", 30, "無", "UR", "水", "癒", "体力を60%回復/周囲の味方の体力を50%回復+状態異常回復", 0],
+["【オーバーロード】守護者統括 アルベド", 12, "無", "UR", "木", "癒", "体力を30%回復", 0],
+["【ペルソナ5】運命の囚われ", 26, "無", "UR", "水", "防", "ダメージを3秒間200%体力に変換する", 0],
+["【ペルソナ5】心の怪盗団", 24, "無", "UR", "木", "周", "周囲の敵に貫通ダメージ", 0],
+["【文スト】武装探偵社", 20, "無", "UR", "水", "周", "周囲の敵に吹き飛ばし効果付きダメージ", 0],
+["【文スト】ありふれた日常の幸せ", 26, "無", "UR", "火", "癒", "体力を80%回復", 0],
+["【文スト】理想という病を愛す", 24, "無", "UR", "火", "近", "近距離の敵に200%吸収ダメージ", 0],
+["【文スト】双つの黒", 32, "短", "UR", "木", "防", "ダメージを8秒間200%体力に変換する", 0],
+["【FFXV】輝かしき未来へ", 30, "無", "UR", "木", "強", "攻撃力を12秒間155%(1.55倍)に上昇/残体力の25％減少", 0],
+["【ダンまち】至福の一時", 30, "短", "UR", "木", "防", "ダメージを8秒間80%カット", 0],
+["【千本桜】初音未來", 34, "無", "UR", "木", "近", "近距離の敵のHSゲージを40%吸収/30%の割合吸収ダメージ", 0],
+["【超歌舞伎】今昔饗宴千本桜", 45, "短", "UR", "水", "癒", "味方全員の体力を100%回復", 0],
+["【STEINS;GATE】未来を司る女神作戦", 20, "無", "UR", "水", "近", "近距離の敵に貫通ダメージ", 0],
+["【最高にハイ!!!エナドリ】猫宮ひなた", 36, "短", "UR", "水", "癒", "体力を20秒間120%回復", 0],
+["【ワンショットワンキル】猫宮ひなた", 27, "無", "UR", "火", "遠", "遠距離の敵にダメージ", 0],
+["【火遊びフラッシュバン】猫宮ひなた", 22, "長", "UR", "火", "罠", "敵の視界を6秒間奪う単発罠(20秒)", 0],
+["【進撃の巨人】 娘々ストレッチ", 12, "無", "UR", "水", "癒", "体力を30%回復", 0],
+["【駄女神’s】アクア＆めぐみん＆ダクネス", 21, "無", "UR", "木", "防", "ダメージを3秒間100%カット", 0],
+["【風呂上がりの休息】アクア＆めぐみん", 28, "短", "UR", "水", "癒", "体力を10秒間140%回復", 0],
+["江ノ島 盾子", 28, "無", "SR", "木", "防", "ダメージを10秒間50%カット", 0],
+["【超高校級の希望】苗木 誠", 42, "短", "UR", "木", "弱", "敵全員のバフ+持続回復を打ち消す", 0],
+["【愉悦の一閃】アイザック", 20, "無", "UR", "木", "近", "近距離の敵にダメージ", 0],
+["【イカれた約束】ザック＆レイ", 30, "短", "UR", "水", "防", "ダメージを8秒間80%カット", 0],
+["【リゼロ】ゼロから始まる異世界生活", 26, "短", "UR", "火", "癒", "体力を100%回復", 0],
+["【リゼロ】間断なき結束", 24, "無", "UR", "火", "周", "周囲の敵に貫通ダメージ", 0],
+["【ラッシュ＆ブレイズ】ケン", 22, "無", "UR", "火", "連", "近距離の敵に連続ダメージ", 0],
+["【魂屠る闇】ネカリ", 16, "無", "UR", "木", "近", "近距離の敵を13秒間サイレント", 0],
+["【拳を極めし者】豪鬼", 20, "無", "UR", "水", "連", "近距離の敵に連続貫通ダメージ", 0],
+["【最終最凶】ベガ", 34, "無", "UR", "水", "近", "近距離の敵のHSゲージを40%吸収/30%の割合吸収ダメージ", 0],
+["【ライジング・フォース】カイ", 32, "短", "UR", "水", "遠", "遠距離の敵を4秒間スタン", 0],
+["【ライディーン】シン", 20, "無", "UR", "水", "近", "近距離の敵にダメージ", 0],
+["【マグナムウェディング】エルフェルト", 28, "無", "UR", "火", "遠", "遠距離の敵に500%吸収ダメージ", 0],
+["【アイウォントアウト】ジャック・オー", 18, "無", "UR", "火", "周", "周囲の敵を20秒間で50%ダメージの毒", 0],
+["【我羨惚(がせんこつ)】紗夢(じゃむ)", 20, "無", "UR", "火", "近", "近距離の敵に貫通ダメージ", 0],
+["ギアメーカー", 26, "短", "UR", "木", "癒", "体力を100%回復", 0],
+["ベータ", 28, "無", "SR", "木", "周", "周囲の敵を10秒間で40%ダメージの毒/毒ダメージ分吸収", 0],
+["電撃ロボ Eledoll-115", 32, "短", "SR", "木", "周", "周囲の敵を5秒間スタン", 0],
+["デジタル堅牢忍具 -不可視金蔵-", 38, "無", "SR", "火", "防", "ダメージを15秒間40%カット", 0],
+["【ピースメーカー】初音 ミク", 38, "無", "SR", "水", "防", "ダメージを15秒間40%カット", 0],
+["八木唯", 30, "無", "SR", "火", "近", "近距離の敵にガードブレイク/ブレイク時クールタイム20秒短縮", 0],
+["白井黒子", 32, "無", "SR", "火", "移", "前方の敵の背後から3秒間スタン", 0]
+].sort((a,b)=>b[7]-a[7]).map((c,i)=>({id:i,name:c[0],ct:c[1],act:c[2],rar:c[3],el:c[4],type:c[5],ab:c[6],use:c[7]}));
+
+const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
+const $=s=>document.querySelector(s);
+const view=$("#view");
+const store={
+  get(k,d){try{const v=localStorage.getItem("cdrill:"+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("cdrill:"+k,JSON.stringify(v))}catch(e){}if(k==="nick"||k==="excl"||k==="del"||k==="mada")queueSync()}
+};
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const fmt=ms=>(ms/1000).toFixed(2);
+
+let settings=Object.assign({range:30,count:10,se:1,bgm:1,bgmSrc:"built",bgmVol:30,seVol:60,fall:1,theme:"auto"},store.get("settings",{}));
+settings.mode="ct";
+let game=null, timerId=null;
+
+function seg(name,opts,cur){
+  return `<div class="seg" role="group">${opts.map(o=>`<button type="button" data-${name}="${o.v}" aria-pressed="${String(o.v)===String(cur)}">${o.t}${o.s?`<small>${o.s}</small>`:""}</button>`).join("")}</div>`;
+}
+
+let soundOpen=false, heroOpen=false;
+const IN_CLAUDE=(()=>{try{return window.top!==window}catch(e){return true}})();
+document.documentElement.classList.add(IN_CLAUDE?"is-claude":"is-web");
+function applyTheme(){const t=settings.theme;if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme")}
+applyTheme();
+function home(){
+  stopTimer(); game=null; listDraw=null; flash=null;
+  $("#navBtn").textContent="📋 カード一覧"; $("#navBtn").onclick=list;
+  const miss=getMiss();
+  const weak=live().filter(c=>miss[c.name]>0);
+  const best=store.get("best",{});
+  const hh=heroOf(); const bk=`${settings.mode}-${settings.range}${hh?"-"+hh.id+(settings.precise?"p":""):""}`;
+  const b=best[bk];
+  view.innerHTML=`
+    <div class="field"><span class="label">範囲（大会使用率の上位から）</span>
+      ${seg("range",[{v:30,t:"上位30"},{v:60,t:"上位60"},{v:CARDS.length,t:"全"+live().length+"枚"}].concat(imgCount()?[{v:-1,t:"画像あり",s:imgCount()+"枚"}]:[]),settings.range)}</div>
+    <section class="mode quiz"><h3>⏱ 秒数クイズ<small>カードを見てCTを数字で答える</small></h3>
+    ${imgCount()?`<div class="field"><span class="label">画像があるカードの名前</span>${seg("hide",[{v:0,t:"表示する"},{v:1,t:"隠す",s:"画像だけで答える"}],settings.hide||0)}</div>`:""}
+    <div class="field"><span class="label">キャラ（アビリティのCT短縮で出題）</span>
+      <details class="hbox" id="heroBox"${heroOpen?" open":""}><summary>${hh?`<span class="hn">${esc(hh.name)}</span><span class="hd">${esc(hh.desc)}</span><b class="hp">−${Math.round((1-hh.m)*100)}%</b>`:`<span class="hn">なし</span><span class="hd">元のCTで出題</span>`}<span class="hv">▼</span></summary>
+        <div class="hlist">${[{id:"",name:"なし",desc:"元のCTで出題",m:1}].concat(HEROES).map(h=>`<button type="button" class="hopt${(settings.hero||"")===h.id?" on":""}" data-hero="${h.id}"><span class="hn">${esc(h.name)}</span><span class="hd">${esc(h.desc)}</span>${h.id?`<b class="hp">−${Math.round((1-h.m)*100)}%</b>`:""}</button>`).join("")}</div></details>
+      ${hh?`<p class="note">${esc(hh.desc)}だけを出題します。答えはCT×${hh.m}。${settings.precise?"小数第1位まで入力して答えます。":"割り切れないときは切り捨て・切り上げのどちらでも正解。"}対象 ${live().filter(c=>!EXCL.has(c.name)&&hh.f(c)).length}枚</p>${seg("precise",[{v:0,t:"整数で答える"},{v:1,t:"小数第1位まで",s:"上級者向け"}],settings.precise?1:0)}`:""}</div>
+    <div class="field"><span class="label">問題数</span>
+      ${seg("count",[{v:10,t:"10問"},{v:20,t:"20問"},{v:0,t:"範囲すべて"}],settings.count)}</div>
+    <button class="primary" id="start" type="button">スタート</button>
+    <button class="sub" id="weak" type="button" ${weak.length?"":"disabled"}>間違えた・あとでのカード（${weak.length}枚）</button>
+    <div class="best">
+      <div><span class="label">この設定のベスト</span><b>${b?b.score+"%":"—"}</b><span class="note">${b?"平均 "+fmt(b.avg)+" 秒":"まだ記録なし"}</span></div>
+    </div>
+    </section>
+    <section class="mode learn"><h3>🃏 カード名を覚える<small>カード絵を見て名前を思い出す（画像があるカードのみ）</small></h3>
+      <button class="primary learnbtn" id="flashBtn" type="button" ${imgCount()?"":"disabled"}>はじめる</button>
+      <button class="sub" id="madaBtn" type="button" ${madaCards().length?"":"disabled"}>「あとで」のカードだけ（${madaCards().length}枚）</button>
+    </section>
+    <details class="field snd" id="sndBox"${soundOpen?" open":""}><summary><span class="sic">🔊</span><b>サウンド・表示設定</b><span class="sum">${settings.fall?"":"背景OFF・"}効果音${settings.se?"ON":"OFF"}・BGM ${settings.bgm?(settings.bgmSrc==="own"&&SND.ownUrl?"自分の音源":"デフォルト音源"):"OFF"}</span></summary><div class="sndin">
+      ${seg("theme",[{v:"auto",t:"自動",s:"端末の設定"},{v:"light",t:"ライト",s:"白い背景"},{v:"dark",t:"ダーク",s:"黒い背景"}],settings.theme||"auto")}
+      ${seg("fall",[{v:1,t:"背景アイテム ON"},{v:0,t:"背景アイテム OFF"}],settings.fall)}
+      ${seg("se",[{v:1,t:"効果音 ON"},{v:0,t:"効果音 OFF"}],settings.se)}${seg("bgm",[{v:1,t:"BGM ON"},{v:0,t:"BGM OFF"}],settings.bgm)}
+      ${settings.bgm?`${seg("bgmsrc",[{v:"built",t:"デフォルト音源"},{v:"own",t:"自分の音源",s:SND.ownUrl?esc(SND.ownName).slice(0,18):"未設定"}],settings.bgmSrc)}
+      <div class="btns"><button class="sub" id="bgmPick" type="button">${SND.ownUrl?"音源を変更":"動画・音源を選ぶ"}</button><button class="sub" id="bgmTest" type="button">${SND.ownPlaying||SND.timer||SND.started?"一時停止":"再生"}</button></div>
+      ${SND.ownUrl?`<button class="sub danger" id="bgmDel" type="button">自分の音源を削除</button>`:""}
+      <p class="note" id="bgmStat">${SND.ownStat||""}</p>`:""}
+      ${settings.bgm?`<label class="sl vol">BGM<input type="range" id="bgmVol" min="0" max="100" value="${settings.bgmVol}"><span>${settings.bgmVol}</span></label>`:""}
+      ${settings.se?`<label class="sl vol">効果音<input type="range" id="seVol" min="0" max="100" value="${settings.seVol}"><span>${settings.seVol}</span></label>`:""}</div></details>
+    <section class="author"><h3>作った人</h3>
+      <div class="arow"><span class="al">X</span><a href="https://x.com/atr_d4c" target="_blank" rel="noopener">@atr_d4c</a></div>
+      <div class="arow"><span class="al">YouTube</span><a href="https://www.youtube.com/channel/UCbL3TFYjH_2jdBgsVaeWVDg" target="_blank" rel="noopener">あたりん</a></div>
+      <div class="arow"><span class="al">応援コード</span><button type="button" class="code" id="cheer">C-orYP <small>タップでコピー</small></button></div>
+    </section>
+    <section class="legal">
+      <details><summary>お問い合わせ</summary><div class="lg">
+        <p>不具合の報告やご意見は、X（<a href="https://x.com/atr_d4c" target="_blank" rel="noopener">@atr_d4c</a>）のDMまでお願いします。</p>
+        <p>個人で作っているため、返信やデータの更新にはお時間をいただくことがあります。</p></div></details>
+      <details><summary>利用規約・注意事項</summary><div class="lg">
+        <p><b>非公式のツールです。</b>#コンパス【戦闘摂理解析システム】の運営会社とは関係ありません。運営会社へのお問い合わせはご遠慮ください。</p>
+        <p>カードの画像・名称などの権利は、#コンパスの運営会社および各コラボ作品の権利者に帰属します。</p>
+        <p>カードのデータ（CT・効果など）やキャラのCT短縮の計算は、できるだけ正確にしていますが、ゲームのアップデートなどでずれる場合があります。内容の正しさは保証できません。</p>
+        <p>このツールを使ったことで生じた損害について、作った人は責任を負いかねます。</p>
+        <p>無料で使えます。内容は予告なく変更・終了することがあります。</p></div></details>
+      <details><summary>プライバシーポリシー</summary><div class="lg">
+        <p>作った人が、使っている人の個人情報を集めることはありません。アクセス解析や広告も使っていません。</p>
+        <p>短縮名・チェック・削除したカード・「あとで」・成績などの設定は、お使いのブラウザに保存されます。<span class="env-claude">claude.aiにログインしている場合は、端末間で同期するため、その人のclaude.aiアカウントにも保存されます。どちらも</span><span class="env-web">これは</span>本人だけが見られる場所で、作った人を含めほかの人は見られません。</p>
+        <p>自分で登録したカード画像やBGMの音源は、その端末のブラウザの中にだけ保存され、外には送られません。</p>
+        <p class="env-claude">このページはclaude.ai上で公開しているため、ページの配信についてはclaude.ai（Anthropic）のプライバシーポリシーも適用されます。</p><p class="env-web">このページはGitHub Pagesで公開しているため、ページの配信についてはGitHubのプライバシーポリシーも適用されます。</p></div></details>
+    </section>
+    <p class="note">CTはメダル補正なしの値です。<br>
+    データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）、使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
+  $("#cheer").onclick=async e=>{const b=e.currentTarget,sm=b.querySelector("small");let ok=false;
+    try{await navigator.clipboard.writeText("C-orYP");ok=true}catch(err){try{const t=document.createElement("textarea");t.value="C-orYP";document.body.appendChild(t);t.select();ok=document.execCommand("copy");t.remove()}catch(e2){}}
+    sm.textContent=ok?"コピーしました！":"長押しでコピーしてください";setTimeout(()=>{sm.textContent="タップでコピー"},1800)};
+  view.querySelectorAll("[data-range]").forEach(x=>x.onclick=()=>{settings.range=+x.dataset.range;save();home()});
+  view.querySelectorAll("[data-hide]").forEach(x=>x.onclick=()=>{settings.hide=+x.dataset.hide;save();home()});
+  view.querySelectorAll("[data-theme]").forEach(x=>{if(x.tagName==="BUTTON")x.onclick=()=>{settings.theme=x.dataset.theme;save();applyTheme();home()}});
+  view.querySelectorAll("[data-fall]").forEach(x=>x.onclick=()=>{settings.fall=+x.dataset.fall;save();const f=document.getElementById("fall");if(!settings.fall)f.innerHTML="";home()});
+  view.querySelectorAll("[data-se]").forEach(x=>x.onclick=()=>{settings.se=+x.dataset.se;save();if(settings.se)SND.ok();home()});
+  view.querySelectorAll("[data-bgm]").forEach(x=>x.onclick=()=>{settings.bgm=+x.dataset.bgm;save();if(settings.bgm)SND.startBgm();else SND.stopBgm();home()});
+  view.querySelectorAll("[data-bgmsrc]").forEach(x=>x.onclick=()=>{if(settings.bgmSrc===x.dataset.bgmsrc)return;settings.bgmSrc=x.dataset.bgmsrc;save();if(settings.bgmSrc==="own"&&!SND.ownUrl){$("#bgmFile").value="";$("#bgmFile").click()}else SND.restart();home()});
+  const bp=$("#bgmPick");if(bp)bp.onclick=()=>{$("#bgmFile").value="";$("#bgmFile").click()};
+  const bt=$("#bgmTest");if(bt)bt.onclick=()=>{if(SND.ownPlaying||SND.timer){SND.stopBgm();bt.textContent="再生"}else{SND.startBgm();bt.textContent="一時停止"}};
+  $("#sndBox").ontoggle=e=>{soundOpen=e.target.open};
+  const vb=$("#bgmVol");if(vb)vb.oninput=()=>{settings.bgmVol=+vb.value;vb.nextElementSibling.textContent=vb.value;save();SND.applyVol()};
+  const vs=$("#seVol");if(vs){vs.oninput=()=>{settings.seVol=+vs.value;vs.nextElementSibling.textContent=vs.value;save();SND.applyVol()};vs.onchange=()=>SND.ok()}
+  const bd=$("#bgmDel");if(bd)bd.onclick=async()=>{SND.stopBgm();try{await DB.del("__bgm__")}catch(e){}SND.setOwn(null);settings.bgmSrc="built";save();SND.restart();home()};
+  view.querySelectorAll("[data-precise]").forEach(x=>x.onclick=()=>{settings.precise=+x.dataset.precise;save();home()});
+  $("#heroBox").ontoggle=e=>{heroOpen=e.target.open};
+  view.querySelectorAll("[data-hero]").forEach(x=>x.onclick=()=>{settings.hero=x.dataset.hero;heroOpen=false;save();home()});
+  view.querySelectorAll("[data-count]").forEach(x=>x.onclick=()=>{settings.count=+x.dataset.count;save();home()});
+  $("#start").onclick=()=>start(poolFor(),false);
+  $("#weak").onclick=()=>start(weak,true);
+  $("#flashBtn").onclick=()=>startFlash(false);
+  $("#madaBtn").onclick=()=>startFlash(true);
+}
+
+// ---- 効果音とBGM（すべてその場で合成） ----
+const SND={ctx:null,bgmGain:null,timer:null,step:0,next:0,
+  ensure(){try{if(!this.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;this.ctx=new A()}if(this.ctx.state==="suspended")this.ctx.resume()}catch(e){return null}return this.ctx},
+  tone(f,t,d,type,v,dest){const c=this.ctx,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+    o.connect(g).connect(dest||c.destination);o.start(t);o.stop(t+d+0.02)},
+  ok(){if(!settings.se||!this.ensure())return;const t=this.ctx.currentTime;this.tone(1318.5,t,0.12,"sine",0.5,this.seOut());this.tone(1760,t+0.09,0.45,"sine",0.5,this.seOut());this.tone(3520,t+0.09,0.25,"sine",0.08,this.seOut())},
+  ng(){if(!settings.se||!this.ensure())return;const t=this.ctx.currentTime;this.tone(150,t,0.2,"square",0.33,this.seOut());this.tone(150,t+0.24,0.32,"square",0.33,this.seOut());this.tone(143,t+0.24,0.32,"sawtooth",0.14,this.seOut())},
+  tap(){if(!settings.se||!this.ensure())return;this.tone(880,this.ctx.currentTime,0.06,"triangle",0.2,this.seOut())},
+  // Am - F - C - G の4小節ループ（8分音符）
+  song:{bass:[45,45,41,41,48,48,43,43],arp:[[57,60,64,69],[53,57,60,65],[48,52,55,60],[55,59,62,67]],bpm:112},
+  seGain:null,
+  seOut(){if(!this.seGain){this.seGain=this.ctx.createGain();this.seGain.connect(this.ctx.destination)}this.seGain.gain.value=settings.seVol/100*1.6;return this.seGain},
+  bv(){return Math.max(0.0001,settings.bgmVol/100)},
+  applyVol(){const c=this.ctx;if(!c)return;const t=c.currentTime;
+    if(this.seGain)this.seGain.gain.value=settings.seVol/100*1.6;
+    if(this.timer&&this.bgmGain){this.bgmGain.gain.cancelScheduledValues(t);this.bgmGain.gain.setValueAtTime(this.bv()*0.8,t)}
+    if(this.ownPlaying&&this.mediaGain){this.mediaGain.gain.cancelScheduledValues(t);this.mediaGain.gain.setValueAtTime(this.bv()*0.9,t)}},
+  own:null,ownUrl:null,ownName:"",media:null,mediaGain:null,
+  setOwn(blob){if(this.ownUrl)URL.revokeObjectURL(this.ownUrl);this.own=blob;this.ownName=blob&&blob.name||"自分の音源";this.ownUrl=blob?URL.createObjectURL(blob):null;
+    if(this.media&&this.curUrl!==this.defUrl){this.media.pause();this.curUrl=null}},
+  defUrl:"bgm/dive.mp3",
+  startOwn(url){url=url||this.ownUrl;if(this.ownPlaying||!this.ensure()||!url)return;const c=this.ctx;
+    if(!this.media){const m=document.createElement("video");m.playsInline=true;m.setAttribute("playsinline","");m.loop=true;m.preload="auto";m.style.display="none";document.body.appendChild(m);this.media=m;
+      try{const src=c.createMediaElementSource(m);this.mediaGain=c.createGain();this.mediaGain.gain.value=0.0001;src.connect(this.mediaGain).connect(c.destination)}catch(e){}}
+    if(this.curUrl!==url){this.media.src=url;this.curUrl=url}
+    if(this.mediaGain){this.mediaGain.gain.cancelScheduledValues(c.currentTime);this.mediaGain.gain.setValueAtTime(0.0001,c.currentTime);this.mediaGain.gain.exponentialRampToValueAtTime(this.bv()*0.9,c.currentTime+0.8)}
+    this.media.play().catch(()=>{});this.ownPlaying=true},
+  restart(){this.stopBgm();setTimeout(()=>{if(this.started)this.startBgm()},500)},
+  startBgm(){this.started=true;if(!settings.bgm)return;if(settings.bgmSrc==="own"&&this.ownUrl){this.startOwn(this.ownUrl);return}
+    this.startOwn(this.defUrl);return;
+    if(this.timer||!this.ensure())return;const c=this.ctx;
+    this.bgmGain=c.createGain();this.bgmGain.gain.value=0.0001;this.bgmGain.connect(c.destination);
+    this.bgmGain.gain.exponentialRampToValueAtTime(this.bv()*0.8,c.currentTime+1.2);
+    this.step=0;this.next=c.currentTime+0.1;
+    this.timer=setInterval(()=>this.sched(),40)},
+  sched(){const c=this.ctx,e=60/this.song.bpm/2,mf=n=>440*Math.pow(2,(n-69)/12);
+    while(this.next<c.currentTime+0.25){const i=this.step%32,bar=i>>3,pos=i&7,ch=this.song.arp[bar];
+      if(pos%2===0)this.tone(mf(this.song.bass[bar*2+(pos>>2)]-12),this.next,e*1.8,"triangle",0.22,this.bgmGain);
+      this.tone(mf(ch[[0,1,2,3,2,1,2,3][pos]]+12),this.next,e*0.9,"square",0.035,this.bgmGain);
+      if(pos===0||pos===4)this.tone(mf(ch[pos?2:3]+12),this.next,e*3.6,"sine",0.05,this.bgmGain);
+      this.next+=e;this.step++}},
+  stopBgm(){if(this.ownPlaying&&this.media){this.ownPlaying=false;const m=this.media,g=this.mediaGain,c=this.ctx;
+      if(g){g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(Math.max(g.gain.value,0.0001),c.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+0.4);setTimeout(()=>{if(!this.ownPlaying)m.pause()},450)}else m.pause()}
+    if(!this.timer)return;clearInterval(this.timer);this.timer=null;const g=this.bgmGain,c=this.ctx;
+    try{g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(Math.max(g.gain.value,0.0001),c.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+0.4);setTimeout(()=>g.disconnect(),600)}catch(e){}}
+};
+const kick=()=>{document.removeEventListener("pointerdown",kick,true);document.removeEventListener("keydown",kick,true);if(!SND.ownPlaying&&!SND.timer)SND.startBgm();const bt=$("#bgmTest");if(bt&&(SND.ownPlaying||SND.timer))bt.textContent="一時停止"};
+document.addEventListener("pointerdown",kick,true);document.addEventListener("keydown",kick,true);
+// ---- 背景でアイテムがゆっくり落ちる ----
+(()=>{const box=document.getElementById("fall"),srcs=["fx/coin.png","fx/pad.png","fx/mark.png","fx/can.png","fx/bat.png"];let n=0;
+  const drop=()=>{if(!settings.fall||document.hidden||box.childElementCount>=9)return;const im=new Image(),sz=34+Math.random()*38,d=16+Math.random()*14;
+    im.src=srcs[Math.random()*srcs.length|0];im.alt="";im.style.width=sz+"px";im.style.left=(Math.random()*100)+"vw";im.style.marginLeft=(-sz/2)+"px";
+    im.style.animationDuration=d+"s";const r=Math.random()*60-30;im.style.setProperty("--r0",r+"deg");im.style.setProperty("--r1",(r+(Math.random()*90-45))+"deg");im.style.setProperty("--r2",(r+(Math.random()*180-90))+"deg");
+    im.style.setProperty("--sx",(Math.random()*60-30)+"px");im.onanimationend=()=>im.remove();box.appendChild(im)};
+  for(let k=0;k<4;k++)setTimeout(drop,k*900);setInterval(drop,2600)})();
+// ---- iPhone/iPadのSafari向け：ホーム画面に追加の案内（公開サイトのみ） ----
+(()=>{try{if(window.top!==window)return}catch(e){return}
+  const ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  const standalone=navigator.standalone||matchMedia("(display-mode: standalone)").matches;
+  if(!ios||standalone||store.get("a2hsDone",false))return;
+  const inApp=/Twitter|Line\/|FBAN|FBAV|Instagram/i.test(ua)||!/Safari/.test(ua);
+  const box=document.getElementById("a2hs");
+  box.innerHTML=`<div class="a2hs"><div><b>📱 ホーム画面に追加して使うのがおすすめ</b>
+    <p>${inApp?"今はアプリ内のブラウザで開いています。右上や下のメニューから「Safariで開く」を選んでから、":""}Safariの共有ボタン（□↑）→「ホーム画面に追加」でアイコンから開くと、短縮名などの設定が消えにくくなります。追加したあとは、アイコンから開いて使ってください。</p></div>
+    <button type="button" class="a2x" aria-label="閉じる">×</button></div>`;
+  box.querySelector(".a2x").onclick=()=>{store.set("a2hsDone",true);box.innerHTML=""}})();
+// ---- カード名を覚える（画像→タップで短縮名） ----
+let flash=null; const PRE={};
+let MADA=new Set(store.get("mada",[]));
+const saveMada=()=>store.set("mada",[...MADA]);
+const madaCards=()=>live().filter(c=>MADA.has(c.name)&&IMG[c.name]);
+function startFlash(onlyMada){
+  let pool;
+  if(onlyMada===true)pool=madaCards();
+  else{pool=poolFor().filter(c=>IMG[c.name]);if(!pool.length)pool=live().filter(c=>IMG[c.name]&&!EXCL.has(c.name));}
+  if(!pool.length){home();return}
+  SND.startBgm();
+  flash={hist:[],deck:shuffle(pool),i:0,known:0,again:0,total:pool.length,open:false,edit:false,mada:onlyMada===true};
+  $("#navBtn").textContent="やめる"; $("#navBtn").onclick=home;
+  drawFlash();
+}
+function drawFlash(){
+  const f=flash; if(f.i>=f.deck.length){
+    const left=madaCards().length;
+    view.innerHTML=`<div class="fdone"><h2>おつかれさま</h2><p>${f.total}枚を一通り見ました。<br>「あとで」を押した回数：${f.again}回</p>
+      <button class="primary" id="fAgain" type="button">もう一度</button>
+      <button class="sub" id="fMada" type="button" ${left?"":"disabled"}>「あとで」のカードだけ（${left}枚）</button>
+      <button class="sub" id="fHome" type="button">ホームへ</button></div>`;
+    $("#fAgain").onclick=()=>startFlash(f.mada);$("#fMada").onclick=()=>startFlash(true);$("#fHome").onclick=home;return}
+  const c=f.deck[f.i];
+  const nameHtml=f.edit
+    ?`<div class="nickrow" id="fedit"><input id="fnk" type="text" maxlength="20" placeholder="短縮名" value="${esc(NICK[c.name]||"")}" autocomplete="off" enterkeyhint="done"><button class="primary" id="fnkSave" type="button">保存</button></div><small>${esc(c.name)}</small>`
+    :`<b>${esc(dname(c))}</b>${NICK[c.name]?`<small>${esc(c.name)}</small>`:""}<small>${c.type}・CT ${c.ct}秒</small><span class="fedit" id="fEditBtn" role="button" tabindex="0">短縮名を変更</span>`;
+  view.innerHTML=`
+    <div class="hud"><span>${f.mada?"「あとで」のカード　":""}${f.i+1} / ${f.deck.length} 枚</span><span>覚えた ${f.known}</span></div>
+    <div class="bar"><i style="width:${f.i/f.deck.length*100}%"></i></div>
+    <div class="fcard" id="fcard" data-el="${c.el}">
+      <img class="art" fetchpriority="high" src="${IMG[c.name]}" alt="">
+      <div class="fname ${f.open?"":"hidden"}" id="fname">${nameHtml}</div>
+    </div>
+    <div class="fbtns"><button class="sub" id="fBack" type="button" aria-label="前のカードに戻る" ${f.hist.length?"":"disabled"}>◀ 戻る</button><button class="sub" id="fNo" type="button">あとで</button><button class="primary" id="fYes" type="button">${f.open?"次へ":"表示"}</button></div>`;
+  for(let k=1;k<=6;k++){const n=f.deck[f.i+k];if(n&&!PRE[n.name]){const im=new Image();im.decoding="async";im.src=IMG[n.name];PRE[n.name]=im}}
+  $("#fcard").onclick=e=>{if(!f.open){SND.tap();f.open=true;drawFlash()}};
+  $("#fYes").onclick=()=>{if(!f.open){SND.tap();f.open=true;drawFlash();return}
+    if(f.edit)saveNick();
+    f.hist.push({t:"y",c,m:MADA.has(c.name)});MADA.delete(c.name);saveMada();f.known++;f.i++;f.open=false;f.edit=false;drawFlash()};
+  $("#fNo").onclick=()=>{if(f.edit)saveNick();f.hist.push({t:"n",c,m:MADA.has(c.name)});MADA.add(c.name);saveMada();f.again++;f.deck.push(c);f.i++;f.open=false;f.edit=false;drawFlash()};
+  $("#fBack").onclick=()=>{if(f.edit)saveNick();const h=f.hist.pop();if(!h)return;
+    if(h.t==="y")f.known--;else{f.again--;f.deck.pop()}
+    if(h.m)MADA.add(h.c.name);else MADA.delete(h.c.name);saveMada();
+    f.i--;f.open=true;f.edit=false;drawFlash()};
+  function saveNick(){const v=$("#fnk").value.trim();if(v)NICK[c.name]=v;else delete NICK[c.name];store.set("nick",NICK);f.edit=false}
+  const eb=$("#fEditBtn");if(eb)eb.onclick=e=>{e.stopPropagation();f.edit=true;drawFlash();const x=$("#fnk");x.focus();x.select()};
+  const sv=$("#fnkSave");if(sv){sv.onclick=e=>{e.stopPropagation();saveNick();drawFlash()};
+    $("#fnk").onclick=e=>e.stopPropagation();
+    $("#fnk").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();saveNick();drawFlash()}}}
+}
+function save(){store.set("settings",settings)}
+function getMiss(){const m=store.get("miss",{});let ch=false;const o={};
+  for(const k in m){if(/^\d+$/.test(k)){ch=true;const c=CARDS[+k];if(c&&c.use>0&&m[k]>0)o[c.name]=m[k]}else o[k]=m[k]}
+  if(ch)store.set("miss",o);return o}
+const AUTHOR_NICK={"【SAO】朝露の少女と": "朝露", "【チェンソーマン】犬とチェンソー": "ポチタ", "【ロックマンエグゼ】ダブルストリーム": "無全", "【超高校級の幸運】狛枝 凪斗": "狛枝", "【チェンソーマン】公安対魔特異4課": "4課", "【ダンまち】恥じらいの疾風": "帯電", "【空駆ける歌姫】初音 ミク": "空駆け", "‡焼亡の森‡ 溺愛弟 ルー・メルク・シルワ": "ルー", "【ロックマンエグゼ】アースブレイカー": "アスブレ", "【祝福する歌姫】初音 ミク": "祝福", "【ロックマンエグゼ】ショックウェーブ": "ウェーブ", "【チェンソーマン】早川アキ": "アキカノ", "銀河防衛ロボ Unidoll-2525": "ユニド", "【チェンソーマン】マキマ": "マキマ", "【メイドインアビス】ナナチ＆ミーティ": "ナナチ", "【ポプテピピック】POP TEAM EPIC": "ポプ回", "【オーバーロード】英雄モモン&美姫ナーベ": "モモナベ", "【超電磁砲】常盤台の超電磁砲（レールガン）": "無アバ", "【慈愛の貧乏リッチー】ウィズ": "ウィズ", "【進撃の巨人】 超大型巨人襲来": "巨人", "∗絢爛ノ美∗ ボラ＆アルヒコ＆アペイロン": "号令", "‡滅国の城‡ 偽らざる鮮血の玉座": "玉座", "#夜光犯罪特区 #きてるちゃんライヴ": "きてる", "【NieR:Automata】戦いの始まり": "青バゲ", "【禁書目録】未元物質（ダークマター）": "翼", "【号令する歌姫】初音 ミク": "号令", "【陰実】HIGHEST": "ハイエスト", "【ライザのアトリエ2】ひと夏の思い出": "緑ドルケ", "【Fate/strange Fake】To The City": "無ノガ", "【夢超える共演】初音ミク&鏡音リンレン": "共演", "【スカイウォーカー】初音 ミク": "SR駆け", "【ポプテピピック】万全のポプ子": "万全", "どこにでもいけるドア": "ドア", "【HUNTER×HUNTER】決意と覚悟の拳": "ゴンカノ", "【FFXV】彼の者の物語": "無アバ", "【幼女戦記】ラインの悪魔": "極始龍", "-蒼王宮-氷冠女王イデア=N=ユランブルク": "イデア", "帝皇機神 ケーニヒ・イェーガー": "イエガー", "【チェンソーマン】レゼ": "レゼ", "//*#イレギュラー 戦闘摂理偽装システム#*//": "コピー", "【リゼロ】ひとときの団欒": "青ドルケ", "不思議の王子様「白馬の晴斗くん」": "はると", "【メイドインアビス】火葬砲": "火葬砲", "【ライザのアトリエ2】いざ！冒険の旅へ！": "赤おかん", "【無職転生】すれ違う物語": "大レンジ", "【ダンまち】眷族の物語（ファミリア・ミィス）": "赤花火", "【HUNTER×HUNTER】旅立ちと仲間たち": "旅立ち", "【爆裂アークウィザード】めぐみん": "赤カノ", "戦略の灯/ 国防長官フレイ": "フレイ", "【超電磁砲】幻想殺し（イマジンブレイカー）": "極ブレ", "【アニモエスティンギ】ラムレザル": "ラムレザル", "【チェンソーマン】チェンソーマン": "連バゲ", "【Fate/stay night [HF]】激辛麻婆豆腐": "赤マジ", "【ダンまち】ソード・オラトリア": "引き連", "【Fate/strange Fake】慢心無き戦": "無フル", "【STEINS;GATE】黄昏の憩い": "赤ユニ", "【超高校級のゲーマー】七海 千秋": "青祝", "【禁書目録】聖人と天才": "加近", "【HUNTER×HUNTER】ゾルディック家": "みど周バゲ", "【画竜点睛】梅喧(ばいけん)": "梅喧", "【超歌舞伎】転生なしたる白狐": "白虎", "【ダンまち】聖火の女神と宴": "宴", "【進撃の巨人】 小さな刃": "刃", "-蒼王宮- 恩寵天使 ソーン=ユーリエフ": "ソーン", "【FFXV】父子の絆": "青夜叉", "ミナ&ルナ&レナのバーゲンセール戦争": "バゲ", "せかいをまもる！守護星の女神": "短縮", "【オーバーロード】不死者の王 アインズ": "じしょフル", "【口寄せ・大型神陣】アンサー": "アンサー", "おかあさん だーいすき": "おかん", "全天首都防壁 Hum-Sphere LLIK": "全天", "【ペルソナ5】TAKE YOUR HEART": "赤テレ", "【STEINS;GATE】時間跳躍の協力者": "跳躍", "【NieR:Automata】交錯する運命": "じしょカノ", "【超電磁砲】超能力者（レベル5）の第一位": "青周バゲ", "【陰実】七陰の頭脳": "ぼっち", "【無職転生】無慈悲なる邂逅": "みどマジ", "【ルナティック・アイズ】レイチェル": "赤シルブレ", "合体攻撃！ドリーム☆エンジェルズアロー": "エンジェルズアロー", "祭りの目玉！ドラゴン花火": "ドラ花", "【雀魂】金と緋に浮かぶ": "雀カノ", "【リゼロ】絶望という病": "みどカノ", "【SAO】旅路の果て": "旅路", "【転スラ】受け継がれる想い": "リムル毒", "極悪！最低！悪人派遣会社社長 ベリバッド": "ベリバ", "【アイアンメイデン】ミリア": "ミリア", "【ポプテピピック】たたかないで…": "たたかないで(ポプドルケ)", "【HUNTER×HUNTER】奇術師 ヒソカ": "ヒソカ", "【熱狂する双演】鏡音リン&鏡音レン": "赤ヴァル(双演)", "【ライザのアトリエ2】夏だ！海だ！水着だ！": "青ジャックオー", "【幼女戦記】神の恩寵": "ウラ姫", "【Fate/stay night [HF]】lost butterfly": "青全", "【無職転生】夕暮れのひと時": "夕暮れ", "#夜光犯罪特区 #終夜の俺様賛美会": "終夜", "ドリーム☆マジカルスクエア": "マジスク", "【幼女戦記】反撃の狼煙": "煙", "【Fate/stay night [HF]】舞い散る桜": "桜", "迅雷の科学者 アバカン": "アバカン", "創霊の加護 タイオワ": "タイオワ", "ぶじゅつかの超速加速": "武術家", "ハイカラ盟友忍者 -壬生咲みみみ-": "みみみ", "祭りの真打ち！打ち上げ花火": "花火", "機航師弾 フルーク・ツォイク": "フルーク", "反導砲 カノーネ・ファイエル": "カノーネ", "楽団姫 ディーバ": "ディーバ", "究極系ノーガード戦法": "ノガド", "楽団長 ドルケストル": "ドルケ", "妖炎参謀 月夜叉": "夜叉", "荒れ狂う天空王 ぶれいずどらごん": "ブレドラ", "∗伝説ノ美∗ プロティバラリナ": "SR駆け", "連合宇宙軍 シールドブレイカー": "シルブレ", "恒星間転送装置 Tele-Pass": "テレパス", "【デルミン】デビルミント始龍": "始龍", "¦¦¦狐ヶ咲¦¦¦ 祓三姉妹 夢色¦桃色": "周バゲ", "戦陣の灯/ VDN-93 強襲揚陸艦 ユグドラシル": "ユグドラシル", "蜘蛛縫組 Ж 三代目組長 蜘蛛縫 正太郎": "引き罠", "失われし呪物¦蛇神アペプ": "アペプ", "学園の王者 生徒会執行部": "生徒会", "オールレンジアタック": "レンジ", "紅薔薇の暗殺術 クルエルダー": "クルエル", "チーちゃんのウワキオシオキ狙撃": "チー", "絶夢の魔女 リベレーション★ルルカ": "リベルル", "¦¦¦狸ヶ原¦¦¦ 破戒怨士 喰色": "タヌキ", "‡滅国の城‡ 双生王 レヴィ・シュシュマルシュ": "レヴィ", "とある家庭用メカの反乱": "メカ犯", "運命の女神 エボリューション☆リリカ": "エボリリ", "革命の旗": "旗", "深淵より湧き上がるシャドウ": "シャドウ", "モノリス Hum-Unknown": "モノリス", "神技官 アンジュ・ソレイユ": "アンジュ", "独災者 アングリフ・ギフト": "アングリフ", "忘愛の長女 アレクサンドラ": "アレク", "紅薔薇の副団長 アミスター": "アミスター", "ガルガルのピカピカデコ戦車": "ガルピコ", "雷霊の加護 ワキンヤン": "ワキ", "ライバル狂刃忍者 -幽々院ゆらら-": "ゆらら", "-蒼王宮- 終焉禁獣 グラナート": "周カノ", "背に負いし亡き妻の加護": "妻", "不思議の支配者「ハートの女王さま」": "壁", "蜘蛛縫組 Ж 面従相談役 千切 常影": "毒罠", "//*#イレギュラードールズ#*//": "ビーム", "せかいをはかい！恐怖の大魔王": "魔王", "【鋼の錬金術師FA】エルリック兄弟": "なみワキ", "【鋼の錬金術師FA】賢者の石": "賢者", "【鋼の錬金術師FA】お父様と人造人間": "朝露", "【雀魂】一姫当千": "デカウィズ", "【雀魂】夏の誘い": "円弱", "【Fate/strange Fake】造られし命達": "スタ連", "【Fate/strange Fake】時計塔の師弟": "時計塔", "【陰実】偽りの中の戯れ": "極サテキャ", "【メイドインアビス】黎明卿": "無エボ", "Dr.ワイリー": "ワイリー", "【超電磁砲】とある少女たちの物語": "桜", "【転スラ】転生したらスライムだった件": "青妻全", "【転スラ】集う者達": "無ヴァル", "【NieR:Automata】静寂の時": "みど始龍", "【SAO】氷の狙撃手": "赤クルエル", "【SAO】妖精たちの国にて": "妖精", "【ペルソナ5】心の怪盗団": "みどレンジ", "【文スト】武装探偵社": "周フル", "【文スト】ありふれた日常の幸せ": "赤桜", "【文スト】双つの黒": "みど妻全", "【FFXV】輝かしき未来へ": "ウラ姫", "【ダンまち】至福の一時": "みどノガ", "【千本桜】初音未來": "ベガ", "【超歌舞伎】今昔饗宴千本桜": "千本桜", "【STEINS;GATE】未来を司る女神作戦": "青ブレ", "【最高にハイ!!!エナドリ】猫宮ひなた": "青アンジュ", "【ワンショットワンキル】猫宮ひなた": "赤イナシュ", "【火遊びフラッシュバン】猫宮ひなた": "フラッシュ罠", "【進撃の巨人】 娘々ストレッチ": "青みみみ", "【駄女神’s】アクア＆めぐみん＆ダクネス": "緑ディーバ", "【風呂上がりの休息】アクア＆めぐみん": "青花火", "江ノ島 盾子": "江ノ島", "【超高校級の希望】苗木 誠": "緑イデア", "【愉悦の一閃】アイザック": "みどフル", "【イカれた約束】ザック＆レイ": "青ノガ", "【リゼロ】間断なき結束": "赤レンジ", "【ラッシュ＆ブレイズ】ケン": "ケン", "【魂屠る闇】ネカリ": "ネカリ", "【拳を極めし者】豪鬼": "豪鬼", "【最終最凶】ベガ": "ベガ", "【ライジング・フォース】カイ": "青アバ", "【ライディーン】シン": "シン", "【アイウォントアウト】ジャック・オー": "ジャックオー", "【我羨惚(がせんこつ)】紗夢(じゃむ)": "じゃむ", "電撃ロボ Eledoll-115": "エレド", "デジタル堅牢忍具 -不可視金蔵-": "赤ピスメ", "【ピースメーカー】初音 ミク": "ピスメ", "八木唯": "SR雀カノ", "白井黒子": "黒子"};
+const DEFAULT_DEL=["【Fate/stay night [HF]】狂戦士の咆哮", "ライダー", "対消滅ロングレンジライフルHum-Buster", "UMEEEEEE!!! ㌍伝道 通信教育カラァーテェ", "闘魂！注入！受け継がれし魂 ゲームバズーカ", "連合宇宙軍 強襲制圧型 装甲多脚戦車", "【天罰の熾天使】†ファースト†", "妖軍一統 ゲネラール", "おとうさん あそんであそんでー", "-蒼王宮- 聖歌連隊 ミローディア", "UMEEEEEE!!! ㌍覇王 プニャトフスキ一族", "連合宇宙軍 サテライトキャノン", "全員集合！魔法少女リリカ☆ルルカ", "狂愛の次女 ヴァルヴァラ", "∗真実ノ美∗ ジョバンニ", "失われし血族¦カティーア大盗賊団", "祭りの粋！オトコの手筒花火", "‡焼亡の森‡ 奴隷狩り密売団 ケルマト", "【オーバーロード】守護者統括 アルベド", "【ペルソナ5】運命の囚われ", "【文スト】理想という病を愛す", "【リゼロ】ゼロから始まる異世界生活", "【マグナムウェディング】エルフェルト", "ギアメーカー", "魂を司る聖天使 ガブリエル", "名門サッカー部 イナズマシュート", "【デルミン】デビルミント鬼龍パパミン", "【魂屠る闇】ネカリ", "【火遊びフラッシュバン】猫宮ひなた"];
+let EXCL=new Set(store.get("excl",[])), DEL=new Set(store.get("del",DEFAULT_DEL));
+let NICK=store.get("nick",{});
+const dname=c=>NICK[c.name]||c.name;
+const CATS=[["近","近距離"],["遠","遠距離"],["連","連続"],["周","周囲"],["癒","回復"],["防","ガード"],["強","強化"],["弱","弱体化"],["移","移動"],["罠","設置"],["返","カウンター"],["他","その他"]];
+const live=()=>CARDS.filter(c=>!DEL.has(c.name));
+function saveExcl(){store.set("excl",[...EXCL])}
+const ATK=c=>"近遠周連".includes(c.type);
+const HEROES=[
+  {id:"gon",name:"ゴン=フリークス",desc:"ガードブレイク",m:.6,f:c=>ATK(c)&&/ガードブレイク/.test(c.ab)},
+  {id:"chushin",name:"桜華忠臣",desc:"近カード",m:.65,f:c=>c.type==="近"},
+  {id:"luciano",name:"ルチアーノ",desc:"遠カード",m:.65,f:c=>c.type==="遠"},
+  {id:"nanigashi",name:"某＜なにがし＞",desc:"貫通カード",m:.65,f:c=>ATK(c)&&/貫通/.test(c.ab)},
+  {id:"archer",name:"アーチャー",desc:"近遠周連",m:.65,f:ATK},
+  {id:"chunli",name:"春麗",desc:"連カード",m:.75,f:c=>c.type==="連"},
+  {id:"tesla",name:"ニコラ テスラ",desc:"罠カード",m:.85,f:c=>c.type==="罠"},
+  {id:"rinne",name:"糸廻 輪廻",desc:"罠カード",m:.9,f:c=>c.type==="罠"}];
+const heroOf=()=>HEROES.find(h=>h.id===settings.hero)||null;
+const exact=c=>{const h=game&&game.hero;return h?Math.round(c.ct*h.m*10)/10:c.ct};
+const eff=c=>exact(c);
+const isOk=(c,v)=>{const h=game&&game.hero,x=exact(c);if(!h)return v===c.ct;if(game.precise)return Math.abs(v-x)<1e-6;return v===Math.floor(x+1e-9)||v===Math.ceil(x-1e-9)};
+function poolFor(){const h=heroOf();const ok=live().filter(c=>!EXCL.has(c.name)&&(!h||h.f(c)));if(settings.range===-1){const a=ok.filter(c=>IMG[c.name]);if(a.length)return a;settings.range=30}return ok.slice(0,settings.range)}
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function start(pool,isWeak){
+  pool=pool.filter(c=>!EXCL.has(c.name)&&!DEL.has(c.name)); if(!pool.length) return;
+  let qs=shuffle(pool);
+  if(settings.count&&!isWeak) qs=qs.slice(0,settings.count);
+  SND.startBgm();
+  const hero=heroOf(); if(hero)qs=qs.filter(c=>hero.f(c)); if(!qs.length){home();return}
+  game={qs,i:0,log:[],isWeak,hero,precise:!!(hero&&settings.precise),key:`${settings.mode}-${settings.range}${hero?"-"+hero.id+(settings.precise?"p":""):""}`};
+  $("#navBtn").textContent="やめる"; $("#navBtn").onclick=home;
+  ask();
+}
+
+function ask(){
+  const c=game.qs[game.i];
+  game.step=settings.mode==="act"?"act":"ct";
+  game.input=""; game.t0=performance.now(); game.cur={card:c,ok:true,ms:0,ansCt:null,ansAct:null};
+  render();
+  for(let k=1;k<=6;k++){const n=game.qs[game.i+k];if(n&&IMG[n.name]&&!PRE[n.name]){const im=new Image();im.decoding="async";im.src=IMG[n.name];PRE[n.name]=im}}
+  const art=view.querySelector(".card .art");
+  if(art&&!art.complete){const g=game;art.addEventListener("load",()=>{if(game===g&&g.cur.card===c&&!g.input)g.t0=performance.now()},{once:true})}
+  startTimer();
+}
+
+function render(fb){
+  const c=game.cur.card, n=game.qs.length;
+  const prompt=game.step==="ct"?"クールタイムは？":"発動時間は？";
+  view.innerHTML=`
+    <div class="hud"><span>${game.hero?`<b class="hchip">${esc(game.hero.name)}</b> `:""}第 <span class="num">${game.i+1}</span> / ${n} 問</span><span><span class="num" id="clock">0.00</span> 秒</span></div>
+    <div class="bar"><i style="width:${game.i/n*100}%"></i></div>
+    <article class="card${IMG[c.name]?" has-art":""}" data-el="${c.el}">
+      <div class="meta"><span class="chip el">${({"火":"赤","水":"青","木":"緑"})[c.el]||c.el}</span><span class="chip type">${c.type}</span><span class="chip">${c.rar}</span><span class="chip use">使用率 ${c.use}%</span></div>
+      ${IMG[c.name]?`<img class="art" fetchpriority="high" src="${IMG[c.name]}" alt="">`:""}
+      <div class="cname" id="cname">${IMG[c.name]&&settings.hide?"？？？":esc(dname(c))}</div>
+      <div class="ability" id="ab"><button type="button" id="hint">効果を見る</button></div>
+    </article>
+    ${fb||""}
+    <div class="ask"><div class="askl"><h2>${prompt}</h2><button type="button" id="laterTg" class="tg${game.cur.later?" on":""}" aria-pressed="${!!game.cur.later}">${game.cur.later?"☑":"☐"} あとで</button></div>${game.step==="ct"?`<div class="readout ${game.input?"":"empty"}" id="ro">${game.input||"00"}<span>秒</span></div>`:""}</div>
+    ${game.step==="ct"?`<div class="pad${game.precise?" prec":""}" id="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button type="button" data-d="${d}">${d}</button>`).join("")}<button type="button" class="del" data-k="del" aria-label="1文字消す">⌫</button><button type="button" data-d="0">0</button>${game.precise?`<button type="button" data-d=".">.</button><button type="button" class="go wide" data-k="go">決定</button>`:`<button type="button" class="go" data-k="go">決定</button>`}</div>`
+    :`<div class="acts" id="acts">${["無","短","長"].map(a=>`<button type="button" data-a="${a}">${a}<small>${ACT_NOTE[a]}</small></button>`).join("")}</div>`}`;
+  $("#hint").onclick=()=>{$("#ab").textContent=c.ab};
+  if(game.step==="ct"){
+    $("#pad").onclick=e=>{const b=e.target.closest("button");if(!b)return;
+      if(b.dataset.d!=null) typeDigit(b.dataset.d); else if(b.dataset.k==="del") del(); else submitCt();};
+  }else{
+    $("#acts").onclick=e=>{const b=e.target.closest("button");if(b) submitAct(b.dataset.a)};
+  }
+}
+function updRO(){const ro=$("#ro");if(!ro)return;ro.className="readout"+(game.input?"":" empty");ro.innerHTML=(game.input||"00")+"<span>秒</span>"}
+function typeDigit(d){const s=game.input;if(d==="."){if(!game.precise||s.includes("."))return;game.input=(s||"0")+".";updRO();return}if(s.includes(".")){if(/\.\d$/.test(s))return}else if(s.length>=3)return;game.input=(s+d).replace(/^0+(?=\d)/,"");updRO()}
+function del(){game.input=game.input.slice(0,-1);updRO()}
+
+function startTimer(){stopTimer();timerId=setInterval(()=>{const el=$("#clock");if(el)el.textContent=fmt(performance.now()-game.t0)},50)}
+function stopTimer(){if(timerId)clearInterval(timerId);timerId=null}
+
+view.addEventListener("click",e=>{if(e.target.id==="laterTg"&&game&&!document.getElementById("next"))setLater(!game.cur.later)});
+function setLater(v){game.cur.later=v;const t=$("#laterTg");if(t){t.classList.toggle("on",v);t.setAttribute("aria-pressed",v);t.textContent=(v?"☑":"☐")+" あとで"}}
+function submitCt(){
+  if(!game.input)return;
+  const c=game.cur.card, v=+game.input, ok=isOk(c,v);
+  game.cur.ansCt=v; if(!ok) game.cur.ok=false;
+  if(settings.mode==="both"&&ok){game.step="act";game.input="";render(`<div class="fb ok"><span class="big">○</span><span class="ans">CT <b>${eff(c)}</b> 秒　続けて発動時間</span></div>`);return}
+  if(settings.mode==="both"&&!ok){game.step="act";game.input="";render(`<div class="fb ng shake"><span class="big">×</span><span class="ans">CT は <b>${eff(c)}</b> 秒（入力 ${v}）　続けて発動時間</span></div>`);return}
+  finish();
+}
+function submitAct(a){game.cur.ansAct=a;if(a!==game.cur.card.act)game.cur.ok=false;finish()}
+
+function finish(){
+  stopTimer();
+  const c=game.cur.card; game.cur.ms=performance.now()-game.t0;
+  game.log.push(game.cur);
+  const miss=getMiss();
+  if(game.cur.ok){if(miss[c.name])miss[c.name]=Math.max(0,miss[c.name]-1)}else miss[c.name]=(miss[c.name]||0)+1;
+  if(game.cur.later)miss[c.name]=Math.max(1,miss[c.name]||0);
+  if(!miss[c.name])delete miss[c.name];
+  store.set("miss",miss);
+  const parts=[]; if(settings.mode!=="act")parts.push(`CT <b>${eff(c)}</b> 秒${game.hero?`<small class="calc">（元${c.ct}秒×${game.hero.m}${!game.precise&&exact(c)%1?`／${Math.floor(exact(c))}でも${Math.ceil(exact(c))}でも正解`:""}）</small>`:""}`); if(settings.mode!=="ct")parts.push(`発動 <b>${c.act}</b>`);
+  if(game.cur.ok)SND.ok();else SND.ng();
+  const fb=game.cur.ok
+    ?`<div class="fb ok"><span class="big">○</span><span class="ans">${parts.join("　")}<br>${fmt(game.cur.ms)} 秒</span></div>`
+    :`<div class="fb ng shake"><span class="big">×</span><span class="ans">正解：${parts.join("　")}</span></div>`;
+  const nm=$("#cname"); if(nm) nm.innerHTML=NICK[c.name]?`${esc(NICK[c.name])}<small class="full">${esc(c.name)}</small>`:esc(c.name);
+  const last=game.i===game.qs.length-1;
+  view.querySelector(".ask")?.remove(); (view.querySelector("#pad")||view.querySelector("#acts"))?.remove();
+  view.querySelector(".fb")?.remove();
+  view.querySelector(".card").insertAdjacentHTML("afterend",fb+`<div class="nxrow one"${game.cur.ok&&!game.cur.later?" style=\"display:none\"":""}><button class="primary" id="next" type="button">${last?"結果を見る":"次へ"}</button></div>`);
+  let done=false;const go=()=>{if(done)return;done=true;clearTimeout(game.auto);if(last)result();else{game.i++;ask()}};
+  $("#next").onclick=go; $("#next").focus();
+  if($("#laterTg"))$("#laterTg").onclick=()=>{clearTimeout(game.auto);const v=!game.cur.later;setLater(v);const m=getMiss();
+    if(v)m[c.name]=Math.max(1,m[c.name]||0);else delete m[c.name];store.set("miss",m)};
+  if(game.cur.ok&&!game.cur.later){game.auto=setTimeout(()=>{if(document.getElementById("next"))go()},700)}
+}
+
+function result(){
+  clearTimeout(game.auto);
+  const L=game.log, ok=L.filter(x=>x.ok), pct=Math.round(ok.length/L.length*100);
+  const avg=ok.length?ok.reduce((s,x)=>s+x.ms,0)/ok.length:0;
+  if(!game.isWeak&&ok.length){const best=store.get("best",{});const b=best[game.key];
+    if(!b||pct>b.score||(pct===b.score&&avg<b.avg)){best[game.key]={score:pct,avg};store.set("best",best)}}
+  const wrong=L.filter(x=>!x.ok), slow=ok.slice().sort((a,b)=>b.ms-a.ms).slice(0,3);
+  $("#navBtn").textContent="📋 カード一覧"; $("#navBtn").onclick=list;
+  view.innerHTML=`
+    <div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>
+    <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>
+    ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>rowHtml(x.card,true,x)).join("")}</div>`:`<p class="note">全問正解です。</p>`}
+    ${slow.length?`<span class="label">時間がかかったカード</span><div class="rows">${slow.map(x=>rowHtml(x.card,false,null,fmt(x.ms)+"秒")).join("")}</div>`:""}
+    ${wrong.length?`<button class="primary" id="retry" type="button">間違えた ${wrong.length} 枚をもう一度</button>`:""}
+    <button class="sub" id="again" type="button">同じ設定でもう一度</button>
+    <button class="sub" id="back" type="button">設定に戻る</button>`;
+  if(wrong.length)$("#retry").onclick=()=>start(wrong.map(x=>x.card),true);
+  $("#again").onclick=()=>start(poolFor(),false);
+  $("#back").onclick=home;
+}
+
+function rowHtml(c,showAns,x,extra){
+  const sub=x?[x.ansCt!=null&&x.ansCt!==eff(c)?`入力 ${x.ansCt}秒`:"",x.ansAct&&x.ansAct!==c.act?`入力 ${x.ansAct}`:""].filter(Boolean).join("・"):(extra||"");
+  return `<div class="row" data-el="${c.el}"><i></i><div class="n">${esc(c.name)}${sub?`<small class="${x?"bad":""}">${sub}</small>`:""}</div><div class="v">${eff(c)}<small style="font-size:11px;color:var(--muted);margin-left:2px">秒</small></div></div>`;
+}
+
+function list(){
+  stopTimer(); game=null; flash=null;
+  $("#navBtn").textContent="戻る"; $("#navBtn").onclick=home;
+  const sort=store.get("sort","use"); const cat=store.get("cat",""), fel=store.get("fel",""), frar=store.get("frar","");
+  const base=()=>live().filter(c=>(!fel||c.el===fel)&&(!frar||c.rar===frar));
+  view.innerHTML=`
+    <h2>カード一覧（${live().length}枚）</h2>
+    <div class="filter"><input id="q" type="search" placeholder="カード名で絞り込み" autocomplete="off"></div>
+    <div class="fl"><span class="label">属性</span><div class="fls">${[["","すべて"],["火","赤"],["水","青"],["木","緑"],["無","無"]].map(([k,t])=>`<button type="button" data-fel="${k}" class="${k===fel?"on":""}"${k?` data-el="${k}"`:""}>${t}</button>`).join("")}</div></div>
+    <div class="fl"><span class="label">レアリティ</span><div class="fls">${[["","すべて"],["SR","SR"],["UR","UR"]].map(([k,t])=>`<button type="button" data-frar="${k}" class="${k===frar?"on":""}">${t}</button>`).join("")}</div></div>
+    <div class="cats" id="cats">${[["","すべて"],...CATS].map(([k,t])=>`<button type="button" data-cat="${k}" class="${k===cat?"on":""}">${t}<small>${base().filter(c=>!k||c.type===k).length}</small></button>`).join("")}</div>
+    ${seg("sort",[{v:"use",t:"使用率順"},{v:"ct",t:"CT短い順"}],sort)}
+    <div class="rows" id="rows"></div>
+    `;
+  const draw=()=>{const q=$("#q").value.trim();let a=base().filter(c=>!cat||c.type===cat).filter(c=>!q||c.name.includes(q)||(NICK[c.name]||"").includes(q));
+    if(sort==="ct")a=a.slice().sort((x,y)=>x.ct-y.ct);
+    $("#rows").innerHTML=a.map(c=>`<div class="row tap${EXCL.has(c.name)?" off":""}" data-el="${c.el}" data-id="${c.id}"><i></i><input type="checkbox" class="ck" aria-label="出題する"${EXCL.has(c.name)?"":" checked"}><div class="n">${nTxt(c)}</div><div class="v">${c.ct}<small style="font-size:11px;color:var(--muted);margin-left:2px">秒</small></div>${IMG[c.name]?`<img class="th" loading="lazy" decoding="async" src="${IMG[c.name]}" alt="">`:`<span class="th" aria-label="画像を登録">＋</span>`}</div>`).join("")||`<div class="row"><i></i><div class="n">見つかりません</div></div>`};
+  const exInfo=()=>{const el=$("#exbar");if(el)el.innerHTML=`<span>チェックを外したカードは出題されません（除外中 ${EXCL.size}枚）</span><span>${EXCL.size?`<button class="sub" id="exClear" type="button">すべて戻す</button> <button class="sub danger" id="exDel" type="button">外したカードを削除</button>`:""}${DEL.size?` <button class="sub" id="delBack" type="button">削除したカード（${DEL.size}）</button>`:""}</span>`;
+    const b=$("#exClear");if(b)b.onclick=()=>{EXCL.clear();saveExcl();exInfo();draw()};
+    const d=$("#exDel");if(d)d.onclick=()=>{EXCL.forEach(n=>DEL.add(n));EXCL.clear();saveExcl();store.set("del",[...DEL]);list()};
+    const r=$("#delBack");if(r)r.onclick=()=>{const box=$("#delList");if(box.innerHTML){box.innerHTML="";return}showDel()}};
+  const showDel=()=>{const box=$("#delList");const ds=CARDS.filter(c=>DEL.has(c.name));
+    if(!ds.length){box.innerHTML="";exInfo();return}
+    box.innerHTML=`<div class="editor inl"><div class="dhead"><b>削除したカード</b><button class="sub" id="delAll" type="button">すべて戻す</button></div>
+      ${ds.map(c=>`<div class="drow" data-el="${c.el}"><span>${esc(dname(c))}<small>${c.type}・${c.rar}・CT${c.ct}</small></span><button class="sub" type="button" data-back="${c.id}">戻す</button></div>`).join("")}</div>`;
+    $("#delAll").onclick=()=>{const h=box.querySelector(".dhead");h.outerHTML=`<div class="dconf"><span>削除した${ds.length}枚を本当にすべて戻しますか？</span><div class="btns"><button class="sub" id="dcNo" type="button">やめる</button><button class="primary" id="dcYes" type="button">すべて戻す</button></div></div>`;
+      $("#dcYes").onclick=()=>{DEL.clear();store.set("del",[]);list()};$("#dcNo").onclick=showDel};
+    box.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>{DEL.delete(CARDS[+b.dataset.back].name);store.set("del",[...DEL]);view.querySelector("h2").textContent=`カード一覧（${live().length}枚）`;draw();exInfo();showDel()})};
+  $("#rows").onclick=e=>{const r=e.target.closest("[data-id]");if(!r)return;const c=CARDS[+r.dataset.id];
+    if(e.target.classList.contains("ck")){if(e.target.checked)EXCL.delete(c.name);else EXCL.add(c.name);saveExcl();r.classList.toggle("off",!e.target.checked);exInfo();return}
+    cardPanel(c,r)};
+  const nTxt=c=>`${esc(c.name)}${NICK[c.name]?`<span class="nick">${esc(NICK[c.name])}</span>`:""}<small>${c.type}・${c.rar}・使用率${c.use}%</small>`;
+  const cardPanel=(c,row)=>{editing=null;document.getElementById("ed")?.remove();
+    row.insertAdjacentHTML("afterend",`<div id="ed"><div class="editor inl">
+      <div class="nickrow"><input id="nk" type="text" maxlength="20" placeholder="短縮名（例：ガブ）" value="${esc(NICK[c.name]||"")}" autocomplete="off" enterkeyhint="next"><button class="primary" id="nkNext" type="button">次へ</button></div>
+      <div class="btns3"><button class="sub" id="nkSave" type="button">保存して閉じる</button><button class="sub" id="pick" type="button">${IMG[c.name]?"画像を変更":"画像を登録"}</button><button class="sub" id="pClose" type="button">閉じる</button></div></div></div>`);
+    const nk=$("#nk");
+    const save=()=>{const v=nk.value.trim();if(v===(NICK[c.name]||""))return;if(v)NICK[c.name]=v;else delete NICK[c.name];store.set("nick",NICK);row.querySelector(".n").innerHTML=nTxt(c)};
+    const close=()=>document.getElementById("ed")?.remove();
+    const next=()=>{save();let r=document.getElementById("ed").nextElementSibling;while(r&&!r.dataset.id)r=r.nextElementSibling;
+      if(!r){close();return}cardPanel(CARDS[+r.dataset.id],r);r.scrollIntoView({block:"start",behavior:"smooth"})};
+    $("#nkNext").onclick=next;$("#nkSave").onclick=()=>{save();close()};$("#pClose").onclick=close;
+    nk.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();next()}};
+    $("#pick").onclick=()=>{save();pickFor(c)};
+    nk.focus({preventScroll:true})};
+  listDraw=draw;
+  view.querySelector(".filter").insertAdjacentHTML("afterend",`<div class="exbar" id="exbar"></div><div id="delList"></div><div class="nkbulk" id="nkbulk"></div><p class="note info">使用頻度が低いカードの一部は、画像が未実装のため出題範囲から外しています。「削除したカード」から戻すと、画像なしで出題できます。</p><p class="note">カードをタップすると、短縮名の設定と画像の登録ができます。画像はこの端末のブラウザにだけ保存されます。</p>`);
+  $("#q").oninput=draw; exInfo();
+  const bulk=()=>{const box=$("#nkbulk");const empty=Object.keys(AUTHOR_NICK).filter(n=>!NICK[n]).length;
+    box.innerHTML=`<button class="sub" id="nkAll" type="button">✏️ 作者（あたりん）の呼び方を短縮名に一括で入れる</button>`;
+    $("#nkAll").onclick=()=>{box.innerHTML=`<div class="dconf"><span>${Object.keys(AUTHOR_NICK).length}枚分の短縮名を入れます。</span>
+      <div class="btns"><button class="sub" id="nkEmpty" type="button" ${empty?"":"disabled"}>空いているカードだけ（${empty}枚）</button><button class="primary" id="nkOver" type="button">すべて上書き</button></div>
+      <button class="sub" id="nkNo" type="button">やめる</button></div>`;
+      const apply=over=>{for(const [k,v] of Object.entries(AUTHOR_NICK))if(over||!NICK[k])NICK[k]=v;store.set("nick",NICK);draw();bulk();$("#nkbulk").insertAdjacentHTML("beforeend",`<p class="note">短縮名を入れました。</p>`)};
+      $("#nkEmpty").onclick=()=>apply(false);$("#nkOver").onclick=()=>apply(true);$("#nkNo").onclick=bulk}};
+  bulk();
+  view.querySelectorAll("[data-fel]").forEach(x=>x.onclick=()=>{store.set("fel",x.dataset.fel);list()});
+  view.querySelectorAll("[data-frar]").forEach(x=>x.onclick=()=>{store.set("frar",x.dataset.frar);list()});
+  view.querySelectorAll("[data-cat]").forEach(x=>x.onclick=()=>{store.set("cat",x.dataset.cat);list()});
+  view.querySelectorAll("[data-sort]").forEach(x=>x.onclick=()=>{store.set("sort",x.dataset.sort);list()});
+  draw();
+}
+
+document.addEventListener("keydown",e=>{
+  if(!game||e.target.tagName==="INPUT")return;
+  const nx=document.getElementById("next");
+  if(nx&&(e.key==="Enter"||e.key===" ")){e.preventDefault();nx.click();return}
+  if(nx)return;
+  if(game.step==="ct"){if(/^[\d.]$/.test(e.key))typeDigit(e.key);else if(e.key==="Backspace")del();else if(e.key==="Enter")submitCt()}
+  else{const m={"1":"無","2":"短","3":"長",q:"無",w:"短",e:"長"}[e.key];if(m)submitAct(m)}
+});
+
+// ---- 画像（IndexedDB・この端末のみ） ----
+const DB={
+  open(){return new Promise((res,rej)=>{const r=indexedDB.open("cdrill",1);r.onupgradeneeded=()=>r.result.createObjectStore("img");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})},
+  async tx(fn){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction("img","readwrite");fn(t.objectStore("img"));t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})},
+  put(k,v){return this.tx(st=>st.put(v,k))},
+  del(k){return this.tx(st=>st.delete(k))},
+  async all(){const db=await this.open();return new Promise((res,rej)=>{const m={};const r=db.transaction("img").objectStore("img").openCursor();r.onsuccess=()=>{const c=r.result;if(c){m[c.key]=c.value;c.continue()}else res(m)};r.onerror=()=>rej(r.error)})}
+};
+function imgCount(){return live().filter(c=>IMG[c.name]).length}
+DB.all().then(m=>{for(const k in m){if(k==="__bgm__"){SND.setOwn(m[k],false);SND.ownStat="この端末に保存済みの音源を使います。";continue}IMG[k]=URL.createObjectURL(m[k])}if(game||flash)return;if(listDraw)listDraw();else home()}).catch(()=>{});
+
+let editing=null;
+function pickFor(card){editing={card};const f=$("#file");f.value="";f.click()}
+$("#bgmFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;
+  SND.stopBgm();settings.bgmSrc="own";settings.bgm=1;save();
+  SND.ownStat="音声を取り出しています…";if(!game&&!flash)home();
+  let blob=f,note="";
+  try{blob=await extractAudio(f);note=`音声だけを取り出しました（${(blob.size/1048576).toFixed(1)}MB）。`}catch(err){note="音声だけの取り出しはできなかったので、ファイルをそのまま使います。"}
+  SND.setOwn(blob);SND.startBgm();
+  let ok=false;try{await DB.put("__bgm__",blob);const back=(await DB.all())["__bgm__"];ok=!!back}catch(err){}
+  try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(err){}
+  SND.ownStat=ok?note+"この端末に保存したので、次からは選び直さなくて大丈夫です。":note+"⚠ この端末に保存できませんでした（容量オーバーなど）。今回だけ再生できます。短い動画で試してください。";
+  if(!game&&!flash)home()};
+async function extractAudio(file){
+  const A=window.AudioContext||window.webkitAudioContext,ac=SND.ensure()||new A();
+  const buf=await file.arrayBuffer();
+  const dec=await new Promise((res,rej)=>{const p=ac.decodeAudioData(buf,res,rej);if(p&&p.then)p.then(res,rej)});
+  const sr=22050,dur=Math.min(dec.duration,600),len=Math.ceil(dur*sr);
+  const O=window.OfflineAudioContext||window.webkitOfflineAudioContext,oc=new O(1,len,sr);
+  const src=oc.createBufferSource();src.buffer=dec;src.connect(oc.destination);src.start();
+  const out=await new Promise((res,rej)=>{oc.oncomplete=e=>res(e.renderedBuffer);const p=oc.startRendering();if(p&&p.then)p.then(res,rej)});
+  const d=out.getChannelData(0),b=new ArrayBuffer(44+d.length*2),v=new DataView(b);
+  const w=(o,str)=>{for(let k=0;k<str.length;k++)v.setUint8(o+k,str.charCodeAt(k))};
+  w(0,"RIFF");v.setUint32(4,36+d.length*2,true);w(8,"WAVE");w(12,"fmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,"data");v.setUint32(40,d.length*2,true);
+  for(let k=0;k<d.length;k++){const x=Math.max(-1,Math.min(1,d[k]));v.setInt16(44+k*2,x<0?x*32768:x*32767,true)}
+  const nm=(file.name||"音源").replace(/\.[^.]+$/,"");
+  return new File([b],nm+".wav",{type:"audio/wav"});
+}
+function alertNote(t){const n=document.createElement("p");n.className="note danger";n.textContent=t;view.prepend(n)}
+$("#file").onchange=async e=>{
+  const file=e.target.files[0]; if(!file||!editing)return;
+  const img=new Image(); img.src=URL.createObjectURL(file);
+  try{await img.decode()}catch(err){$("#ed").innerHTML=`<p class="note danger">画像を読み込めませんでした。PNGかJPEGのスクショを選んでください。</p>`;return}
+  editing.img=img; editing.rect=detectArt(img); editing.adj={t:0,b:0,l:0,r:0};
+  showEditor();
+};
+// カード詳細画面のスクショから、外側の属性色（赤・青・緑）の枠を手がかりにカード絵の範囲を推定する
+function detectArt(img){
+  const W=img.naturalWidth,H=img.naturalHeight,sc=Math.min(1,400/W);
+  const cv=document.createElement("canvas");cv.width=Math.round(W*sc);cv.height=Math.round(H*sc);
+  const cx=cv.getContext("2d",{willReadFrequently:true});cx.drawImage(img,0,0,cv.width,cv.height);
+  const d=cx.getImageData(0,0,cv.width,cv.height).data;
+  let x0=1e9,y0=1e9,x1=-1,y1=-1;
+  for(let y=0;y<cv.height;y++)for(let x=0;x<cv.width;x++){const i=(y*cv.width+x)*4;
+    const r=d[i],g=d[i+1],b=d[i+2];
+    if((r>190&&g<60&&b<60)||(g>150&&r<90&&b<70)||(b>170&&r<60&&g<90)){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
+  if(x1>0&&(x1-x0)>cv.width*.5&&(y1-y0)>cv.height*.45){
+    const bx=x0/sc,by=y0/sc,bw=(x1-x0)/sc,bh=(y1-y0)/sc;
+    return{x:bx+bw*.0208,y:by+bh*.0807,w:bw*.9584,h:bh*.8809};
+  }
+  return{x:W*.149,y:H*.179,w:W*.702,h:H*.671};
+}
+function cropRect(){const r=editing.rect,a=editing.adj,W=editing.img.naturalWidth,H=editing.img.naturalHeight,u=W*.004;
+  const x=Math.max(0,r.x-a.l*u),y=Math.max(0,r.y-a.t*u);
+  return{x,y,w:Math.max(10,Math.min(W-x,r.w+(a.l+a.r)*u)),h:Math.max(10,Math.min(H-y,r.h+(a.t+a.b)*u))}}
+function drawCrop(cv,maxW){const c=cropRect(),k=Math.min(1,maxW/c.w);cv.width=Math.round(c.w*k);cv.height=Math.round(c.h*k);
+  cv.getContext("2d").drawImage(editing.img,c.x,c.y,c.w,c.h,0,0,cv.width,cv.height)}
+function closeEditor(){$("#ed").innerHTML="";editing=null}
+function showEditor(){
+  const c=editing.card;
+  $("#ed").innerHTML=`<div class="editor"><h2>${esc(c.name)}</h2><canvas id="cv"></canvas>
+    ${[["t","上"],["b","下"],["l","左"],["r","右"]].map(([k,t])=>`<label class="sl">${t}<input type="range" id="adj-${k}" min="-30" max="30" value="0"></label>`).join("")}
+    <p class="note">ずれていたらスライダーで調整します。右に動かすとその方向に広がります。</p>
+    <div class="btns"><button class="primary" id="saveImg" type="button">保存</button><button class="sub" id="cancelImg" type="button">やめる</button></div>
+    ${IMG[c.name]?`<button class="sub danger" id="delImg" type="button">登録済みの画像を削除</button>`:""}</div>`;
+  const cv=$("#cv");drawCrop(cv,800);
+  $("#ed").querySelectorAll("input[type=range]").forEach(r=>r.oninput=()=>{editing.adj[r.id.slice(4)]=+r.value;drawCrop(cv,800)});
+  $("#cancelImg").onclick=closeEditor;
+  $("#saveImg").onclick=()=>{const out=document.createElement("canvas");drawCrop(out,480);
+    out.toBlob(async b=>{try{await DB.put(c.name,b)}catch(err){$("#ed").insertAdjacentHTML("beforeend",`<p class="note danger">保存できませんでした。プライベートブラウズでは保存できないことがあります。</p>`);return}
+      if(IMG[c.name])URL.revokeObjectURL(IMG[c.name]);IMG[c.name]=URL.createObjectURL(b);closeEditor();listDraw&&listDraw()},"image/jpeg",.85)};
+  const del=$("#delImg");if(del)del.onclick=async()=>{try{await DB.del(c.name)}catch(err){}if(PRESET[c.name])IMG[c.name]=PRESET[c.name];else delete IMG[c.name];closeEditor();listDraw&&listDraw()};
+  $("#ed").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+// ---- 端末間の同期（claude.aiアカウントに保存） ----
+let syncRef=null,syncTimer=null,syncState="local";
+function syncBody(){return{nick:Object.entries(NICK),excl:[...EXCL],del:[...DEL],mada:[...MADA],t:Date.now()}}
+function queueSync(){if(!syncRef)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>{syncTimer=null;syncRef.set(syncBody()).catch(()=>{})},600)}
+function applyRemote(d){
+  NICK=Object.fromEntries(Array.isArray(d.nick)?d.nick:[]);EXCL=new Set(d.excl||[]);DEL=new Set(d.del||[]);if(d.mada)MADA=new Set(d.mada);
+  try{localStorage.setItem("cdrill:nick",JSON.stringify(NICK));localStorage.setItem("cdrill:excl",JSON.stringify([...EXCL]));localStorage.setItem("cdrill:del",JSON.stringify([...DEL]));localStorage.setItem("cdrill:mada",JSON.stringify([...MADA]))}catch(e){}
+  if(game||flash)return; if(listDraw&&!$("#nk"))list(); else if(!listDraw)home();
+}
+(async()=>{try{
+  if(!window.claude||!claude.use)return;
+  const db=await claude.use("db"),user=await claude.use("user"); if(!db||!user)return;
+  const id=await user.id(); if(!id)return;
+  const ref=db.collection("data/users/"+id).doc("prefs");
+  const snap=await ref.get(); const first=!store.get("synced",false);
+  if(snap.exists){const d=snap.data();
+    if(first){const n=Object.fromEntries(Array.isArray(d.nick)?d.nick:[]);
+      applyRemote({nick:Object.entries({...NICK,...n}),excl:[...new Set([...(d.excl||[]),...EXCL])],del:[...new Set([...(d.del||[]),...DEL])],mada:[...new Set([...(d.mada||[]),...MADA])]});
+      syncRef=ref;await ref.set(syncBody());}
+    else{applyRemote(d);syncRef=ref;}
+  }else{syncRef=ref;if(Object.keys(NICK).length||EXCL.size||DEL.size)await ref.set(syncBody());}
+  try{localStorage.setItem("cdrill:synced","true")}catch(e){}
+  syncState="sync";
+  let skip=true;ref.onSnapshot(sn=>{if(skip){skip=false;return}if(sn.exists&&!syncTimer)applyRemote(sn.data())},()=>{});
+}catch(e){}})();
+
+home();
+</script>
+
+</body></html>
