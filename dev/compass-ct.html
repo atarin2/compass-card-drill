@@ -97,6 +97,8 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .tg{border:2px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:999px;padding:8px 18px;font-size:16px;font-weight:700;min-width:7.5em}
 .tg.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
 .tg.big{border-radius:12px;font-size:15px}
+.askb{display:flex;gap:8px;align-items:center}
+.skip{border:2px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:8px 14px;font-size:15px;font-weight:700}
 .sl.vol{grid-template-columns:3.6em 1fr 2.4em;font-size:13px}.sl.vol span{text-align:right;font-family:var(--f-num)}
 .snd summary{display:flex;gap:8px;align-items:center;cursor:pointer;list-style:none;padding:13px 14px;border:2px solid var(--accent);border-radius:14px;background:var(--surface);font-size:15px}
 .snd summary b{font-weight:700}.snd .sic{font-size:18px}
@@ -550,8 +552,8 @@ function home(){
         <p>自分で登録したカード画像やBGMの音源は、その端末のブラウザの中にだけ保存され、外には送られません。</p>
         <p class="env-claude">このページはclaude.ai上で公開しているため、ページの配信についてはclaude.ai（Anthropic）のプライバシーポリシーも適用されます。</p><p class="env-web">このページはGitHub Pagesで公開しているため、ページの配信についてはGitHubのプライバシーポリシーも適用されます。</p></div></details>
     </section>
-    <div class="upd"><b>データ最終更新：2026/10/25</b>
-      <ul><li>超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正</li><li>奴隷狩り密売団 ケルマトのCTを32秒に修正</li></ul></div>
+    <div class="upd"><b>最終更新：2026/10/25</b>
+      <ul><li>秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）</li><li>超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正</li><li>奴隷狩り密売団 ケルマトのCTを32秒に修正</li></ul></div>
     <p class="note">CTはメダル補正なしの値です。<br>
     データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）、使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
   $("#cheer").onclick=async e=>{const b=e.currentTarget,sm=b.querySelector("small");let ok=false;
@@ -774,10 +776,11 @@ function render(fb){
       <div class="ability" id="ab"><button type="button" id="hint">効果を見る</button></div>
     </article>
     ${fb||""}
-    <div class="ask"><div class="askl"><h2>${prompt}</h2><button type="button" id="laterTg" class="tg${game.cur.later?" on":""}" aria-pressed="${!!game.cur.later}">${game.cur.later?"☑":"☐"} あとで</button></div>${game.step==="ct"?`<div class="readout ${game.input?"":"empty"}" id="ro">${game.input||"00"}<span>秒</span></div>`:""}</div>
+    <div class="ask"><div class="askl"><h2>${prompt}</h2><div class="askb"><button type="button" id="laterTg" class="tg${game.cur.later?" on":""}" aria-pressed="${!!game.cur.later}">${game.cur.later?"☑":"☐"} あとで</button><button type="button" id="skipBtn" class="skip" aria-label="答えずに次のカードへ（記録しない）">スキップ ▶</button></div></div>${game.step==="ct"?`<div class="readout ${game.input?"":"empty"}" id="ro">${game.input||"00"}<span>秒</span></div>`:""}</div>
     ${game.step==="ct"?`<div class="pad${game.precise?" prec":""}" id="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button type="button" data-d="${d}">${d}</button>`).join("")}<button type="button" class="del" data-k="del" aria-label="1文字消す">⌫</button><button type="button" data-d="0">0</button>${game.precise?`<button type="button" data-d=".">.</button><button type="button" class="go wide" data-k="go">決定</button>`:`<button type="button" class="go" data-k="go">決定</button>`}</div>`
     :`<div class="acts" id="acts">${["無","短","長"].map(a=>`<button type="button" data-a="${a}">${a}<small>${ACT_NOTE[a]}</small></button>`).join("")}</div>`}`;
   $("#hint").onclick=()=>{$("#ab").textContent=c.ab};
+  $("#skipBtn").onclick=skip;
   if(game.step==="ct"){
     $("#pad").onclick=e=>{const b=e.target.closest("button");if(!b)return;
       if(b.dataset.d!=null) typeDigit(b.dataset.d); else if(b.dataset.k==="del") del(); else submitCt();};
@@ -802,6 +805,7 @@ function submitCt(){
   if(settings.mode==="both"&&!ok){game.step="act";game.input="";render(`<div class="fb ng shake"><span class="big">×</span><span class="ans">CT は <b>${eff(c)}</b> 秒（入力 ${v}）　続けて発動時間</span></div>`);return}
   finish();
 }
+function skip(){stopTimer();game.skip=(game.skip||0)+1;if(game.i>=game.qs.length-1){result();return}game.i++;ask()}
 function submitAct(a){game.cur.ansAct=a;if(a!==game.cur.card.act)game.cur.ok=false;finish()}
 
 function finish(){
@@ -832,6 +836,7 @@ function finish(){
 
 function result(){
   clearTimeout(game.auto);
+  if(!game.log.length){home();return}
   const L=game.log, ok=L.filter(x=>x.ok), pct=Math.round(ok.length/L.length*100);
   const avg=ok.length?ok.reduce((s,x)=>s+x.ms,0)/ok.length:0;
   if(!game.isWeak&&ok.length){const best=store.get("best",{});const b=best[game.key];
@@ -839,7 +844,7 @@ function result(){
   const wrong=L.filter(x=>!x.ok), slow=ok.slice().sort((a,b)=>b.ms-a.ms).slice(0,3);
   $("#navBtn").textContent="📋 カード一覧"; $("#navBtn").onclick=list;
   view.innerHTML=`
-    <div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>
+    <div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>${game.skip?`<p class="note">スキップ ${game.skip}枚（成績・復習には入りません）</p>`:""}
     <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>
     ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>rowHtml(x.card,true,x)).join("")}</div>`:`<p class="note">全問正解です。</p>`}
     ${slow.length?`<span class="label">時間がかかったカード</span><div class="rows">${slow.map(x=>rowHtml(x.card,false,null,fmt(x.ms)+"秒")).join("")}</div>`:""}
