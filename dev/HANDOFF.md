@@ -42,3 +42,6 @@
 2. `python3 dev/build_site.py`
 3. claude.ai 版も同じ `dev/compass-ct.html` で公開し直す
 4. commit して push（反映まで1〜2分）
+
+## 更新履歴の書き方
+- compass-ct.html の `const UPDATES=[...]` の先頭に ["YYYY/MM/DD",["内容",...]] を追加する（同じ日なら既存の配列に追記）。最終更新日は先頭の日付が自動で表示される

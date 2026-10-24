@@ -155,7 +155,10 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .a2hs{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:10px 12px;border-radius:12px;border:2px solid var(--water);background:color-mix(in srgb,var(--water) 10%,var(--surface));font-size:13px;line-height:1.6}
 .a2hs p{margin:4px 0 0;color:var(--muted)}.a2x{border:0;background:none;color:var(--muted);font-size:20px;line-height:1;padding:2px 6px}
 .is-claude .env-web,.is-web .env-claude{display:none}
-.upd{font-size:12px;color:var(--muted);line-height:1.6}.upd b{color:var(--ink)}.upd ul{margin:4px 0 0;padding-left:1.2em}
+.upd{font-size:12px;color:var(--muted);line-height:1.6;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.upd b{color:var(--ink)}.upd ul{margin:2px 0 0;padding-left:1.2em}
+.upd summary{display:flex;justify-content:space-between;align-items:center;gap:8px;list-style:none;cursor:pointer;font-size:13px}.upd summary::-webkit-details-marker{display:none}
+.upd .ul{color:var(--accent);font-weight:700;font-size:12px}.upd .ul::after{content:" ▼"}.upd[open] .ul::after{content:" ▲"}
+.upd .ud{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
 .nxrow{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}.nxrow.one{grid-template-columns:1fr}
 .fdone{display:flex;flex-direction:column;gap:12px;text-align:center}
 .cats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
@@ -482,6 +485,11 @@ const CARDS = [
 ["白井黒子", 32, "無", "SR", "火", "移", "前方の敵の背後から3秒間スタン", 0]
 ].sort((a,b)=>b[7]-a[7]).map((c,i)=>({id:i,name:c[0],ct:c[1],act:c[2],rar:c[3],el:c[4],type:c[5],ab:c[6],use:c[7]}));
 
+// 更新履歴（新しい日付を先頭に追加していく）
+const UPDATES=[
+["2026/10/25",["秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
+];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
 const $=s=>document.querySelector(s);
 const view=$("#view");
@@ -568,8 +576,8 @@ function home(){
         <p>自分で登録したカード画像やBGMの音源は、その端末のブラウザの中にだけ保存され、外には送られません。</p>
         <p class="env-claude">このページはclaude.ai上で公開しているため、ページの配信についてはclaude.ai（Anthropic）のプライバシーポリシーも適用されます。</p><p class="env-web">このページはGitHub Pagesで公開しているため、ページの配信についてはGitHubのプライバシーポリシーも適用されます。</p></div></details>
     </section>
-    <div class="upd"><b>最終更新：2026/10/25</b>
-      <ul><li>秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）</li><li>超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正</li><li>奴隷狩り密売団 ケルマトのCTを32秒に修正</li></ul></div>
+    <details class="upd" id="updBox"><summary><b>最終更新：${UPDATES[0][0]}</b><span class="ul">更新履歴を見る</span></summary>
+      ${UPDATES.map(([d,items])=>`<div class="ud"><b>${d}</b><ul>${items.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</details>
     <p class="note">CTはメダル補正なしの値です。<br>
     データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）、使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
   $("#cheer").onclick=async e=>{const b=e.currentTarget,sm=b.querySelector("small");let ok=false;
