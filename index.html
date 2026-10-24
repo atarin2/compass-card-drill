@@ -578,7 +578,7 @@ function home(){
   view.querySelectorAll("[data-bgm]").forEach(x=>x.onclick=()=>{settings.bgm=+x.dataset.bgm;save();if(settings.bgm)SND.startBgm();else SND.stopBgm();home()});
   view.querySelectorAll("[data-bgmsrc]").forEach(x=>x.onclick=()=>{if(settings.bgmSrc===x.dataset.bgmsrc)return;settings.bgmSrc=x.dataset.bgmsrc;save();if(settings.bgmSrc==="own"&&!SND.ownUrl){$("#bgmFile").value="";$("#bgmFile").click()}else SND.restart();home()});
   const bp=$("#bgmPick");if(bp)bp.onclick=()=>{$("#bgmFile").value="";$("#bgmFile").click()};
-  const bt=$("#bgmTest");if(bt)bt.onclick=()=>{if(SND.ownPlaying||SND.timer){SND.stopBgm();bt.textContent="再生"}else{SND.startBgm();bt.textContent="一時停止"}};
+  const bt=$("#bgmTest");if(bt)bt.onclick=()=>{if(SND.ownPlaying||SND.timer){SND.stopBgm();SND.paused=true;bt.textContent="再生"}else{SND.paused=false;SND.startBgm();bt.textContent="一時停止"}};
   $("#sndBox").ontoggle=e=>{soundOpen=e.target.open};
   const vb=$("#bgmVol");if(vb)vb.oninput=()=>{settings.bgmVol=+vb.value;vb.nextElementSibling.textContent=vb.value;save();SND.applyVol()};
   const vs=$("#seVol");if(vs){vs.oninput=()=>{settings.seVol=+vs.value;vs.nextElementSibling.textContent=vs.value;save();SND.applyVol()};vs.onchange=()=>SND.ok()}
@@ -595,7 +595,10 @@ function home(){
 
 // ---- 効果音とBGM（すべてその場で合成） ----
 const SND={ctx:null,bgmGain:null,timer:null,step:0,next:0,
-  ensure(){try{if(!this.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;this.ctx=new A()}if(this.ctx.state==="suspended")this.ctx.resume()}catch(e){return null}return this.ctx},
+  ensure(){try{try{if(navigator.audioSession&&navigator.audioSession.type!=="playback")navigator.audioSession.type="playback"}catch(e){}
+    if(!this.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;this.ctx=new A()}
+    if(this.ctx.state!=="running")this.ctx.resume().catch(()=>{})}catch(e){return null}return this.ctx},
+  unlocked(){return this.ctx&&this.ctx.state==="running"},
   tone(f,t,d,type,v,dest){const c=this.ctx,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);
     g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
     o.connect(g).connect(dest||c.destination);o.start(t);o.stop(t+d+0.02)},
@@ -640,8 +643,14 @@ const SND={ctx:null,bgmGain:null,timer:null,step:0,next:0,
     if(!this.timer)return;clearInterval(this.timer);this.timer=null;const g=this.bgmGain,c=this.ctx;
     try{g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(Math.max(g.gain.value,0.0001),c.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+0.4);setTimeout(()=>g.disconnect(),600)}catch(e){}}
 };
-const kick=()=>{document.removeEventListener("pointerdown",kick,true);document.removeEventListener("keydown",kick,true);if(!SND.ownPlaying&&!SND.timer)SND.startBgm();const bt=$("#bgmTest");if(bt&&(SND.ownPlaying||SND.timer))bt.textContent="一時停止"};
-document.addEventListener("pointerdown",kick,true);document.addEventListener("keydown",kick,true);
+// iPhoneは「タップ完了（touchend/click）」の中でしか音を鳴らせないので、鳴るまで毎回試す
+const KEV=["touchend","click","keydown"];
+const kick=()=>{const c=SND.ensure();if(!c)return;
+  if(settings.bgm&&!SND.paused){if(SND.ownPlaying&&SND.media&&SND.media.paused){SND.media.play().catch(()=>{})}else if(!SND.ownPlaying&&!SND.timer)SND.startBgm()}
+  const bt=$("#bgmTest");if(bt&&(SND.ownPlaying||SND.timer))bt.textContent="一時停止";
+  setTimeout(()=>{const ok=SND.unlocked()&&(!settings.bgm||SND.paused||SND.timer||(SND.media&&!SND.media.paused));if(ok)KEV.forEach(ev=>document.removeEventListener(ev,kick,true))},300)};
+const arm=()=>KEV.forEach(ev=>document.addEventListener(ev,kick,true));arm();
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&SND.ctx){SND.ctx.resume().catch(()=>{});if(SND.ownPlaying&&SND.media&&SND.media.paused)SND.media.play().catch(()=>{});arm()}});
 // ---- 背景でアイテムがゆっくり落ちる ----
 (()=>{const box=document.getElementById("fall"),srcs=["fx/coin.png","fx/pad.png","fx/mark.png","fx/can.png","fx/bat.png"];let n=0;
   const drop=()=>{if(!settings.fall||document.hidden||box.childElementCount>=9)return;const im=new Image(),sz=34+Math.random()*38,d=16+Math.random()*14;
