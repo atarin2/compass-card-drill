@@ -652,9 +652,11 @@ document.addEventListener("pointerdown",kick,true);document.addEventListener("ke
   const standalone=navigator.standalone||matchMedia("(display-mode: standalone)").matches;
   if(!ios||standalone||store.get("a2hsDone",false))return;
   const inApp=/Twitter|Line\/|FBAN|FBAV|Instagram/i.test(ua)||!/Safari/.test(ua);
+  const br=/CriOS/.test(ua)?"Chrome":/EdgiOS/.test(ua)?"Edge":/FxiOS/.test(ua)?"Firefox":"Safari";
+  const how=br==="Safari"?"Safariの共有ボタン（□↑）→「ホーム画面に追加」":`${br}のアドレスバーの共有ボタン（□↑）→「ホーム画面に追加」`;
   const box=document.getElementById("a2hs");
   box.innerHTML=`<div class="a2hs"><div><b>📱 ホーム画面に追加して使うのがおすすめ</b>
-    <p>${inApp?"今はアプリ内のブラウザで開いています。右上や下のメニューから「Safariで開く」を選んでから、":""}Safariの共有ボタン（□↑）→「ホーム画面に追加」でアイコンから開くと、短縮名などの設定が消えにくくなります。追加したあとは、アイコンから開いて使ってください。</p></div>
+    <p>${inApp?"今はアプリ内のブラウザで開いています。右上や下のメニューから「Safariで開く」を選んでから、":""}${inApp?"Safariの共有ボタン（□↑）→「ホーム画面に追加」":how}でアイコンから開くと、短縮名などの設定が消えにくくなります。追加したあとは、アイコンから開いて使ってください。</p></div>
     <button type="button" class="a2x" aria-label="閉じる">×</button></div>`;
   box.querySelector(".a2x").onclick=()=>{store.set("a2hsDone",true);box.innerHTML=""}})();
 // ---- カード名を覚える（画像→タップで短縮名） ----
