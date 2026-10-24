@@ -500,6 +500,7 @@ function seg(name,opts,cur){
 let soundOpen=false, heroOpen=false;
 const IN_CLAUDE=(()=>{try{return window.top!==window}catch(e){return true}})();
 document.documentElement.classList.add(IN_CLAUDE?"is-claude":"is-web");
+if(!IN_CLAUDE&&/github\.io$/.test(location.hostname)){const g=document.createElement("script");g.async=true;g.src="https://gc.zgo.at/count.js";g.dataset.goatcounter="https://atarin2.goatcounter.com/count";document.head.appendChild(g)}
 function applyTheme(){const t=settings.theme;if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme")}
 applyTheme();
 function home(){
@@ -557,7 +558,7 @@ function home(){
         <p>このツールを使ったことで生じた損害について、作った人は責任を負いかねます。</p>
         <p>無料で使えます。内容は予告なく変更・終了することがあります。</p></div></details>
       <details><summary>プライバシーポリシー</summary><div class="lg">
-        <p>作った人が、使っている人の個人情報を集めることはありません。アクセス解析や広告も使っていません。</p>
+        <p class="env-claude">作った人が、使っている人の個人情報を集めることはありません。アクセス解析や広告も使っていません。</p><p class="env-web">作った人が、使っている人の個人情報を集めることはありません。広告も使っていません。利用状況を知るために、個人を特定しない形でアクセス数を数えるサービス（<a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>）を使っています。Cookieは使わず、誰が使ったかは分かりません。</p>
         <p>短縮名・チェック・削除したカード・「あとで」・成績などの設定は、お使いのブラウザに保存されます。<span class="env-claude">claude.aiにログインしている場合は、端末間で同期するため、その人のclaude.aiアカウントにも保存されます。どちらも</span><span class="env-web">これは</span>本人だけが見られる場所で、作った人を含めほかの人は見られません。</p>
         <p>自分で登録したカード画像やBGMの音源は、その端末のブラウザの中にだけ保存され、外には送られません。</p>
         <p class="env-claude">このページはclaude.ai上で公開しているため、ページの配信についてはclaude.ai（Anthropic）のプライバシーポリシーも適用されます。</p><p class="env-web">このページはGitHub Pagesで公開しているため、ページの配信についてはGitHubのプライバシーポリシーも適用されます。</p></div></details>
