@@ -471,7 +471,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -676,7 +676,7 @@ const madaCards=()=>live().filter(c=>MADA.has(c.name)&&IMG[c.name]);
 function startFlash(onlyMada){
   let pool;
   if(onlyMada===true)pool=madaCards();
-  else{pool=poolFor().filter(c=>IMG[c.name]);if(!pool.length)pool=live().filter(c=>IMG[c.name]&&!EXCL.has(c.name));}
+  else{pool=poolFor(true).filter(c=>IMG[c.name]);if(!pool.length)pool=live().filter(c=>IMG[c.name]&&!EXCL.has(c.name));}
   if(!pool.length){home();return}
   SND.startBgm();
   flash={hist:[],deck:shuffle(pool),i:0,known:0,again:0,total:pool.length,open:false,edit:false,mada:onlyMada===true};
@@ -745,7 +745,7 @@ const heroOf=()=>HEROES.find(h=>h.id===settings.hero)||null;
 const exact=c=>{const h=game&&game.hero;return h?Math.round(c.ct*h.m*10)/10:c.ct};
 const eff=c=>exact(c);
 const isOk=(c,v)=>{const h=game&&game.hero,x=exact(c);if(!h)return v===c.ct;if(game.precise)return Math.abs(v-x)<1e-6;return v===Math.floor(x+1e-9)||v===Math.ceil(x-1e-9)};
-function poolFor(){const h=heroOf();const ok=live().filter(c=>!EXCL.has(c.name)&&(!h||h.f(c)));if(settings.range===-1){const a=ok.filter(c=>IMG[c.name]);if(a.length)return a;settings.range=30}return ok.slice(0,settings.range)}
+function poolFor(noHero){const h=noHero?null:heroOf();const ok=live().filter(c=>!EXCL.has(c.name)&&(!h||h.f(c)));if(settings.range===-1){const a=ok.filter(c=>IMG[c.name]);if(a.length)return a;settings.range=30}return ok.slice(0,settings.range)}
 
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
 
