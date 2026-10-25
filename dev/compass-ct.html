@@ -995,7 +995,7 @@ function result(){
     ${slow.length?`<span class="label">時間がかかったカード</span><div class="rows">${slow.map(x=>rowHtml(x.card,false,null,fmt(x.ms)+"秒")).join("")}</div>`:""}
     ${wrong.length?`<button class="primary" id="retry" type="button">間違えた ${wrong.length} 枚をもう一度</button>`:""}
     <button class="sub" id="again" type="button">同じ設定でもう一度</button>
-    <button class="sub" id="back" type="button">設定に戻る</button>`;
+    <button class="sub" id="back" type="button">ホームへ</button>`;
   if(wrong.length)$("#retry").onclick=()=>start(wrong.map(x=>x.card),true);
   $("#again").onclick=()=>start(poolFor(),false);
   $("#back").onclick=home;
