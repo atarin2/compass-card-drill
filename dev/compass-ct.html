@@ -483,7 +483,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -800,9 +800,20 @@ function tSubmit(spoken){const g=tgame,q=g.qs[g.i];if(g.done)return;let v;
   const show=t=>sec?t+"秒":mmss(t);
   $("#ro").textContent=show(v);$("#ro").className="readout";
   view.querySelector(".ask")?.remove();$("#pad")?.remove();
-  const calc=`${mmss(q.at)} − ${q.d}秒${g.kind==="end"?"（効果時間）":"（CT）"} ＝ ${sec?`${mmss(q.ans)} → <b>${q.ans%60}秒</b>`:`<b>${mmss(q.ans)}</b>`}`;
+  const calc=tCalc(g.kind,q);
   view.querySelector(".card").insertAdjacentHTML("afterend",`<div class="fb ${ok?"ok":"ng shake"}"><span class="big">${ok?"○":"×"}</span><span class="ans">${ok?"":`入力 ${show(v)}<br>`}${calc}${ok?`<br>${fmt(ms)} 秒`:""}</span></div><div class="nxrow one"${ok?' style="display:none"':""}><button class="primary" id="tNext" type="button">${g.i===g.qs.length-1?"結果を見る":"次へ"}</button></div>`);
   $("#tNext").onclick=tNext;if(ok)g.auto=setTimeout(()=>{if(tgame===g&&$("#tNext"))tNext()},900)}
+// 答え合わせの式：報告（CT）は「60−CT を足す」、ガードは「そのまま引く／0をまたいだら足りない分を60から引く」
+function tCalc(kind,q){const s=q.at%60,ans=q.ans%60,full=`<small class="calc">${mmss(q.at)} − ${q.d}秒 ＝ ${mmss(q.ans)}</small>`;
+  if(kind==="end"){const d=q.d;
+    return (s>=d?`${s} − ${d} ＝ <b>${ans}秒</b>`:`${s} − ${d} → 足りない${d-s}秒 → 60 − ${d-s} ＝ <b>${ans}秒</b>`)+full}
+  const D=q.d%60;
+  const head=q.d>=60?`CT${q.d}秒は${D}秒と同じ　`:"";
+  if(q.d>=60&&!D)return `${head}秒はそのまま ＝ <b>${ans}秒</b>`+full;
+  if(q.d>=60&&D<=15){
+    return head+(s>=D?`${s} − ${D} ＝ <b>${ans}秒</b>`:`${s} − ${D} → 足りない${D-s}秒 → 60 − ${D-s} ＝ <b>${ans}秒</b>`)+full}
+  const add=60-D,sum=s+add;
+  return `${head}${s} ＋ ${add}（60−${D}） ＝ ${sum>=60?`${sum} − 60 ＝ `:""}<b>${ans}秒</b>`+full}
 function tNext(){const g=tgame;clearTimeout(g.auto);if(g.i>=g.qs.length-1){tResult();return}g.i++;tAsk()}
 function tResult(){stopTimer();showMute(false);const g=tgame,L=g.log;
   $("#navBtn").textContent="📋 カード一覧";$("#navBtn").onclick=list;
