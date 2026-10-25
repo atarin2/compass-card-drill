@@ -575,7 +575,7 @@ function home(){
       <div class="arow"><span class="al">X</span><a href="https://x.com/atr_d4c" target="_blank" rel="noopener" data-ev="click-x" data-evt="Xのリンク">@atr_d4c</a></div>
       <div class="arow"><span class="al">YouTube</span><a href="https://www.youtube.com/channel/UCbL3TFYjH_2jdBgsVaeWVDg" target="_blank" rel="noopener" data-ev="click-youtube" data-evt="YouTubeのリンク">あたりん</a></div>
       <div class="arow"><span class="al">応援コード</span><button type="button" class="code" id="cheer">C-orYP <small>タップでコピー</small></button></div>
-      <p class="note cnote">入れても負担はありません。応援してもらえると、更新を続けるモチベーションになります🙏<br>（#コンパスのホーム → コミュニティ → プレイヤー応援）</p>
+      <p class="note cnote">応援してもらえると、更新を続けるモチベーションになります🙏<br>（#コンパスのホーム → コミュニティ → プレイヤー応援）</p>
     </section>
     <section class="legal">
       <details><summary>お問い合わせ</summary><div class="lg">
@@ -886,7 +886,7 @@ function micToggle(){if(micOn){stopMic();return}if(!tgame)return;micOn=true;micQ
 const CHEER_GAP=3*24*3600*1000;
 function cheerCard(){if(IN_CLAUDE)return"";const c=store.get("cheer",{});c.n=(c.n||0)+1;store.set("cheer",c);
   if(c.done||c.n<2||(c.last&&Date.now()-c.last<CHEER_GAP))return"";
-  return `<div class="cheerc" id="cheerC"><div class="ct"><b>🙏 応援コードで応援してもらえると嬉しいです</b><span>入れても負担はありません。更新を続けるモチベーションになります</span></div>
+  return `<div class="cheerc" id="cheerC"><div class="ct"><b>🙏 応援コードで応援してもらえると嬉しいです</b><span>更新を続けるモチベーションになります</span></div>
     <button type="button" class="code" id="cheerCopy">C-orYP <small>タップでコピー</small></button>
     <div class="cb"><button type="button" class="sub" id="cheerDone">入力した！</button><button type="button" class="sub" id="cheerLater">また今度</button></div></div>`}
 async function copyCheer(b,ev){const sm=b.querySelector("small");let ok=false;
