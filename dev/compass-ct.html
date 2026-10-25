@@ -483,7 +483,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を答える）","「🛡 ガードが切れる時刻」モードを追加","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -781,23 +781,25 @@ function tAsk(){const g=tgame,q=g.qs[g.i],c=q.card;g.input="";g.done=false;g.t0=
       <div class="cname">${IMG[c.name]&&settings.hide?"？？？":esc(dname(c))}</div>
       <div class="ability">${g.kind==="end"?esc(c.ab):""}</div>
     </article>
-    <div class="tq" id="tq"><span>敵が <b class="when">${mmss(q.at)}</b> に使用</span><span class="sm">${g.kind==="up"?"次に上がるのは何分何秒？":"ガードが切れるのは何分何秒？"}</span></div>
-    <div class="ask"><div class="askl">${SR?`<button type="button" class="mic" id="micBtn">🎤 声で答える</button>`:""}<button type="button" id="tSkip" class="skip">スキップ ▶</button></div><div class="readout empty" id="ro">0:00</div></div>
+    <div class="tq" id="tq"><span>敵が <b class="when">${mmss(q.at)}</b> に使用</span><span class="sm">${g.kind==="up"?"次に上がるのは何分何秒？":"ガードが切れるのは何秒？（秒だけ答える）"}</span></div>
+    <div class="ask"><div class="askl">${SR?`<button type="button" class="mic" id="micBtn">🎤 声で答える</button>`:""}<button type="button" id="tSkip" class="skip">スキップ ▶</button></div><div class="readout empty" id="ro">${g.kind==="end"?"00<span>秒</span>":"0:00"}</div></div>
     <div class="pad" id="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button type="button" data-d="${d}">${d}</button>`).join("")}<button type="button" class="del" data-k="del" aria-label="1文字消す">⌫</button><button type="button" data-d="0">0</button><button type="button" class="go" data-k="go">決定</button></div>`;
-  $("#pad").onclick=e=>{const b=e.target.closest("button");if(!b||g.done)return;if(b.dataset.d!=null){if(g.input.length<3)g.input=(g.input+b.dataset.d).replace(/^0+(?=\d)/,"");tRO()}else if(b.dataset.k==="del"){g.input=g.input.slice(0,-1);tRO()}else tSubmit()};
+  $("#pad").onclick=e=>{const b=e.target.closest("button");if(!b||g.done)return;if(b.dataset.d!=null){if(g.input.length<(g.kind==="end"?2:3))g.input=(g.input+b.dataset.d).replace(/^0+(?=\d)/,"");tRO()}else if(b.dataset.k==="del"){g.input=g.input.slice(0,-1);tRO()}else tSubmit()};
   $("#tSkip").onclick=()=>{stopMic();tNext()};
   const mb=$("#micBtn");if(mb)mb.onclick=()=>micToggle();
   stopTimer();timerId=setInterval(()=>{const el=$("#clock");if(el)el.textContent=fmt(performance.now()-g.t0)},50)}
 const inSec=s=>{const v=s.padStart(3,"0");return +v.slice(0,-2)*60+ +v.slice(-2)};
-function tRO(){const ro=$("#ro"),v=tgame.input.padStart(3,"0");ro.className="readout"+(tgame.input?"":" empty");ro.textContent=`${+v.slice(0,-2)}:${v.slice(-2)}`}
+function tRO(){const ro=$("#ro"),v=tgame.input.padStart(3,"0");ro.className="readout"+(tgame.input?"":" empty");if(tgame.kind==="end"){ro.innerHTML=(tgame.input||"00")+"<span>秒</span>";return}ro.textContent=`${+v.slice(0,-2)}:${v.slice(-2)}`}
 function tSubmit(spoken){const g=tgame,q=g.qs[g.i];if(g.done)return;let v;
-  if(spoken!=null)v=spoken;else{if(!g.input)return;if(+g.input.slice(-2)>59)return;v=inSec(g.input)}
-  stopMic();stopTimer();g.done=true;const ok=v===q.ans,ms=performance.now()-g.t0;g.log.push({q,ok,ms,v});
+  const sec=g.kind==="end";
+  if(spoken!=null)v=sec?spoken%60:spoken;else{if(!g.input)return;if(+g.input.slice(-2)>59)return;v=sec?+g.input:inSec(g.input)}
+  stopMic();stopTimer();g.done=true;const ok=v===(sec?q.ans%60:q.ans),ms=performance.now()-g.t0;g.log.push({q,ok,ms,v});
   if(ok)SND.ok();else SND.ng();
-  $("#ro").textContent=mmss(v);$("#ro").className="readout";
+  const show=t=>sec?t+"秒":mmss(t);
+  $("#ro").textContent=show(v);$("#ro").className="readout";
   view.querySelector(".ask")?.remove();$("#pad")?.remove();
-  const calc=`${mmss(q.at)} − ${q.d}秒${g.kind==="up"?"（CT）":"（効果時間）"} ＝ <b>${mmss(q.ans)}</b>`;
-  $("#tq").insertAdjacentHTML("afterend",`<div class="fb ${ok?"ok":"ng shake"}"><span class="big">${ok?"○":"×"}</span><span class="ans">${ok?"":`入力 ${mmss(v)}<br>`}${calc}${ok?`<br>${fmt(ms)} 秒`:""}</span></div><div class="nxrow one"${ok?' style="display:none"':""}><button class="primary" id="tNext" type="button">${g.i===g.qs.length-1?"結果を見る":"次へ"}</button></div>`);
+  const calc=`${mmss(q.at)} − ${q.d}秒${sec?"（効果時間）":"（CT）"} ＝ ${sec?`${mmss(q.ans)} → <b>${q.ans%60}秒</b>`:`<b>${mmss(q.ans)}</b>`}`;
+  $("#tq").insertAdjacentHTML("afterend",`<div class="fb ${ok?"ok":"ng shake"}"><span class="big">${ok?"○":"×"}</span><span class="ans">${ok?"":`入力 ${show(v)}<br>`}${calc}${ok?`<br>${fmt(ms)} 秒`:""}</span></div><div class="nxrow one"${ok?' style="display:none"':""}><button class="primary" id="tNext" type="button">${g.i===g.qs.length-1?"結果を見る":"次へ"}</button></div>`);
   $("#tNext").onclick=tNext;if(ok)g.auto=setTimeout(()=>{if(tgame===g&&$("#tNext"))tNext()},900)}
 function tNext(){const g=tgame;clearTimeout(g.auto);if(g.i>=g.qs.length-1){tResult();return}g.i++;tAsk()}
 function tResult(){stopTimer();showMute(false);const g=tgame,L=g.log;
@@ -806,7 +808,7 @@ function tResult(){stopTimer();showMute(false);const g=tgame,L=g.log;
   const ok=L.filter(x=>x.ok),pct=Math.round(ok.length/L.length*100),avg=ok.length?ok.reduce((a,x)=>a+x.ms,0)/ok.length:0,wrong=L.filter(x=>!x.ok);
   view.innerHTML=`<div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>
     <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>
-    ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>`<div class="row" data-el="${x.q.card.el}"><i></i><div class="n">${esc(dname(x.q.card))}<small class="bad">${mmss(x.q.at)}に使用 → 正解 ${mmss(x.q.ans)}（入力 ${mmss(x.v)}）</small></div><div class="v">${x.q.d}<small style="font-size:11px;color:var(--muted);margin-left:2px">秒</small></div></div>`).join("")}</div>`:`<p class="note">全問正解です。</p>`}
+    ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>`<div class="row" data-el="${x.q.card.el}"><i></i><div class="n">${esc(dname(x.q.card))}<small class="bad">${mmss(x.q.at)}に使用 → 正解 ${g.kind==="end"?x.q.ans%60+"秒":mmss(x.q.ans)}（入力 ${g.kind==="end"?x.v+"秒":mmss(x.v)}）</small></div><div class="v">${x.q.d}<small style="font-size:11px;color:var(--muted);margin-left:2px">秒</small></div></div>`).join("")}</div>`:`<p class="note">全問正解です。</p>`}
     <button class="primary" id="tAgain" type="button">もう一度</button><button class="sub" id="back" type="button">ホームへ</button>`;
   $("#tAgain").onclick=()=>startTime(g.kind);$("#back").onclick=home}
 // 音声入力（対応ブラウザのみ。「2分4秒」「2:04」「204」などを読み取る）
