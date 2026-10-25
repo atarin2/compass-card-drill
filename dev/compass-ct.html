@@ -483,7 +483,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["🎤は1回押すとONのまま聞き続けるように（もう1回押すとOFF。「次」と言うと次の問題へ）","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["🎤は1回押すとONのまま聞き続けるように（もう1回押すとOFF。「次」と言うと次の問題へ）","🎤がONとOFFを繰り返し続けることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -623,7 +623,7 @@ function home(){
 
 // ---- 効果音とBGM（すべてその場で合成） ----
 const SND={ctx:null,bgmGain:null,timer:null,step:0,next:0,
-  ensure(){try{try{if(navigator.audioSession&&navigator.audioSession.type!=="playback")navigator.audioSession.type="playback"}catch(e){}
+  ensure(){try{try{const want=(typeof micOn!=="undefined"&&micOn)?"play-and-record":"playback";if(navigator.audioSession&&navigator.audioSession.type!==want)navigator.audioSession.type=want}catch(e){}
     if(!this.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;this.ctx=new A()}
     if(this.ctx.state!=="running")this.ctx.resume().catch(()=>{})}catch(e){return null}return this.ctx},
   unlocked(){return this.ctx&&this.ctx.state==="running"},
@@ -836,21 +836,26 @@ function parseSpoken(raw){const s=kan(raw).replace(/\s/g,"");let m;
   if((m=s.match(/(\d{1,3})/))){const d=m[1];if(d.length===3&&+d.slice(1)<60)return inSec(d);if(+d<60)return +d}
   return null}
 // 🎤は1回押すとONのまま聞き続け、もう1回押すとOFF（問題が変わっても聞き続ける）
-let micOn=false;
+let micOn=false, micQuick=0, micT0=0;
+function setSession(t){try{if(navigator.audioSession)navigator.audioSession.type=t}catch(e){}}
 function micLabel(t){const b=$("#micBtn");if(!b)return;b.classList.toggle("on",micOn);b.textContent=t||(micOn?"🎤 ON":"🎤 声")}
-function stopMic(){micOn=false;try{rec&&rec.abort()}catch(e){}rec=null;micLabel()}
-function micHeard(alts){const g=tgame;if(!g)return;
+function stopMic(msg){micOn=false;const r0=rec;rec=null;try{r0&&r0.abort()}catch(e){}setSession("playback");micLabel(msg)}
+function micHeard(alts){const g=tgame;if(!g)return;micQuick=0;
   if(alts.some(a=>/次|つぎ|ネクスト|スキップ/.test(a))&&(g.done||alts.some(a=>/スキップ/.test(a)))){if($("#tNext")||!g.done)tNext();return}
   if(g.done)return;let v=null,heard=alts[0]||"";for(const a of alts){v=parseSpoken(a);if(v!=null){heard=a;break}}
   if(v==null){micLabel("🎤 ？（"+heard.slice(0,6)+"）");setTimeout(()=>{if(micOn)micLabel()},1500);return}
   tSubmit(v)}
-function startRec(){if(!micOn)return;
-  try{rec=new SR();rec.lang="ja-JP";rec.continuous=true;rec.interimResults=false;rec.maxAlternatives=5;
-    rec.onresult=e=>{for(let k=e.resultIndex;k<e.results.length;k++)if(e.results[k].isFinal)micHeard([...e.results[k]].map(a=>a.transcript))};
-    rec.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){micOn=false;rec=null;micLabel("🎤 マイクが使えません")}};
-    rec.onend=()=>{rec=null;if(micOn)setTimeout(startRec,150)};
-    rec.start();micLabel()}catch(e){micOn=false;rec=null;micLabel("🎤 使えません")}}
-function micToggle(){if(micOn){stopMic();return}micOn=true;startRec()}
+function startRec(){if(!micOn||rec||document.hidden)return;
+  try{const r0=new SR();rec=r0;r0.lang="ja-JP";r0.continuous=true;r0.interimResults=false;r0.maxAlternatives=5;
+    r0.onresult=e=>{for(let k=e.resultIndex;k<e.results.length;k++)if(e.results[k].isFinal)micHeard([...e.results[k]].map(a=>a.transcript))};
+    r0.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed")stopMic("🎤 マイクが使えません")};
+    // iPhoneは黙っていると勝手に止まるので聞き直す。ただしすぐ止まるのが続いたら（ON/OFFの繰り返し防止）止めて押し直してもらう
+    r0.onend=()=>{if(rec!==r0)return;rec=null;if(!micOn)return;
+      if(performance.now()-micT0<2500){if(++micQuick>=3){stopMic("🎤 止まりました（押して再開）");return}}else micQuick=0;
+      setTimeout(startRec,micQuick?800:200)};
+    setSession("play-and-record");micT0=performance.now();r0.start();micLabel()}catch(e){rec=null;stopMic("🎤 使えません")}}
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&rec){const r0=rec;rec=null;try{r0.abort()}catch(e){}}else if(!document.hidden&&micOn)startRec()});
+function micToggle(){if(micOn){stopMic();return}micOn=true;micQuick=0;startRec()}
 function save(){store.set("settings",settings)}
 function getMiss(){const m=store.get("miss",{});let ch=false;const o={};
   for(const k in m){if(/^\d+$/.test(k)){ch=true;const c=CARDS[+k];if(c&&c.use>0&&m[k]>0)o[c.name]=m[k]}else o[k]=m[k]}
