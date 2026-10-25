@@ -157,7 +157,7 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .cheerm{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:color-mix(in srgb,#000 55%,transparent);animation:cin .25s ease .5s both}
 @keyframes cin{from{opacity:0}to{opacity:1}}
 .cheerc{width:min(100%,380px);display:flex;flex-direction:column;gap:14px;padding:20px 18px;border-radius:18px;border:2px solid var(--accent);background:var(--surface);text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-.cheerc .ct{display:flex;flex-direction:column;gap:6px;font-size:16px;line-height:1.5}.cheerc .ct b{text-wrap:balance}.cheerc .ct span{font-size:12.5px;color:var(--muted)}.cheerc .thx{padding:18px 0}
+.cheerc .ct{display:flex;flex-direction:column;gap:6px;font-size:16px;line-height:1.5}.cheerc .ct i{font-style:normal;display:inline-block}.cheerc .ct b i{display:block}.cheerc .cpath{font-size:12px!important}.cheerc .ct span{font-size:12.5px;color:var(--muted)}.cheerc .thx{padding:18px 0}
 .cheerc .code.big{align-self:center;font-size:22px;padding:8px 16px}
 .cheerc .cb{display:grid;grid-template-columns:1fr;gap:8px}.cheerc .cb .primary{font-size:17px;padding:13px}.cheerc .cb .sub{padding:10px;font-size:14px}
 .cnote{margin:2px 0 0;font-size:11.5px}
@@ -889,7 +889,7 @@ function micToggle(){if(micOn){stopMic();return}if(!tgame)return;micOn=true;micQ
 const CHEER_GAP=3*24*3600*1000;
 function cheerCard(){if(IN_CLAUDE)return"";const c=store.get("cheer",{});c.n=(c.n||0)+1;store.set("cheer",c);
   if(c.done||c.n<2||(c.last&&Date.now()-c.last<CHEER_GAP))return"";
-  return `<div class="cheerm" id="cheerM" role="dialog" aria-modal="true" aria-labelledby="cheerT"><div class="cheerc" id="cheerC"><div class="ct"><b id="cheerT">🙏 応援コードで応援してもらえると嬉しいです</b><span>更新を続けるモチベーションになります<br>（#コンパスのホーム → コミュニティ → プレイヤー応援）</span></div>
+  return `<div class="cheerm" id="cheerM" role="dialog" aria-modal="true" aria-labelledby="cheerT"><div class="cheerc" id="cheerC"><div class="ct"><b id="cheerT"><i>🙏 応援コードで</i><i>応援してもらえると嬉しいです</i></b><span><i>更新を続ける</i><i>モチベーションになります</i></span><span class="cpath"><i>入力場所：ホーム →</i> <i>コミュニティ →</i> <i>プレイヤー応援</i></span></div>
     <button type="button" class="code big" id="cheerCopy">C-orYP <small>タップでコピー</small></button>
     <div class="cb"><button type="button" class="primary" id="cheerDone">入力した！</button><button type="button" class="sub" id="cheerLater">また今度</button></div></div></div>`}
 async function copyCheer(b,ev){const sm=b.querySelector("small");let ok=false;
