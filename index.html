@@ -127,6 +127,14 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .mode h3{margin:0 0 2px;font-size:17px;display:flex;flex-direction:column;gap:2px}.mode h3 small{font-size:12px;font-weight:400;color:var(--muted)}
 .mode.learn{border-color:var(--water);background:color-mix(in srgb,var(--water) 10%,var(--surface));box-shadow:0 4px 14px color-mix(in srgb,var(--water) 25%,transparent)}
 .mode.quiz h3{color:var(--accent)}.mode.learn h3{color:var(--water)}.mode h3 small{color:var(--muted)}
+.mode.rep{border-color:var(--wood);background:color-mix(in srgb,var(--wood) 9%,var(--surface));box-shadow:0 4px 14px color-mix(in srgb,var(--wood) 22%,transparent)}.mode.rep h3{color:var(--wood)}
+.mode.rep .repbtn{background:var(--wood);box-shadow:0 3px 0 color-mix(in srgb,var(--wood) 60%,#000);color:#fff}
+.mode.grd{border-color:#d08a12;background:color-mix(in srgb,#d08a12 9%,var(--surface));box-shadow:0 4px 14px color-mix(in srgb,#d08a12 22%,transparent)}.mode.grd h3{color:#d08a12}
+.mode.grd .grdbtn{background:#d08a12;box-shadow:0 3px 0 color-mix(in srgb,#d08a12 60%,#000);color:#fff}
+.tq{display:flex;flex-direction:column;gap:3px;font-size:14px;line-height:1.45;color:var(--ink)}
+.tq .when{font-family:var(--f-num);font-size:28px;font-weight:700;color:var(--ink)}.tq .sm{font-size:12px;color:var(--muted)}
+.mic{border:2px solid var(--wood);background:var(--surface);color:var(--wood);border-radius:999px;padding:8px 14px;font-size:15px;font-weight:700}.mic.on{background:var(--wood);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.6}}
 .mode.learn .learnbtn{background:var(--water);box-shadow:0 3px 0 color-mix(in srgb,var(--water) 60%,#000);color:#fff}
 .mode .best{margin:0}
 .pad .go.wide{grid-column:1/-1}
@@ -491,7 +499,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -505,9 +513,10 @@ const esc=s=>String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 const fmt=ms=>(ms/1000).toFixed(2);
 
 // 未確認の更新：初めて来た人には出さない（設定が保存済み＝前から使っている人だけ）
-if(!store.get("updSeen",null)&&!store.get("settings",null))store.set("updSeen",UPDATES[0][0]);
-const updNew=()=>(store.get("updSeen","")||"")<UPDATES[0][0];
-const markUpd=()=>store.set("updSeen",UPDATES[0][0]);
+const UPD_KEY=UPDATES[0][0]+"#"+UPDATES[0][1].length; // 同じ日に追記してもお知らせが出るように件数も含める
+if(!store.get("updSeen",null)&&!store.get("settings",null))store.set("updSeen",UPD_KEY);
+const updNew=()=>store.get("updSeen","")!==UPD_KEY;
+const markUpd=()=>store.set("updSeen",UPD_KEY);
 let settings=Object.assign({range:30,count:10,se:1,bgm:1,bgmSrc:"built",bgmVol:30,seVol:60,fall:1,theme:"auto"},store.get("settings",{}));
 settings.mode="ct";
 let game=null, timerId=null;
@@ -526,7 +535,7 @@ function applyTheme(){const t=settings.theme;if(t==="light"||t==="dark")document
 applyTheme();
 function home(){
   showMute(false);
-  stopTimer(); game=null; listDraw=null; flash=null;
+  stopTimer(); if(tgame){clearTimeout(tgame.auto);tgame=null;stopMic()} game=null; listDraw=null; flash=null;
   $("#navBtn").textContent="📋 カード一覧"; $("#navBtn").onclick=list;
   const miss=getMiss();
   const weak=live().filter(c=>miss[c.name]>0);
@@ -556,6 +565,12 @@ function home(){
     <section class="mode learn"><h3>🃏 カード名を覚える<small>カード絵を見て名前を思い出す（画像があるカードのみ）</small></h3>
       <button class="primary learnbtn" id="flashBtn" type="button" ${imgCount()?"":"disabled"}>はじめる</button>
       <button class="sub" id="madaBtn" type="button" ${madaCards().length?"":"disabled"}>「あとで」のカードだけ（${madaCards().length}枚）</button>
+    </section>
+    <section class="mode rep"><h3>📣 報告練習<small>敵がカードを使った時刻から、次に上がる時刻を答える（試合の残り時間）</small></h3>
+      <button class="primary repbtn" id="repBtn" type="button">はじめる</button>
+    </section>
+    <section class="mode grd"><h3>🛡 ガードが切れる時刻<small>敵がガードを使った時刻から、効果が切れる時刻を答える</small></h3>
+      <button class="primary grdbtn" id="grdBtn" type="button">はじめる</button>
     </section>
     <details class="field snd" id="sndBox"${soundOpen?" open":""}><summary><span class="sic">⚙️</span><b>サウンド・表示設定</b><span class="sum">${settings.fall?"":"背景OFF・"}効果音${settings.se?"ON":"OFF"}・BGM ${settings.bgm?(settings.bgmSrc==="own"&&SND.ownUrl?"自分の音源":"デフォルト音源"):"OFF"}</span></summary><div class="sndin">
       ${seg("theme",[{v:"auto",t:"自動",s:"端末の設定"},{v:"light",t:"ライト",s:"白い背景"},{v:"dark",t:"ダーク",s:"黒い背景"}],settings.theme||"auto")}
@@ -618,6 +633,7 @@ function home(){
   $("#start").onclick=()=>start(poolFor(),false);
   $("#weak").onclick=()=>start(weak,true);
   $("#flashBtn").onclick=()=>startFlash(false);
+  $("#repBtn").onclick=()=>startTime("up");$("#grdBtn").onclick=()=>startTime("end");
   $("#madaBtn").onclick=()=>startFlash(true);
 }
 
@@ -757,6 +773,92 @@ function drawFlash(){
     $("#fnk").onclick=e=>e.stopPropagation();
     $("#fnk").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();saveNick();drawFlash()}}}
 }
+// ---- 報告練習・ガードが切れる時刻（試合の残り時間 3:00 → 0:00 で答える） ----
+let tgame=null;
+const secOnly=()=>true; // 今は両モードとも秒だけで答える（分まで答える形に戻すときはここを変える）
+const durOf=c=>{const m=c.ab.match(/(\d+(?:\.\d+)?)秒間/);return m?+m[1]:0};
+const mmss=t=>`${Math.floor(t/60)}:${String(t%60).padStart(2,"0")}`;
+const guardCards=()=>live().filter(c=>c.type==="防"&&durOf(c)&&!EXCL.has(c.name));
+function startTime(kind){
+  let pool=kind==="up"?poolFor(true):guardCards(); if(!pool.length){home();return}
+  let qs=shuffle(pool); if(settings.count)qs=qs.slice(0,settings.count);
+  qs=qs.map(c=>{const d=kind==="up"?c.ct:durOf(c);const at=d+5+Math.floor(Math.random()*(175-d-5+1));return{card:c,d,at:Math.min(175,at),ans:Math.min(175,at)-d}});
+  SND.startBgm(); showMute(true);
+  tgame={kind,qs,i:0,log:[]};
+  $("#navBtn").textContent="やめる"; $("#navBtn").onclick=()=>{stopMic();home()};
+  tAsk();
+}
+function tAsk(){const g=tgame,q=g.qs[g.i],c=q.card;g.input="";g.done=false;g.t0=performance.now();
+  view.innerHTML=`
+    <div class="hud"><span>${g.kind==="up"?"報告練習":"ガードが切れる時刻"}　第 <span class="num">${g.i+1}</span> / ${g.qs.length} 問</span><span><span class="num" id="clock">0.00</span> 秒</span></div>
+    <div class="bar"><i style="width:${g.i/g.qs.length*100}%"></i></div>
+    <article class="card${IMG[c.name]?" has-art":""}" data-el="${c.el}">
+      <div class="meta"><span class="chip el">${({"火":"赤","水":"青","木":"緑"})[c.el]||c.el}</span><span class="chip type">${c.type}</span><span class="chip">${c.rar}</span></div>
+      ${IMG[c.name]?`<img class="art" fetchpriority="high" src="${IMG[c.name]}" alt="">`:""}
+      <div class="cname">${IMG[c.name]&&settings.hide?"？？？":esc(dname(c))}</div>
+      <div class="ability tq" id="tq"><span>敵が <b class="when">${mmss(q.at)}</b> に使用</span><span class="sm">${g.kind==="up"?"次に上がるのは何秒？（秒だけ）":"切れるのは何秒？（秒だけ）"}</span>${g.kind==="end"?`<span class="sm">${esc(c.ab)}</span>`:""}</div>
+    </article>
+    <div class="ask"><div class="askb">${SR&&!IN_CLAUDE?`<button type="button" class="mic" id="micBtn">🎤 声</button>`:""}<button type="button" id="tSkip" class="skip">スキップ ▶</button></div><div class="readout empty" id="ro">${secOnly()?"00<span>秒</span>":"0:00"}</div></div>
+    <div class="pad" id="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button type="button" data-d="${d}">${d}</button>`).join("")}<button type="button" class="del" data-k="del" aria-label="1文字消す">⌫</button><button type="button" data-d="0">0</button><button type="button" class="go" data-k="go">決定</button></div>`;
+  $("#pad").onclick=e=>{const b=e.target.closest("button");if(!b||g.done)return;if(b.dataset.d!=null){if(g.input.length<(secOnly()?2:3))g.input=(g.input+b.dataset.d).replace(/^0+(?=\d)/,"");tRO()}else if(b.dataset.k==="del"){g.input=g.input.slice(0,-1);tRO()}else tSubmit()};
+  for(let k=1;k<=6;k++){const n=g.qs[g.i+k];if(n&&IMG[n.card.name]&&!PRE[n.card.name]){const im=new Image();im.decoding="async";im.src=IMG[n.card.name];PRE[n.card.name]=im}}
+  const art=view.querySelector(".card .art");if(art&&!art.complete)art.addEventListener("load",()=>{if(tgame===g&&g.qs[g.i]===q&&!g.input&&!g.done)g.t0=performance.now()},{once:true});
+  $("#tSkip").onclick=()=>{stopMic();tNext()};
+  const mb=$("#micBtn");if(mb)mb.onclick=()=>micToggle();
+  stopTimer();timerId=setInterval(()=>{const el=$("#clock");if(el)el.textContent=fmt(performance.now()-g.t0)},50)}
+const inSec=s=>{const v=s.padStart(3,"0");return +v.slice(0,-2)*60+ +v.slice(-2)};
+function tRO(){const ro=$("#ro"),v=tgame.input.padStart(3,"0");ro.className="readout"+(tgame.input?"":" empty");if(secOnly()){ro.innerHTML=(tgame.input||"00")+"<span>秒</span>";return}ro.textContent=`${+v.slice(0,-2)}:${v.slice(-2)}`}
+function tSubmit(spoken){const g=tgame,q=g.qs[g.i];if(g.done)return;let v;
+  const sec=secOnly();
+  if(spoken!=null)v=sec?spoken%60:spoken;else{if(!g.input)return;if(+g.input.slice(-2)>59)return;v=sec?+g.input:inSec(g.input)}
+  stopMic();stopTimer();g.done=true;const ok=v===(sec?q.ans%60:q.ans),ms=performance.now()-g.t0;g.log.push({q,ok,ms,v});
+  if(ok)SND.ok();else SND.ng();
+  const show=t=>sec?t+"秒":mmss(t);
+  $("#ro").textContent=show(v);$("#ro").className="readout";
+  view.querySelector(".ask")?.remove();$("#pad")?.remove();
+  const calc=tCalc(g.kind,q);
+  view.querySelector(".card").insertAdjacentHTML("afterend",`<div class="fb ${ok?"ok":"ng shake"}"><span class="big">${ok?"○":"×"}</span><span class="ans">${ok?"":`入力 ${show(v)}<br>`}${calc}${ok?`<br>${fmt(ms)} 秒`:""}</span></div><div class="nxrow one"${ok?' style="display:none"':""}><button class="primary" id="tNext" type="button">${g.i===g.qs.length-1?"結果を見る":"次へ"}</button></div>`);
+  $("#tNext").onclick=tNext;if(ok)g.auto=setTimeout(()=>{if(tgame===g&&$("#tNext"))tNext()},900)}
+// 答え合わせの式：報告（CT）は「60−CT を足す」、ガードは「そのまま引く／0をまたいだら足りない分を60から引く」
+function tCalc(kind,q){const s=q.at%60,ans=q.ans%60,full=`<small class="calc">${mmss(q.at)} − ${q.d}秒 ＝ ${mmss(q.ans)}</small>`;
+  if(kind==="end"){const d=q.d;
+    return (s>=d?`${s} − ${d} ＝ <b>${ans}秒</b>`:`${s} − ${d} → 足りない${d-s}秒 → 60 − ${d-s} ＝ <b>${ans}秒</b>`)+full}
+  const D=q.d%60;
+  const head=q.d>=60?`CT${q.d}秒は${D}秒と同じ　`:"";
+  if(q.d>=60&&!D)return `${head}秒はそのまま ＝ <b>${ans}秒</b>`+full;
+  if(q.d>=60&&D<=15){
+    return head+(s>=D?`${s} − ${D} ＝ <b>${ans}秒</b>`:`${s} − ${D} → 足りない${D-s}秒 → 60 − ${D-s} ＝ <b>${ans}秒</b>`)+full}
+  const add=60-D,sum=s+add;
+  return `${head}${s} ＋ ${add}（60−${D}） ＝ ${sum>=60?`${sum} − 60 ＝ `:""}<b>${ans}秒</b>`+full}
+function tNext(){const g=tgame;clearTimeout(g.auto);if(g.i>=g.qs.length-1){tResult();return}g.i++;tAsk()}
+function tResult(){stopTimer();showMute(false);const g=tgame,L=g.log;
+  $("#navBtn").textContent="📋 カード一覧";$("#navBtn").onclick=list;
+  if(!L.length){home();return}
+  const ok=L.filter(x=>x.ok),pct=Math.round(ok.length/L.length*100),avg=ok.length?ok.reduce((a,x)=>a+x.ms,0)/ok.length:0,wrong=L.filter(x=>!x.ok);
+  view.innerHTML=`<div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>
+    <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>
+    ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>`<div class="row" data-el="${x.q.card.el}"><i></i><div class="n">${esc(dname(x.q.card))}<small class="bad">${mmss(x.q.at)}に使用 → 正解 ${secOnly()?x.q.ans%60+"秒":mmss(x.q.ans)}（入力 ${secOnly()?x.v+"秒":mmss(x.v)}）</small></div><div class="v">${x.q.d}<small style="font-size:11px;color:var(--muted);margin-left:2px">秒</small></div></div>`).join("")}</div>`:`<p class="note">全問正解です。</p>`}
+    <button class="primary" id="tAgain" type="button">もう一度</button><button class="sub" id="back" type="button">ホームへ</button>`;
+  $("#tAgain").onclick=()=>startTime(g.kind);$("#back").onclick=home}
+// 音声入力（対応ブラウザのみ。「2分4秒」「2:04」「204」などを読み取る）
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null; let rec=null;
+const kan=s=>s.replace(/[０-９]/g,d=>String.fromCharCode(d.charCodeAt(0)-65248)).replace(/[一二三四五六七八九十]+/g,k=>{const n={一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9};let v=0,t=0;for(const ch of k){if(ch==="十"){v+=(t||1)*10;t=0}else t=n[ch]}return String(v+t)});
+function parseSpoken(raw){const s=kan(raw).replace(/\s/g,"");let m;
+  if((m=s.match(/(\d+)分(\d+)秒?/)))return +m[1]*60+ +m[2];
+  if((m=s.match(/(\d+)分半/)))return +m[1]*60+30;
+  if((m=s.match(/(\d+)分/)))return +m[1]*60;
+  if((m=s.match(/(\d+)[:：](\d{1,2})/)))return +m[1]*60+ +m[2];
+  if((m=s.match(/(\d+)秒/)))return +m[1];
+  if((m=s.match(/(\d{1,3})/))){const d=m[1];if(d.length===3&&+d.slice(1)<60)return inSec(d);if(+d<60)return +d}
+  return null}
+function stopMic(){try{rec&&rec.abort()}catch(e){}rec=null;const b=$("#micBtn");if(b){b.classList.remove("on");b.textContent="🎤 声"}}
+function micToggle(){if(rec){stopMic();return}const b=$("#micBtn");
+  try{rec=new SR();rec.lang="ja-JP";rec.interimResults=false;rec.maxAlternatives=5;
+    rec.onresult=e=>{const alts=[...e.results[0]].map(a=>a.transcript);let v=null,heard=alts[0];for(const a of alts){v=parseSpoken(a);if(v!=null){heard=a;break}}
+      rec=null;if(v==null){b.classList.remove("on");b.textContent="🎤 聞き取れず（"+heard.slice(0,8)+"）";return}tSubmit(v)};
+    rec.onerror=e=>{rec=null;if(b){b.classList.remove("on");b.textContent=e.error==="not-allowed"?"🎤 マイクが使えません":"🎤 もう一度"}};
+    rec.onend=()=>{if(rec){rec=null;if(b&&b.classList.contains("on")){b.classList.remove("on");b.textContent="🎤 もう一度"}}};
+    rec.start();b.classList.add("on");b.textContent="🎤 聞いてます"}catch(e){rec=null;b.textContent="🎤 使えません"}}
 function save(){store.set("settings",settings)}
 function getMiss(){const m=store.get("miss",{});let ch=false;const o={};
   for(const k in m){if(/^\d+$/.test(k)){ch=true;const c=CARDS[+k];if(c&&c.use>0&&m[k]>0)o[c.name]=m[k]}else o[k]=m[k]}
@@ -909,7 +1011,7 @@ function result(){
     ${slow.length?`<span class="label">時間がかかったカード</span><div class="rows">${slow.map(x=>rowHtml(x.card,false,null,fmt(x.ms)+"秒")).join("")}</div>`:""}
     ${wrong.length?`<button class="primary" id="retry" type="button">間違えた ${wrong.length} 枚をもう一度</button>`:""}
     <button class="sub" id="again" type="button">同じ設定でもう一度</button>
-    <button class="sub" id="back" type="button">設定に戻る</button>`;
+    <button class="sub" id="back" type="button">ホームへ</button>`;
   if(wrong.length)$("#retry").onclick=()=>start(wrong.map(x=>x.card),true);
   $("#again").onclick=()=>start(poolFor(),false);
   $("#back").onclick=home;
@@ -922,7 +1024,7 @@ function rowHtml(c,showAns,x,extra){
 
 function list(){
   showMute(false);
-  stopTimer(); game=null; flash=null;
+  stopTimer(); if(tgame){clearTimeout(tgame.auto);tgame=null;stopMic()} game=null; flash=null;
   $("#navBtn").textContent="戻る"; $("#navBtn").onclick=home;
   const sort=store.get("sort","use"); const cat=store.get("cat",""), fel=store.get("fel",""), frar=store.get("frar","");
   const base=()=>live().filter(c=>(!fel||c.el===fel)&&(!frar||c.rar===frar));
