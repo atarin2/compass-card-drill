@@ -499,7 +499,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["🎤は押すたびに1回聞く形に変更（iPhoneでONとOFFを繰り返してしまう問題の対策）","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChromeなど声が使えないブラウザでは🎤ボタンを出さないように","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["🎤は押すたびに1回聞く形に変更（iPhoneでONとOFFを繰り返してしまう問題の対策）","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChromeやホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -694,7 +694,7 @@ const showMute=v=>{$("#muteBtn").style.display=v?"":"none"};
 // iPhoneは「タップ完了（touchend/click）」の中でしか音を鳴らせないので、鳴るまで毎回試す
 const KEV=["touchend","click","keydown"];
 const kick=()=>{const c=SND.ensure();if(!c)return;
-  if(settings.bgm&&!settings.mute&&!SND.paused){if(SND.ownPlaying&&SND.media&&SND.media.paused){SND.media.play().catch(()=>{})}else if(!SND.ownPlaying&&!SND.timer)SND.startBgm()}
+  if(settings.bgm&&!settings.mute&&!SND.paused&&!(typeof micOn!=="undefined"&&micOn)&&!(typeof bgmHeld!=="undefined"&&bgmHeld)){if(SND.ownPlaying&&SND.media&&SND.media.paused){SND.media.play().catch(()=>{})}else if(!SND.ownPlaying&&!SND.timer)SND.startBgm()}
   const bt=$("#bgmTest");if(bt&&(SND.ownPlaying||SND.timer))bt.textContent="一時停止";
   setTimeout(()=>{const ok=SND.unlocked()&&(!settings.bgm||settings.mute||SND.paused||SND.timer||(SND.media&&!SND.media.paused));if(ok)KEV.forEach(ev=>document.removeEventListener(ev,kick,true))},300)};
 const arm=()=>KEV.forEach(ev=>document.addEventListener(ev,kick,true));arm();
@@ -843,7 +843,8 @@ function tResult(){stopTimer();stopMic();showMute(false);const g=tgame,L=g.log;
 // 音声入力（対応ブラウザのみ。「2分4秒」「2:04」「204」などを読み取る）
 // iPhoneのChromeなどはボタンがあっても音声認識が動かないので、Safari以外では出さない
 const IOS_OTHER=/CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent);
-const SR=IOS_OTHER?null:(window.SpeechRecognition||window.webkitSpeechRecognition||null); let rec=null;
+const STANDALONE=navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
+const SR=(IOS_OTHER||STANDALONE)?null:(window.SpeechRecognition||window.webkitSpeechRecognition||null); let rec=null;
 const kan=s=>s.replace(/[０-９]/g,d=>String.fromCharCode(d.charCodeAt(0)-65248)).replace(/[一二三四五六七八九十]+/g,k=>{const n={一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9};let v=0,t=0;for(const ch of k){if(ch==="十"){v+=(t||1)*10;t=0}else t=n[ch]}return String(v+t)});
 function parseSpoken(raw){const s=kan(raw).replace(/\s/g,"");let m;
   if((m=s.match(/(\d+)分(\d+)秒?/)))return +m[1]*60+ +m[2];
@@ -860,8 +861,8 @@ let micOn=false, micWait=null, bgmHeld=false;
 const SR_IDLE="🎤 声で答える";
 function micLabel(t){const b=$("#micBtn");if(!b)return;b.classList.toggle("on",micOn);b.textContent=t||(micOn?"🎤 聞いています…":SR_IDLE)}
 function sess(t){try{if(navigator.audioSession&&navigator.audioSession.type!==t)navigator.audioSession.type=t}catch(e){}}
-function holdBgm(){if(SND.ownPlaying&&SND.media&&!SND.media.paused){SND.media.pause();bgmHeld=true}}
-function releaseBgm(){if(bgmHeld){bgmHeld=false;if(SND.ownPlaying&&SND.media&&!settings.mute)setTimeout(()=>{if(!micOn)SND.media.play().catch(()=>{})},250)}}
+function holdBgm(){if(SND.ownPlaying&&SND.media){const g=SND.mediaGain,c=SND.ctx;if(g&&c){g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(0.0001,c.currentTime)}if(!SND.media.paused)SND.media.pause();bgmHeld=true}}
+function releaseBgm(){if(!bgmHeld)return;setTimeout(()=>{if(micOn)return;bgmHeld=false;if(!(SND.ownPlaying&&SND.media)||settings.mute)return;const g=SND.mediaGain,c=SND.ctx;SND.media.play().catch(()=>{});if(g&&c){g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(0.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(SND.bv()*0.9,c.currentTime+0.8)}},400)}
 function stopMic(msg){micOn=false;clearTimeout(micWait);const r0=rec;rec=null;try{r0&&r0.abort()}catch(e){}setTimeout(()=>{if(!micOn)sess("playback")},200);releaseBgm();micLabel(msg)}
 function micCmd(alts){const g=tgame;if(!g)return false;
   if(alts.some(a=>/次|つぎ|ネクスト|スキップ/.test(a))&&(g.done||alts.some(a=>/スキップ/.test(a)))){stopMic();tNext();return true}return false}
