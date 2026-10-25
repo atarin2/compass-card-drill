@@ -499,7 +499,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["🎤は1回押すとON、もう1回押すとOFF（問題が変わっても聞き続け、ONの間はBGMと効果音を止める）","別のアプリに切り替えたときにBGMが流れ続ける問題を修正","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChromeやホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["🎤は1回押すとON、もう1回押すとOFF（問題が変わっても聞き続け、ONの間はBGMと効果音を止める）","別のアプリに切り替えたときにBGMが流れ続ける問題を修正","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChrome・Xなどのアプリ内ブラウザ・ホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -847,7 +847,10 @@ function tResult(){stopTimer();stopMic();showMute(false);const g=tgame,L=g.log;
   $("#tAgain").onclick=()=>startTime(g.kind);$("#back").onclick=home}
 // 音声入力（対応ブラウザのみ。「2分4秒」「2:04」「204」などを読み取る）
 // iPhoneのChromeなどはボタンがあっても音声認識が動かないので、Safari以外では出さない
-const IOS_OTHER=/CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent);
+const IOS_DEV=/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+// Xやインスタなどのアプリ内ブラウザも音声認識が動かない
+const IN_APP=/Twitter|Line\/|FBAN|FBAV|Instagram|TikTok|musical_ly|BytedanceWebview/i.test(navigator.userAgent)||(IOS_DEV&&!/Safari\//.test(navigator.userAgent));
+const IOS_OTHER=/CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent)||IN_APP;
 const STANDALONE=navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
 const SR=(IOS_OTHER||STANDALONE)?null:(window.SpeechRecognition||window.webkitSpeechRecognition||null); let rec=null;
 const kan=s=>s.replace(/[０-９]/g,d=>String.fromCharCode(d.charCodeAt(0)-65248)).replace(/[一二三四五六七八九十]+/g,k=>{const n={一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9};let v=0,t=0;for(const ch of k){if(ch==="十"){v+=(t||1)*10;t=0}else t=n[ch]}return String(v+t)});
@@ -862,7 +865,7 @@ function parseSpoken(raw){const s=kan(raw).replace(/\s/g,"");let m;
 // 🎤は1回押すとON（問題が変わっても聞き続ける）、もう1回押すとOFF。ONの間はBGMを止める
 // ・言い終わりを待たず、途中の聞き取りで数字が確定したらすぐ答える（「秒」まで聞こえたら即、数字だけなら少し待つ）
 // ・iPhoneは黙っていると聞き取りを止めるので自動で聞き直す。すぐ止まるのが続いたらOFFにする（ON/OFFの繰り返し防止）
-let micOn=false, micWait=null, bgmHeld=false, micQuick=0, micT0=0, micRe=null, micUsed=-1;
+let micOn=false, micWait=null, bgmHeld=false, micQuick=0, micT0=0, micRe=null, micUsed=-1, micEverHeard=false;
 const SR_IDLE="🎤 声で答える";
 function sess(t){try{if(navigator.audioSession&&navigator.audioSession.type!==t)navigator.audioSession.type=t}catch(e){}}
 function micLabel(t){const b=$("#micBtn");if(!b)return;b.classList.toggle("on",micOn);b.textContent=t||(micOn?"🎤 ON（押すとOFF）":SR_IDLE)}
@@ -883,10 +886,10 @@ function micInterim(alts,idx){const g=tgame;if(!g||!micOn)return;micQuick=0;if(g
   micWait=setTimeout(()=>{if(micOn&&tgame===g&&!g.done)micAnswer(hit.v,idx)},600)}
 function startRec(){if(!micOn||rec||document.hidden||!tgame)return;
   try{const r0=new SR();rec=r0;r0.lang="ja-JP";r0.continuous=true;r0.interimResults=true;r0.maxAlternatives=5;
-    r0.onresult=e=>{if(rec!==r0)return;const idx=e.results.length-1;if(idx<=micUsed)return;const res=e.results[idx],alts=[...res].map(a=>a.transcript);if(res.isFinal)micFinal(alts,idx);else micInterim(alts,idx)};
-    r0.onerror=e=>{if(rec!==r0)return;if(e.error==="not-allowed"||e.error==="service-not-allowed")stopMic("🎤 マイクが使えません")};
+    r0.onresult=e=>{if(rec!==r0)return;micEverHeard=true;const idx=e.results.length-1;if(idx<=micUsed)return;const res=e.results[idx],alts=[...res].map(a=>a.transcript);if(res.isFinal)micFinal(alts,idx);else micInterim(alts,idx)};
+    r0.onerror=e=>{if(rec!==r0)return;if(e.error==="not-allowed")stopMic("🎤 マイクが許可されていません");else if(e.error==="service-not-allowed")stopMic(IOS_DEV?"🎤 使えません（Safariで開いてください）":"🎤 使えません（Chromeで開いてください）")};
     r0.onend=()=>{if(rec!==r0)return;rec=null;if(!micOn)return;
-      if(performance.now()-micT0<1500){if(++micQuick>=4){stopMic("🎤 止まりました（押して再開）");return}}else micQuick=0;
+      if(performance.now()-micT0<1500){if(++micQuick>=4){stopMic(micEverHeard?"🎤 止まりました（押して再開）":(IOS_DEV?"🎤 使えません（Safariで開いてください）":"🎤 使えません（Chromeで開いてください）"));return}}else micQuick=0;
       micAgain(micQuick?600:150)};
     micUsed=-1;micT0=performance.now();r0.start();micLabel()}catch(e){stopMic("🎤 使えません")}}
 document.addEventListener("visibilitychange",()=>{if(!micOn)return;if(document.hidden)endRec();else micAgain(300)});
