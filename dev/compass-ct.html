@@ -784,6 +784,8 @@ function tAsk(){const g=tgame,q=g.qs[g.i],c=q.card;g.input="";g.done=false;g.t0=
     <div class="ask"><div class="askb">${SR&&!IN_CLAUDE?`<button type="button" class="mic" id="micBtn">🎤 声</button>`:""}<button type="button" id="tSkip" class="skip">スキップ ▶</button></div><div class="readout empty" id="ro">${g.kind==="end"?"00<span>秒</span>":"0:00"}</div></div>
     <div class="pad" id="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button type="button" data-d="${d}">${d}</button>`).join("")}<button type="button" class="del" data-k="del" aria-label="1文字消す">⌫</button><button type="button" data-d="0">0</button><button type="button" class="go" data-k="go">決定</button></div>`;
   $("#pad").onclick=e=>{const b=e.target.closest("button");if(!b||g.done)return;if(b.dataset.d!=null){if(g.input.length<(g.kind==="end"?2:3))g.input=(g.input+b.dataset.d).replace(/^0+(?=\d)/,"");tRO()}else if(b.dataset.k==="del"){g.input=g.input.slice(0,-1);tRO()}else tSubmit()};
+  for(let k=1;k<=6;k++){const n=g.qs[g.i+k];if(n&&IMG[n.card.name]&&!PRE[n.card.name]){const im=new Image();im.decoding="async";im.src=IMG[n.card.name];PRE[n.card.name]=im}}
+  const art=view.querySelector(".card .art");if(art&&!art.complete)art.addEventListener("load",()=>{if(tgame===g&&g.qs[g.i]===q&&!g.input&&!g.done)g.t0=performance.now()},{once:true});
   $("#tSkip").onclick=()=>{stopMic();tNext()};
   const mb=$("#micBtn");if(mb)mb.onclick=()=>micToggle();
   stopTimer();timerId=setInterval(()=>{const el=$("#clock");if(el)el.textContent=fmt(performance.now()-g.t0)},50)}
