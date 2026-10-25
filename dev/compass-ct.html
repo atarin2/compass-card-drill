@@ -483,7 +483,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["🎤は1回押すとON、もう1回押すとOFF（問題が変わっても聞き続け、ONの間はBGMを止める）","別のアプリに切り替えたときにBGMが流れ続ける問題を修正","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChromeやホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["🎤は1回押すとON、もう1回押すとOFF（問題が変わっても聞き続け、ONの間はBGMと効果音を止める）","別のアプリに切り替えたときにBGMが流れ続ける問題を修正","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChromeやホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -625,14 +625,14 @@ function home(){
 const SND={ctx:null,bgmGain:null,timer:null,step:0,next:0,
   ensure(){try{try{if(!(typeof micOn!=="undefined"&&micOn)&&navigator.audioSession&&navigator.audioSession.type!=="playback")navigator.audioSession.type="playback"}catch(e){}
     if(!this.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;this.ctx=new A()}
-    if(this.ctx.state!=="running")this.ctx.resume().catch(()=>{})}catch(e){return null}return this.ctx},
+    if(this.ctx.state!=="running"&&!(typeof micOn!=="undefined"&&micOn))this.ctx.resume().catch(()=>{})}catch(e){return null}return this.ctx},
   unlocked(){return this.ctx&&this.ctx.state==="running"},
   tone(f,t,d,type,v,dest){const c=this.ctx,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);
     g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
     o.connect(g).connect(dest||c.destination);o.start(t);o.stop(t+d+0.02)},
-  ok(){if(!settings.se||settings.mute||!this.ensure())return;const t=this.ctx.currentTime;this.tone(1318.5,t,0.12,"sine",0.5,this.seOut());this.tone(1760,t+0.09,0.45,"sine",0.5,this.seOut());this.tone(3520,t+0.09,0.25,"sine",0.08,this.seOut())},
-  ng(){if(!settings.se||settings.mute||!this.ensure())return;const t=this.ctx.currentTime;this.tone(150,t,0.2,"square",0.33,this.seOut());this.tone(150,t+0.24,0.32,"square",0.33,this.seOut());this.tone(143,t+0.24,0.32,"sawtooth",0.14,this.seOut())},
-  tap(){if(!settings.se||settings.mute||!this.ensure())return;this.tone(880,this.ctx.currentTime,0.06,"triangle",0.2,this.seOut())},
+  ok(){if(!settings.se||settings.mute||(typeof micOn!=="undefined"&&micOn)||!this.ensure())return;const t=this.ctx.currentTime;this.tone(1318.5,t,0.12,"sine",0.5,this.seOut());this.tone(1760,t+0.09,0.45,"sine",0.5,this.seOut());this.tone(3520,t+0.09,0.25,"sine",0.08,this.seOut())},
+  ng(){if(!settings.se||settings.mute||(typeof micOn!=="undefined"&&micOn)||!this.ensure())return;const t=this.ctx.currentTime;this.tone(150,t,0.2,"square",0.33,this.seOut());this.tone(150,t+0.24,0.32,"square",0.33,this.seOut());this.tone(143,t+0.24,0.32,"sawtooth",0.14,this.seOut())},
+  tap(){if(!settings.se||settings.mute||(typeof micOn!=="undefined"&&micOn)||!this.ensure())return;this.tone(880,this.ctx.currentTime,0.06,"triangle",0.2,this.seOut())},
   // Am - F - C - G の4小節ループ（8分音符）
   song:{bass:[45,45,41,41,48,48,43,43],arp:[[57,60,64,69],[53,57,60,65],[48,52,55,60],[55,59,62,67]],bpm:112},
   seGain:null,
@@ -793,7 +793,7 @@ function tAsk(){const g=tgame,q=g.qs[g.i],c=q.card;g.input="";g.done=false;g.t0=
   for(let k=1;k<=6;k++){const n=g.qs[g.i+k];if(n&&IMG[n.card.name]&&!PRE[n.card.name]){const im=new Image();im.decoding="async";im.src=IMG[n.card.name];PRE[n.card.name]=im}}
   const art=view.querySelector(".card .art");if(art&&!art.complete)art.addEventListener("load",()=>{if(tgame===g&&g.qs[g.i]===q&&!g.input&&!g.done)g.t0=performance.now()},{once:true});
   $("#tSkip").onclick=()=>tNext();
-  const mb=$("#micBtn");if(mb){mb.onclick=()=>micToggle();micLabel()}if(micOn&&!rec)micAgain(200);
+  const mb=$("#micBtn");if(mb){mb.onclick=()=>micToggle();micLabel()}if(micOn&&!rec&&!micRe)micAgain(200);
   stopTimer();timerId=setInterval(()=>{const el=$("#clock");if(el)el.textContent=fmt(performance.now()-g.t0)},50)}
 const inSec=s=>{const v=s.padStart(3,"0");return +v.slice(0,-2)*60+ +v.slice(-2)};
 function tRO(){const ro=$("#ro"),v=tgame.input.padStart(3,"0");ro.className="readout"+(tgame.input?"":" empty");if(secOnly()){ro.innerHTML=(tgame.input||"00")+"<span>秒</span>";return}ro.textContent=`${+v.slice(0,-2)}:${v.slice(-2)}`}
@@ -846,7 +846,7 @@ function parseSpoken(raw){const s=kan(raw).replace(/\s/g,"");let m;
 // 🎤は1回押すとON（問題が変わっても聞き続ける）、もう1回押すとOFF。ONの間はBGMを止める
 // ・言い終わりを待たず、途中の聞き取りで数字が確定したらすぐ答える（「秒」まで聞こえたら即、数字だけなら少し待つ）
 // ・iPhoneは黙っていると聞き取りを止めるので自動で聞き直す。すぐ止まるのが続いたらOFFにする（ON/OFFの繰り返し防止）
-let micOn=false, micWait=null, bgmHeld=false, micQuick=0, micT0=0, micRe=null;
+let micOn=false, micWait=null, bgmHeld=false, micQuick=0, micT0=0, micRe=null, micUsed=-1;
 const SR_IDLE="🎤 声で答える";
 function sess(t){try{if(navigator.audioSession&&navigator.audioSession.type!==t)navigator.audioSession.type=t}catch(e){}}
 function micLabel(t){const b=$("#micBtn");if(!b)return;b.classList.toggle("on",micOn);b.textContent=t||(micOn?"🎤 ON（押すとOFF）":SR_IDLE)}
@@ -854,27 +854,27 @@ function holdBgm(){if(SND.ownPlaying&&SND.media){const g=SND.mediaGain,c=SND.ctx
 function releaseBgm(){if(!bgmHeld)return;bgmHeld=false;if(!(SND.ownPlaying&&SND.media)||settings.mute||document.hidden)return;const g=SND.mediaGain,c=SND.ctx;SND.media.play().catch(()=>{});
   if(g&&c){g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(0.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(SND.bv()*0.9,c.currentTime+0.8)}}
 function endRec(){clearTimeout(micWait);const r0=rec;rec=null;try{r0&&r0.abort()}catch(e){}}
-function stopMic(msg){micOn=false;clearTimeout(micRe);endRec();setTimeout(()=>{if(!micOn)sess("playback")},200);releaseBgm();micLabel(msg)}
-function micAgain(ms){clearTimeout(micRe);micRe=setTimeout(startRec,ms)}
+function stopMic(msg){micOn=false;clearTimeout(micRe);endRec();setTimeout(()=>{if(micOn)return;sess("playback");try{SND.ctx&&!document.hidden&&SND.ctx.resume()}catch(e){}},200);setTimeout(releaseBgm,300);micLabel(msg)}
+function micAgain(ms){clearTimeout(micRe);micRe=setTimeout(()=>{micRe=null;startRec()},ms)}
 function micCmd(alts){const g=tgame;if(!g)return false;
-  if(alts.some(a=>/次|つぎ|ネクスト|スキップ/.test(a))&&(g.done||alts.some(a=>/スキップ/.test(a)))){endRec();tNext();micAgain(300);return true}return false}
+  if(alts.some(a=>/次|つぎ|ネクスト|スキップ/.test(a))&&(g.done||alts.some(a=>/スキップ/.test(a)))){clearTimeout(micWait);tNext();return true}return false}
 function micValue(alts){for(const a of alts){const v=parseSpoken(a);if(v!=null)return{v,a}}return null}
-function micAnswer(v){endRec();tSubmit(v);micAgain(500)}
-function micFinal(alts){const g=tgame;if(!g||!micOn)return;micQuick=0;if(micCmd(alts))return;if(g.done)return;
-  const hit=micValue(alts);if(!hit){micLabel("🎤 ？（"+(alts[0]||"").slice(0,6)+"）");setTimeout(()=>{if(micOn)micLabel()},1500);return}micAnswer(hit.v)}
-function micInterim(alts){const g=tgame;if(!g||!micOn)return;micQuick=0;if(g.done){micCmd(alts);return}const hit=micValue(alts);clearTimeout(micWait);if(!hit)return;
-  if(/秒/.test(hit.a)){micAnswer(hit.v);return}
-  micWait=setTimeout(()=>{if(micOn&&tgame===g&&!g.done)micAnswer(hit.v)},600)}
+function micAnswer(v,idx){clearTimeout(micWait);micUsed=idx;tSubmit(v)}
+function micFinal(alts,idx){const g=tgame;if(!g||!micOn)return;micQuick=0;if(micCmd(alts)){micUsed=idx;return}if(g.done)return;
+  const hit=micValue(alts);if(!hit){micLabel("🎤 ？（"+(alts[0]||"").slice(0,6)+"）");setTimeout(()=>{if(micOn)micLabel()},1500);return}micAnswer(hit.v,idx)}
+function micInterim(alts,idx){const g=tgame;if(!g||!micOn)return;micQuick=0;if(g.done){if(micCmd(alts))micUsed=idx;return}const hit=micValue(alts);clearTimeout(micWait);if(!hit)return;
+  if(/秒/.test(hit.a)){micAnswer(hit.v,idx);return}
+  micWait=setTimeout(()=>{if(micOn&&tgame===g&&!g.done)micAnswer(hit.v,idx)},600)}
 function startRec(){if(!micOn||rec||document.hidden||!tgame)return;
   try{const r0=new SR();rec=r0;r0.lang="ja-JP";r0.continuous=true;r0.interimResults=true;r0.maxAlternatives=5;
-    r0.onresult=e=>{if(rec!==r0)return;const res=e.results[e.results.length-1],alts=[...res].map(a=>a.transcript);if(res.isFinal)micFinal(alts);else micInterim(alts)};
+    r0.onresult=e=>{if(rec!==r0)return;const idx=e.results.length-1;if(idx<=micUsed)return;const res=e.results[idx],alts=[...res].map(a=>a.transcript);if(res.isFinal)micFinal(alts,idx);else micInterim(alts,idx)};
     r0.onerror=e=>{if(rec!==r0)return;if(e.error==="not-allowed"||e.error==="service-not-allowed")stopMic("🎤 マイクが使えません")};
     r0.onend=()=>{if(rec!==r0)return;rec=null;if(!micOn)return;
       if(performance.now()-micT0<1500){if(++micQuick>=4){stopMic("🎤 止まりました（押して再開）");return}}else micQuick=0;
       micAgain(micQuick?600:150)};
-    micT0=performance.now();r0.start();micLabel()}catch(e){stopMic("🎤 使えません")}}
+    micUsed=-1;micT0=performance.now();r0.start();micLabel()}catch(e){stopMic("🎤 使えません")}}
 document.addEventListener("visibilitychange",()=>{if(!micOn)return;if(document.hidden)endRec();else micAgain(300)});
-function micToggle(){if(micOn){stopMic();return}if(!tgame)return;micOn=true;micQuick=0;holdBgm();sess("auto");startRec()}
+function micToggle(){if(micOn){stopMic();return}if(!tgame)return;micOn=true;micQuick=0;holdBgm();try{SND.ctx&&SND.ctx.suspend()}catch(e){}sess("auto");startRec()}
 function save(){store.set("settings",settings)}
 function getMiss(){const m=store.get("miss",{});let ch=false;const o={};
   for(const k in m){if(/^\d+$/.test(k)){ch=true;const c=CARDS[+k];if(c&&c.use>0&&m[k]>0)o[c.name]=m[k]}else o[k]=m[k]}
