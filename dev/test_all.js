@@ -60,6 +60,8 @@ for(const [btn,name] of [['#repBtn','報告練習'],['#grdBtn','ガード']]){
   await p.click('#navBtn');}
 ok('ガード問題はガードだけ',await p.evaluate(()=>guardCards().every(c=>c.type==='防'&&durOf(c)>0)));
 ok('音声の読み取り',await p.evaluate(()=>parseSpoken('2分4秒')===124&&parseSpoken('2:04')===124&&parseSpoken('204')===124&&parseSpoken('1分半')===90&&parseSpoken('45秒')===45));
+// 応援コードのお願い（1回目は出さない・2回目に出る・閉じたら出ない）
+ok('応援のお願いのルール',await p.evaluate(()=>{localStorage.removeItem('cdrill:cheer');const a=cheerCard()==='';const b2=cheerCard()!=='';cheerSet({last:Date.now()});const c=cheerCard()==='';cheerSet({last:0,done:true});const d=cheerCard()==='';localStorage.removeItem('cdrill:cheer');return a&&b2&&c&&d}));
 // カード一覧
 await p.click('#navBtn');await p.waitForTimeout(200);
 ok('カード一覧',(await p.$$('.row')).length>50);
