@@ -170,6 +170,7 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .upd .ul{color:var(--accent);font-weight:700;font-size:12px}.upd .ul::after{content:" ▼"}.upd[open] .ul::after{content:" ▲"}
 .newupd{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;text-align:left;padding:11px 14px;border-radius:12px;border:2px solid var(--water);background:color-mix(in srgb,var(--water) 10%,var(--surface));font-size:14px;font-weight:700}.newupd .go{color:var(--water);font-size:13px}
 .nb{display:inline-block;font-family:var(--f-num);font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 6px;border-radius:6px;background:var(--water);color:#fff;vertical-align:1px}
+.upd .udl{max-height:min(46vh,360px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-right:4px;margin-top:6px;border-bottom:1px solid var(--line)}
 .upd .ud{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
 .nxrow{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}.nxrow.one{grid-template-columns:1fr}
 .fdone{display:flex;flex-direction:column;gap:12px;text-align:center}
@@ -604,7 +605,7 @@ function home(){
         <p class="env-claude">このページはclaude.ai上で公開しているため、ページの配信についてはclaude.ai（Anthropic）のプライバシーポリシーも適用されます。</p><p class="env-web">このページはGitHub Pagesで公開しているため、ページの配信についてはGitHubのプライバシーポリシーも適用されます。</p></div></details>
     </section>
     <details class="upd" id="updBox"><summary><b>最終更新：${UPDATES[0][0]}${updNew()?' <span class="nb">NEW</span>':""}</b><span class="ul">更新履歴を見る</span></summary>
-      ${UPDATES.map(([d,items])=>`<div class="ud"><b>${d}</b><ul>${items.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</details>
+      <div class="udl">${UPDATES.map(([d,items])=>`<div class="ud"><b>${d}</b><ul>${items.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</div></details>
     <p class="note">CTはメダル補正なしの値です。<br>
     データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）、使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
   $("#cheer").onclick=async e=>{const b=e.currentTarget,sm=b.querySelector("small");let ok=false;
