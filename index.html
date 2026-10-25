@@ -170,6 +170,13 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .upd .ul{color:var(--accent);font-weight:700;font-size:12px}.upd .ul::after{content:" ▼"}.upd[open] .ul::after{content:" ▲"}
 .newupd{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;text-align:left;padding:11px 14px;border-radius:12px;border:2px solid var(--water);background:color-mix(in srgb,var(--water) 10%,var(--surface));font-size:14px;font-weight:700}.newupd .go{color:var(--water);font-size:13px}
 .nb{display:inline-block;font-family:var(--f-num);font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 6px;border-radius:6px;background:var(--water);color:#fff;vertical-align:1px}
+.cheerm{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:color-mix(in srgb,#000 55%,transparent);animation:cin .25s ease .5s both}
+@keyframes cin{from{opacity:0}to{opacity:1}}
+.cheerc{width:min(100%,380px);display:flex;flex-direction:column;gap:14px;padding:20px 18px;border-radius:18px;border:2px solid var(--accent);background:var(--surface);text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.cheerc .ct{display:flex;flex-direction:column;gap:6px;font-size:16px;line-height:1.5}.cheerc .ct i{font-style:normal;display:inline-block}.cheerc .ct b i{display:block}.cheerc .cpath{font-size:12px!important}.cheerc .ct span{font-size:12.5px;color:var(--muted)}.cheerc .thx{padding:18px 0}
+.cheerc .code.big{align-self:stretch;font-size:24px;padding:12px 16px;background:var(--accent);color:var(--accent-ink);border:0;box-shadow:0 4px 0 color-mix(in srgb,var(--accent) 60%,#000)}.cheerc .code.big small{color:inherit;opacity:.85;font-size:12px}
+.cheerc .cb{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cheerc .cb .sub{padding:9px;font-size:13px;color:var(--muted)}
+.cnote{margin:2px 0 0;font-size:11.5px}
 .upd .udl{max-height:min(46vh,360px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-right:4px;margin-top:6px;border-bottom:1px solid var(--line)}
 .upd .ud{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
 .nxrow{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}.nxrow.one{grid-template-columns:1fr}
@@ -500,7 +507,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["🎤は1回押すとON、もう1回押すとOFF（問題が変わっても聞き続け、ONの間はBGMと効果音を止める）","別のアプリに切り替えたときにBGMが流れ続ける問題を修正","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChrome・Xなどのアプリ内ブラウザ・ホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["結果画面に、ときどき応援コードのご案内を表示","🎤は1回押すとON、もう1回押すとOFF（問題が変わっても聞き続け、ONの間はBGMと効果音を止める）","別のアプリに切り替えたときにBGMが流れ続ける問題を修正","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChrome・Xなどのアプリ内ブラウザ・ホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -587,6 +594,7 @@ function home(){
       <div class="arow"><span class="al">X</span><a href="https://x.com/atr_d4c" target="_blank" rel="noopener" data-ev="click-x" data-evt="Xのリンク">@atr_d4c</a></div>
       <div class="arow"><span class="al">YouTube</span><a href="https://www.youtube.com/channel/UCbL3TFYjH_2jdBgsVaeWVDg" target="_blank" rel="noopener" data-ev="click-youtube" data-evt="YouTubeのリンク">あたりん</a></div>
       <div class="arow"><span class="al">応援コード</span><button type="button" class="code" id="cheer">C-orYP <small>タップでコピー</small></button></div>
+      <p class="note cnote">応援してもらえると、更新を続けるモチベーションになります🙏<br>（#コンパスのホーム → コミュニティ → プレイヤー応援）</p>
     </section>
     <section class="legal">
       <details><summary>お問い合わせ</summary><div class="lg">
@@ -607,10 +615,8 @@ function home(){
     <details class="upd" id="updBox"><summary><b>最終更新：${UPDATES[0][0]}${updNew()?' <span class="nb">NEW</span>':""}</b><span class="ul">更新履歴を見る</span></summary>
       <div class="udl">${UPDATES.map(([d,items])=>`<div class="ud"><b>${d}</b><ul>${items.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</div></details>
     <p class="note">CTはメダル補正なしの値です。<br>
-    データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）、使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
-  $("#cheer").onclick=async e=>{const b=e.currentTarget,sm=b.querySelector("small");let ok=false;
-    try{await navigator.clipboard.writeText("C-orYP");ok=true}catch(err){try{const t=document.createElement("textarea");t.value="C-orYP";document.body.appendChild(t);t.select();ok=document.execCommand("copy");t.remove()}catch(e2){}}
-    sm.textContent=ok?"コピーしました！":"長押しでコピーしてください";track("copy-cheer-code","応援コードのコピー");setTimeout(()=>{sm.textContent="タップでコピー"},1800)};
+    データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）<br>使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
+  $("#cheer").onclick=e=>copyCheer(e.currentTarget,"copy-cheer-code");
   view.querySelectorAll("[data-range]").forEach(x=>x.onclick=()=>{settings.range=+x.dataset.range;save();home()});
   view.querySelectorAll("[data-hide]").forEach(x=>x.onclick=()=>{settings.hide=+x.dataset.hide;save();home()});
   view.querySelectorAll("[data-theme]").forEach(x=>{if(x.tagName==="BUTTON")x.onclick=()=>{settings.theme=x.dataset.theme;save();applyTheme();home()}});
@@ -744,7 +750,7 @@ function startFlash(onlyMada){
 function drawFlash(){
   const f=flash; if(f.i>=f.deck.length){
     const left=madaCards().length;
-    view.innerHTML=`<div class="fdone"><h2>おつかれさま</h2><p>${f.total}枚を一通り見ました。<br>「あとで」を押した回数：${f.again}回</p>
+    view.innerHTML=`<div class="fdone"><h2>おつかれさま</h2><p>${f.total}枚を一通り見ました。<br>「あとで」を押した回数：${f.again}回</p>${cheerCard()}
       <button class="primary" id="fAgain" type="button">もう一度</button>
       <button class="sub" id="fMada" type="button" ${left?"":"disabled"}>「あとで」のカードだけ（${left}枚）</button>
       <button class="sub" id="fHome" type="button">ホームへ</button></div>`;
@@ -842,7 +848,7 @@ function tResult(){stopTimer();stopMic();showMute(false);const g=tgame,L=g.log;
   if(!L.length){home();return}
   const ok=L.filter(x=>x.ok),pct=Math.round(ok.length/L.length*100),avg=ok.length?ok.reduce((a,x)=>a+x.ms,0)/ok.length:0,wrong=L.filter(x=>!x.ok);
   view.innerHTML=`<div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>
-    <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>
+    <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>${cheerCard()}
     ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>`<div class="row" data-el="${x.q.card.el}"><i></i><div class="n">${esc(dname(x.q.card))}<small class="bad">${mmss(x.q.at)}に使用 → 正解 ${secOnly()?x.q.ans%60+"秒":mmss(x.q.ans)}（入力 ${secOnly()?x.v+"秒":mmss(x.v)}）</small></div><div class="v">${x.q.d}<small style="font-size:11px;color:var(--muted);margin-left:2px">秒</small></div></div>`).join("")}</div>`:`<p class="note">全問正解です。</p>`}
     <button class="primary" id="tAgain" type="button">もう一度</button><button class="sub" id="back" type="button">ホームへ</button>`;
   $("#tAgain").onclick=()=>startTime(g.kind);$("#back").onclick=home}
@@ -895,6 +901,21 @@ function startRec(){if(!micOn||rec||document.hidden||!tgame)return;
     micUsed=-1;micT0=performance.now();r0.start();micLabel()}catch(e){stopMic("🎤 使えません")}}
 document.addEventListener("visibilitychange",()=>{if(!micOn)return;if(document.hidden)endRec();else micAgain(300)});
 function micToggle(){if(micOn){stopMic();return}if(!tgame)return;micOn=true;micQuick=0;holdBgm();try{SND.ctx&&SND.ctx.suspend()}catch(e){}sess("auto");startRec()}
+// ---- 応援コードのお願い（結果画面に控えめに。初回は出さず、閉じたら3日後、入力済みなら二度と出さない） ----
+const CHEER_GAP=3*24*3600*1000;
+function cheerCard(){if(IN_CLAUDE)return"";const c=store.get("cheer",{});c.n=(c.n||0)+1;store.set("cheer",c);
+  if(c.done||c.n<2||(c.last&&Date.now()-c.last<CHEER_GAP))return"";
+  return `<div class="cheerm" id="cheerM" role="dialog" aria-modal="true" aria-labelledby="cheerT"><div class="cheerc" id="cheerC"><div class="ct"><b id="cheerT"><i>🙏 応援コードで</i><i>応援してもらえると嬉しいです</i></b><span><i>更新を続ける</i><i>モチベーションになります</i></span><span class="cpath"><i>入力場所：ホーム →</i> <i>コミュニティ →</i> <i>プレイヤー応援</i></span></div>
+    <button type="button" class="code big" id="cheerCopy">C-orYP <small>タップでコピー</small></button>
+    <div class="cb"><button type="button" class="sub" id="cheerDone">入力した！</button><button type="button" class="sub" id="cheerLater">また今度</button></div></div></div>`}
+async function copyCheer(b,ev){const sm=b.querySelector("small");let ok=false;
+  try{await navigator.clipboard.writeText("C-orYP");ok=true}catch(err){try{const t=document.createElement("textarea");t.value="C-orYP";document.body.appendChild(t);t.select();ok=document.execCommand("copy");t.remove()}catch(e2){}}
+  if(sm){sm.textContent=ok?"コピーしました！":"長押しでコピーしてください";setTimeout(()=>{sm.textContent="タップでコピー"},1800)}track(ev,"応援コードのコピー")}
+const cheerSet=v=>{const c=store.get("cheer",{});Object.assign(c,v);store.set("cheer",c)};
+view.addEventListener("click",e=>{const id=e.target.closest("button")?.id;if(!id)return;
+  if(id==="cheerCopy"){cheerSet({last:Date.now()});copyCheer(e.target.closest("button"),"copy-cheer-code-result")}
+  else if(id==="cheerDone"){cheerSet({done:true});track("cheer-done","応援コード入力済み");const c=$("#cheerC");if(c)c.innerHTML=`<div class="ct thx"><b>ありがとうございます！🙏</b></div>`;setTimeout(()=>$("#cheerM")?.remove(),1400)}
+  else if(id==="cheerLater"){cheerSet({last:Date.now()});track("cheer-later","応援のお願い：また今度");$("#cheerM")?.remove()}});
 function save(){store.set("settings",settings)}
 function getMiss(){const m=store.get("miss",{});let ch=false;const o={};
   for(const k in m){if(/^\d+$/.test(k)){ch=true;const c=CARDS[+k];if(c&&c.use>0&&m[k]>0)o[c.name]=m[k]}else o[k]=m[k]}
@@ -1042,7 +1063,7 @@ function result(){
   $("#navBtn").textContent="📋 カード一覧"; $("#navBtn").onclick=list;
   view.innerHTML=`
     <div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>${game.skip?`<p class="note">スキップ ${game.skip}枚（成績・復習には入りません）</p>`:""}
-    <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>
+    <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>${cheerCard()}
     ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>rowHtml(x.card,true,x)).join("")}</div>`:`<p class="note">全問正解です。</p>`}
     ${slow.length?`<span class="label">時間がかかったカード</span><div class="rows">${slow.map(x=>rowHtml(x.card,false,null,fmt(x.ms)+"秒")).join("")}</div>`:""}
     ${wrong.length?`<button class="primary" id="retry" type="button">間違えた ${wrong.length} 枚をもう一度</button>`:""}
