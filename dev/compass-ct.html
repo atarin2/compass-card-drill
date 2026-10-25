@@ -483,7 +483,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/25",["🎤は押すたびに1回聞く形に変更（iPhoneでONとOFFを繰り返してしまう問題の対策）","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChromeやホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
+["2026/10/25",["🎤は1回押すとON、もう1回押すとOFF（問題が変わっても聞き続け、ONの間はBGMを止める）","別のアプリに切り替えたときにBGMが流れ続ける問題を修正","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChromeやホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
 ];
 const ACT_NOTE={"無":"すぐ発動","短":"少し遅い","長":"かなり遅い"};
@@ -682,7 +682,12 @@ const kick=()=>{const c=SND.ensure();if(!c)return;
   const bt=$("#bgmTest");if(bt&&(SND.ownPlaying||SND.timer))bt.textContent="一時停止";
   setTimeout(()=>{const ok=SND.unlocked()&&(!settings.bgm||settings.mute||SND.paused||SND.timer||(SND.media&&!SND.media.paused));if(ok)KEV.forEach(ev=>document.removeEventListener(ev,kick,true))},300)};
 const arm=()=>KEV.forEach(ev=>document.addEventListener(ev,kick,true));arm();
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&SND.ctx){SND.ctx.resume().catch(()=>{});if(SND.ownPlaying&&SND.media&&SND.media.paused)SND.media.play().catch(()=>{});arm()}});
+// 別のアプリに切り替えたらBGMを止め、戻ったら再開（マイクで止めている間は再開しない）
+const bgmHeldNow=()=>typeof bgmHeld!=="undefined"&&bgmHeld;
+function bgPause(){if(SND.media&&!SND.media.paused)SND.media.pause();try{SND.ctx&&SND.ctx.suspend()}catch(e){}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){bgPause();return}
+  if(SND.ctx){SND.ctx.resume().catch(()=>{});if(SND.ownPlaying&&SND.media&&SND.media.paused&&!settings.mute&&!bgmHeldNow())SND.media.play().catch(()=>{});arm()}});
+window.addEventListener("pagehide",bgPause);
 // ---- 背景でアイテムがゆっくり落ちる ----
 (()=>{const box=document.getElementById("fall"),srcs=["fx/coin.png","fx/pad.png","fx/mark.png","fx/can.png","fx/bat.png"];let n=0;
   const drop=()=>{if(!settings.fall||document.hidden||box.childElementCount>=9)return;const im=new Image(),sz=34+Math.random()*38,d=16+Math.random()*14;
@@ -788,7 +793,7 @@ function tAsk(){const g=tgame,q=g.qs[g.i],c=q.card;g.input="";g.done=false;g.t0=
   for(let k=1;k<=6;k++){const n=g.qs[g.i+k];if(n&&IMG[n.card.name]&&!PRE[n.card.name]){const im=new Image();im.decoding="async";im.src=IMG[n.card.name];PRE[n.card.name]=im}}
   const art=view.querySelector(".card .art");if(art&&!art.complete)art.addEventListener("load",()=>{if(tgame===g&&g.qs[g.i]===q&&!g.input&&!g.done)g.t0=performance.now()},{once:true});
   $("#tSkip").onclick=()=>tNext();
-  const mb=$("#micBtn");if(mb){mb.onclick=()=>micToggle();micLabel()}
+  const mb=$("#micBtn");if(mb){mb.onclick=()=>micToggle();micLabel()}if(micOn&&!rec)micAgain(200);
   stopTimer();timerId=setInterval(()=>{const el=$("#clock");if(el)el.textContent=fmt(performance.now()-g.t0)},50)}
 const inSec=s=>{const v=s.padStart(3,"0");return +v.slice(0,-2)*60+ +v.slice(-2)};
 function tRO(){const ro=$("#ro"),v=tgame.input.padStart(3,"0");ro.className="readout"+(tgame.input?"":" empty");if(secOnly()){ro.innerHTML=(tgame.input||"00")+"<span>秒</span>";return}ro.textContent=`${+v.slice(0,-2)}:${v.slice(-2)}`}
@@ -838,30 +843,38 @@ function parseSpoken(raw){const s=kan(raw).replace(/\s/g,"");let m;
   if((m=s.match(/(\d+)秒/)))return +m[1];
   if((m=s.match(/(\d{1,3})/))){const d=m[1];if(d.length===3&&+d.slice(1)<60)return inSec(d);if(+d<60)return +d}
   return null}
-// 🎤は1回押すと1回だけ聞く（iPhoneは押した瞬間にしかマイクを確実に開けないため）
-// ・聞いている間はBGMを止める（マイクとBGMが同時だとブツブツ音が出るため）
+// 🎤は1回押すとON（問題が変わっても聞き続ける）、もう1回押すとOFF。ONの間はBGMを止める
 // ・言い終わりを待たず、途中の聞き取りで数字が確定したらすぐ答える（「秒」まで聞こえたら即、数字だけなら少し待つ）
-let micOn=false, micWait=null, bgmHeld=false;
+// ・iPhoneは黙っていると聞き取りを止めるので自動で聞き直す。すぐ止まるのが続いたらOFFにする（ON/OFFの繰り返し防止）
+let micOn=false, micWait=null, bgmHeld=false, micQuick=0, micT0=0, micRe=null;
 const SR_IDLE="🎤 声で答える";
-function micLabel(t){const b=$("#micBtn");if(!b)return;b.classList.toggle("on",micOn);b.textContent=t||(micOn?"🎤 聞いています…":SR_IDLE)}
 function sess(t){try{if(navigator.audioSession&&navigator.audioSession.type!==t)navigator.audioSession.type=t}catch(e){}}
-function holdBgm(){if(SND.ownPlaying&&SND.media){const g=SND.mediaGain,c=SND.ctx;if(g&&c){g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(0.0001,c.currentTime)}if(!SND.media.paused)SND.media.pause();bgmHeld=true}}
-function releaseBgm(){if(!bgmHeld)return;setTimeout(()=>{if(micOn)return;bgmHeld=false;if(!(SND.ownPlaying&&SND.media)||settings.mute)return;const g=SND.mediaGain,c=SND.ctx;SND.media.play().catch(()=>{});if(g&&c){g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(0.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(SND.bv()*0.9,c.currentTime+0.8)}},400)}
-function stopMic(msg){micOn=false;clearTimeout(micWait);const r0=rec;rec=null;try{r0&&r0.abort()}catch(e){}setTimeout(()=>{if(!micOn)sess("playback")},200);releaseBgm();micLabel(msg)}
+function micLabel(t){const b=$("#micBtn");if(!b)return;b.classList.toggle("on",micOn);b.textContent=t||(micOn?"🎤 ON（押すとOFF）":SR_IDLE)}
+function holdBgm(){if(SND.ownPlaying&&SND.media){const g=SND.mediaGain,c=SND.ctx;if(g&&c){g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(0.0001,c.currentTime)}if(!SND.media.paused)SND.media.pause()}bgmHeld=true}
+function releaseBgm(){if(!bgmHeld)return;bgmHeld=false;if(!(SND.ownPlaying&&SND.media)||settings.mute||document.hidden)return;const g=SND.mediaGain,c=SND.ctx;SND.media.play().catch(()=>{});
+  if(g&&c){g.gain.cancelScheduledValues(c.currentTime);g.gain.setValueAtTime(0.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(SND.bv()*0.9,c.currentTime+0.8)}}
+function endRec(){clearTimeout(micWait);const r0=rec;rec=null;try{r0&&r0.abort()}catch(e){}}
+function stopMic(msg){micOn=false;clearTimeout(micRe);endRec();setTimeout(()=>{if(!micOn)sess("playback")},200);releaseBgm();micLabel(msg)}
+function micAgain(ms){clearTimeout(micRe);micRe=setTimeout(startRec,ms)}
 function micCmd(alts){const g=tgame;if(!g)return false;
-  if(alts.some(a=>/次|つぎ|ネクスト|スキップ/.test(a))&&(g.done||alts.some(a=>/スキップ/.test(a)))){stopMic();tNext();return true}return false}
+  if(alts.some(a=>/次|つぎ|ネクスト|スキップ/.test(a))&&(g.done||alts.some(a=>/スキップ/.test(a)))){endRec();tNext();micAgain(300);return true}return false}
 function micValue(alts){for(const a of alts){const v=parseSpoken(a);if(v!=null)return{v,a}}return null}
-function micFinal(alts){const g=tgame;if(!g||!micOn)return;if(micCmd(alts))return;if(g.done){stopMic();return}
-  const hit=micValue(alts);if(!hit){stopMic("🎤 もう一度（"+(alts[0]||"").slice(0,6)+"）");return}stopMic();tSubmit(hit.v)}
-function micInterim(alts){const g=tgame;if(!g||!micOn||g.done)return;const hit=micValue(alts);clearTimeout(micWait);if(!hit)return;
-  if(/秒/.test(hit.a)){stopMic();tSubmit(hit.v);return}
-  micWait=setTimeout(()=>{if(micOn&&tgame===g&&!g.done){stopMic();tSubmit(hit.v)}},600)}
-function micToggle(){if(micOn){stopMic();return}if(!tgame||tgame.done)return;
-  try{const r0=new SR();rec=r0;micOn=true;r0.lang="ja-JP";r0.continuous=false;r0.interimResults=true;r0.maxAlternatives=5;
+function micAnswer(v){endRec();tSubmit(v);micAgain(500)}
+function micFinal(alts){const g=tgame;if(!g||!micOn)return;micQuick=0;if(micCmd(alts))return;if(g.done)return;
+  const hit=micValue(alts);if(!hit){micLabel("🎤 ？（"+(alts[0]||"").slice(0,6)+"）");setTimeout(()=>{if(micOn)micLabel()},1500);return}micAnswer(hit.v)}
+function micInterim(alts){const g=tgame;if(!g||!micOn)return;micQuick=0;if(g.done){micCmd(alts);return}const hit=micValue(alts);clearTimeout(micWait);if(!hit)return;
+  if(/秒/.test(hit.a)){micAnswer(hit.v);return}
+  micWait=setTimeout(()=>{if(micOn&&tgame===g&&!g.done)micAnswer(hit.v)},600)}
+function startRec(){if(!micOn||rec||document.hidden||!tgame)return;
+  try{const r0=new SR();rec=r0;r0.lang="ja-JP";r0.continuous=true;r0.interimResults=true;r0.maxAlternatives=5;
     r0.onresult=e=>{if(rec!==r0)return;const res=e.results[e.results.length-1],alts=[...res].map(a=>a.transcript);if(res.isFinal)micFinal(alts);else micInterim(alts)};
-    r0.onerror=e=>{if(rec!==r0)return;stopMic(e.error==="not-allowed"||e.error==="service-not-allowed"?"🎤 マイクが使えません":"🎤 もう一度")};
-    r0.onend=()=>{if(rec!==r0)return;stopMic("🎤 もう一度")};
-    holdBgm();sess("auto");r0.start();micLabel()}catch(e){stopMic("🎤 使えません")}}
+    r0.onerror=e=>{if(rec!==r0)return;if(e.error==="not-allowed"||e.error==="service-not-allowed")stopMic("🎤 マイクが使えません")};
+    r0.onend=()=>{if(rec!==r0)return;rec=null;if(!micOn)return;
+      if(performance.now()-micT0<1500){if(++micQuick>=4){stopMic("🎤 止まりました（押して再開）");return}}else micQuick=0;
+      micAgain(micQuick?600:150)};
+    micT0=performance.now();r0.start();micLabel()}catch(e){stopMic("🎤 使えません")}}
+document.addEventListener("visibilitychange",()=>{if(!micOn)return;if(document.hidden)endRec();else micAgain(300)});
+function micToggle(){if(micOn){stopMic();return}if(!tgame)return;micOn=true;micQuick=0;holdBgm();sess("auto");startRec()}
 function save(){store.set("settings",settings)}
 function getMiss(){const m=store.get("miss",{});let ch=false;const o={};
   for(const k in m){if(/^\d+$/.test(k)){ch=true;const c=CARDS[+k];if(c&&c.use>0&&m[k]>0)o[c.name]=m[k]}else o[k]=m[k]}
