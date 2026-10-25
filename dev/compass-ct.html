@@ -599,7 +599,7 @@ function home(){
     <details class="upd" id="updBox"><summary><b>最終更新：${UPDATES[0][0]}${updNew()?' <span class="nb">NEW</span>':""}</b><span class="ul">更新履歴を見る</span></summary>
       <div class="udl">${UPDATES.map(([d,items])=>`<div class="ud"><b>${d}</b><ul>${items.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</div></details>
     <p class="note">CTはメダル補正なしの値です。<br>
-    データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）、使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
+    データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）<br>使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
   $("#cheer").onclick=e=>copyCheer(e.currentTarget,"copy-cheer-code");
   view.querySelectorAll("[data-range]").forEach(x=>x.onclick=()=>{settings.range=+x.dataset.range;save();home()});
   view.querySelectorAll("[data-hide]").forEach(x=>x.onclick=()=>{settings.hide=+x.dataset.hide;save();home()});
