@@ -54,7 +54,7 @@ for(const [btn,name] of [['#repBtn','報告練習'],['#grdBtn','ガード']]){
   await p.click(btn);await p.waitForTimeout(150);
   const q=await p.evaluate(()=>tgame.qs[0]);
   ok(name+'：時刻の計算',q.ans===q.at-q.d&&q.ans>=0&&q.at<=175);
-  const v=btn==='#grdBtn'?String(q.ans%60):(Math.floor(q.ans/60)+String(q.ans%60).padStart(2,'0')).replace(/^0+/,'')||'0';
+  const v=String(q.ans%60);
   for(const d of v)await p.click(`[data-d="${d}"]`);await p.click('[data-k="go"]');await p.waitForTimeout(100);
   ok(name+'：正解判定',await p.$eval('.fb',e=>e.classList.contains('ok')));
   await p.click('#navBtn');}
