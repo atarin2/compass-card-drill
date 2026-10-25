@@ -115,8 +115,8 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .mode.rep .repbtn{background:var(--wood);box-shadow:0 3px 0 color-mix(in srgb,var(--wood) 60%,#000);color:#fff}
 .mode.grd{border-color:#d08a12;background:color-mix(in srgb,#d08a12 9%,var(--surface));box-shadow:0 4px 14px color-mix(in srgb,#d08a12 22%,transparent)}.mode.grd h3{color:#d08a12}
 .mode.grd .grdbtn{background:#d08a12;box-shadow:0 3px 0 color-mix(in srgb,#d08a12 60%,#000);color:#fff}
-.tq{display:flex;flex-direction:column;gap:4px;padding:10px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:14px;line-height:1.5}
-.tq .when{font-family:var(--f-num);font-size:30px;font-weight:700;color:var(--ink)}.tq .sm{font-size:12px;color:var(--muted)}
+.tq{display:flex;flex-direction:column;gap:3px;font-size:14px;line-height:1.45;color:var(--ink)}
+.tq .when{font-family:var(--f-num);font-size:28px;font-weight:700;color:var(--ink)}.tq .sm{font-size:12px;color:var(--muted)}
 .mic{border:2px solid var(--wood);background:var(--surface);color:var(--wood);border-radius:999px;padding:8px 14px;font-size:15px;font-weight:700}.mic.on{background:var(--wood);color:#fff;animation:pulse 1s infinite}
 @keyframes pulse{50%{opacity:.6}}
 .mode.learn .learnbtn{background:var(--water);box-shadow:0 3px 0 color-mix(in srgb,var(--water) 60%,#000);color:#fff}
@@ -779,10 +779,9 @@ function tAsk(){const g=tgame,q=g.qs[g.i],c=q.card;g.input="";g.done=false;g.t0=
       <div class="meta"><span class="chip el">${({"火":"赤","水":"青","木":"緑"})[c.el]||c.el}</span><span class="chip type">${c.type}</span><span class="chip">${c.rar}</span></div>
       ${IMG[c.name]?`<img class="art" fetchpriority="high" src="${IMG[c.name]}" alt="">`:""}
       <div class="cname">${IMG[c.name]&&settings.hide?"？？？":esc(dname(c))}</div>
-      <div class="ability">${g.kind==="end"?esc(c.ab):""}</div>
+      <div class="ability tq" id="tq"><span>敵が <b class="when">${mmss(q.at)}</b> に使用</span><span class="sm">${g.kind==="up"?"次に上がるのは何分何秒？":"切れるのは何秒？（秒だけ）"}</span>${g.kind==="end"?`<span class="sm">${esc(c.ab)}</span>`:""}</div>
     </article>
-    <div class="tq" id="tq"><span>敵が <b class="when">${mmss(q.at)}</b> に使用</span><span class="sm">${g.kind==="up"?"次に上がるのは何分何秒？":"ガードが切れるのは何秒？（秒だけ答える）"}</span></div>
-    <div class="ask"><div class="askl">${SR?`<button type="button" class="mic" id="micBtn">🎤 声で答える</button>`:""}<button type="button" id="tSkip" class="skip">スキップ ▶</button></div><div class="readout empty" id="ro">${g.kind==="end"?"00<span>秒</span>":"0:00"}</div></div>
+    <div class="ask"><div class="askb">${SR&&!IN_CLAUDE?`<button type="button" class="mic" id="micBtn">🎤 声</button>`:""}<button type="button" id="tSkip" class="skip">スキップ ▶</button></div><div class="readout empty" id="ro">${g.kind==="end"?"00<span>秒</span>":"0:00"}</div></div>
     <div class="pad" id="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button type="button" data-d="${d}">${d}</button>`).join("")}<button type="button" class="del" data-k="del" aria-label="1文字消す">⌫</button><button type="button" data-d="0">0</button><button type="button" class="go" data-k="go">決定</button></div>`;
   $("#pad").onclick=e=>{const b=e.target.closest("button");if(!b||g.done)return;if(b.dataset.d!=null){if(g.input.length<(g.kind==="end"?2:3))g.input=(g.input+b.dataset.d).replace(/^0+(?=\d)/,"");tRO()}else if(b.dataset.k==="del"){g.input=g.input.slice(0,-1);tRO()}else tSubmit()};
   $("#tSkip").onclick=()=>{stopMic();tNext()};
@@ -799,7 +798,7 @@ function tSubmit(spoken){const g=tgame,q=g.qs[g.i];if(g.done)return;let v;
   $("#ro").textContent=show(v);$("#ro").className="readout";
   view.querySelector(".ask")?.remove();$("#pad")?.remove();
   const calc=`${mmss(q.at)} − ${q.d}秒${sec?"（効果時間）":"（CT）"} ＝ ${sec?`${mmss(q.ans)} → <b>${q.ans%60}秒</b>`:`<b>${mmss(q.ans)}</b>`}`;
-  $("#tq").insertAdjacentHTML("afterend",`<div class="fb ${ok?"ok":"ng shake"}"><span class="big">${ok?"○":"×"}</span><span class="ans">${ok?"":`入力 ${show(v)}<br>`}${calc}${ok?`<br>${fmt(ms)} 秒`:""}</span></div><div class="nxrow one"${ok?' style="display:none"':""}><button class="primary" id="tNext" type="button">${g.i===g.qs.length-1?"結果を見る":"次へ"}</button></div>`);
+  view.querySelector(".card").insertAdjacentHTML("afterend",`<div class="fb ${ok?"ok":"ng shake"}"><span class="big">${ok?"○":"×"}</span><span class="ans">${ok?"":`入力 ${show(v)}<br>`}${calc}${ok?`<br>${fmt(ms)} 秒`:""}</span></div><div class="nxrow one"${ok?' style="display:none"':""}><button class="primary" id="tNext" type="button">${g.i===g.qs.length-1?"結果を見る":"次へ"}</button></div>`);
   $("#tNext").onclick=tNext;if(ok)g.auto=setTimeout(()=>{if(tgame===g&&$("#tNext"))tNext()},900)}
 function tNext(){const g=tgame;clearTimeout(g.auto);if(g.i>=g.qs.length-1){tResult();return}g.i++;tAsk()}
 function tResult(){stopTimer();showMute(false);const g=tgame,L=g.log;
@@ -822,14 +821,14 @@ function parseSpoken(raw){const s=kan(raw).replace(/\s/g,"");let m;
   if((m=s.match(/(\d+)秒/)))return +m[1];
   if((m=s.match(/(\d{1,3})/))){const d=m[1];if(d.length===3&&+d.slice(1)<60)return inSec(d);if(+d<60)return +d}
   return null}
-function stopMic(){try{rec&&rec.abort()}catch(e){}rec=null;const b=$("#micBtn");if(b){b.classList.remove("on");b.textContent="🎤 声で答える"}}
+function stopMic(){try{rec&&rec.abort()}catch(e){}rec=null;const b=$("#micBtn");if(b){b.classList.remove("on");b.textContent="🎤 声"}}
 function micToggle(){if(rec){stopMic();return}const b=$("#micBtn");
   try{rec=new SR();rec.lang="ja-JP";rec.interimResults=false;rec.maxAlternatives=5;
     rec.onresult=e=>{const alts=[...e.results[0]].map(a=>a.transcript);let v=null,heard=alts[0];for(const a of alts){v=parseSpoken(a);if(v!=null){heard=a;break}}
       rec=null;if(v==null){b.classList.remove("on");b.textContent="🎤 聞き取れず（"+heard.slice(0,8)+"）";return}tSubmit(v)};
     rec.onerror=e=>{rec=null;if(b){b.classList.remove("on");b.textContent=e.error==="not-allowed"?"🎤 マイクが使えません":"🎤 もう一度"}};
     rec.onend=()=>{if(rec){rec=null;if(b&&b.classList.contains("on")){b.classList.remove("on");b.textContent="🎤 もう一度"}}};
-    rec.start();b.classList.add("on");b.textContent="🎤 聞いています…"}catch(e){rec=null;b.textContent="🎤 使えません"}}
+    rec.start();b.classList.add("on");b.textContent="🎤 聞いてます"}catch(e){rec=null;b.textContent="🎤 使えません"}}
 function save(){store.set("settings",settings)}
 function getMiss(){const m=store.get("miss",{});let ch=false;const o={};
   for(const k in m){if(/^\d+$/.test(k)){ch=true;const c=CARDS[+k];if(c&&c.use>0&&m[k]>0)o[c.name]=m[k]}else o[k]=m[k]}
