@@ -154,9 +154,12 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .upd .ul{color:var(--accent);font-weight:700;font-size:12px}.upd .ul::after{content:" ▼"}.upd[open] .ul::after{content:" ▲"}
 .newupd{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;text-align:left;padding:11px 14px;border-radius:12px;border:2px solid var(--water);background:color-mix(in srgb,var(--water) 10%,var(--surface));font-size:14px;font-weight:700}.newupd .go{color:var(--water);font-size:13px}
 .nb{display:inline-block;font-family:var(--f-num);font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 6px;border-radius:6px;background:var(--water);color:#fff;vertical-align:1px}
-.cheerc{display:grid;grid-template-columns:1fr auto;gap:8px 10px;align-items:center;padding:12px 14px;border-radius:14px;border:2px dashed var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface));text-align:left}
-.cheerc .ct{display:flex;flex-direction:column;gap:3px;font-size:13px;line-height:1.5}.cheerc .ct span{font-size:12px;color:var(--muted)}
-.cheerc .cb{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px}.cheerc .cb .sub{padding:8px;font-size:13px}
+.cheerm{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:color-mix(in srgb,#000 55%,transparent);animation:cin .25s ease .5s both}
+@keyframes cin{from{opacity:0}to{opacity:1}}
+.cheerc{width:min(100%,380px);display:flex;flex-direction:column;gap:14px;padding:20px 18px;border-radius:18px;border:2px solid var(--accent);background:var(--surface);text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.cheerc .ct{display:flex;flex-direction:column;gap:6px;font-size:16px;line-height:1.5}.cheerc .ct b{text-wrap:balance}.cheerc .ct span{font-size:12.5px;color:var(--muted)}.cheerc .thx{padding:18px 0}
+.cheerc .code.big{align-self:center;font-size:22px;padding:8px 16px}
+.cheerc .cb{display:grid;grid-template-columns:1fr;gap:8px}.cheerc .cb .primary{font-size:17px;padding:13px}.cheerc .cb .sub{padding:10px;font-size:14px}
 .cnote{margin:2px 0 0;font-size:11.5px}
 .upd .udl{max-height:min(46vh,360px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-right:4px;margin-top:6px;border-bottom:1px solid var(--line)}
 .upd .ud{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
@@ -886,17 +889,17 @@ function micToggle(){if(micOn){stopMic();return}if(!tgame)return;micOn=true;micQ
 const CHEER_GAP=3*24*3600*1000;
 function cheerCard(){if(IN_CLAUDE)return"";const c=store.get("cheer",{});c.n=(c.n||0)+1;store.set("cheer",c);
   if(c.done||c.n<2||(c.last&&Date.now()-c.last<CHEER_GAP))return"";
-  return `<div class="cheerc" id="cheerC"><div class="ct"><b>🙏 応援コードで応援してもらえると嬉しいです</b><span>更新を続けるモチベーションになります</span></div>
-    <button type="button" class="code" id="cheerCopy">C-orYP <small>タップでコピー</small></button>
-    <div class="cb"><button type="button" class="sub" id="cheerDone">入力した！</button><button type="button" class="sub" id="cheerLater">また今度</button></div></div>`}
+  return `<div class="cheerm" id="cheerM" role="dialog" aria-modal="true" aria-labelledby="cheerT"><div class="cheerc" id="cheerC"><div class="ct"><b id="cheerT">🙏 応援コードで応援してもらえると嬉しいです</b><span>更新を続けるモチベーションになります<br>（#コンパスのホーム → コミュニティ → プレイヤー応援）</span></div>
+    <button type="button" class="code big" id="cheerCopy">C-orYP <small>タップでコピー</small></button>
+    <div class="cb"><button type="button" class="primary" id="cheerDone">入力した！</button><button type="button" class="sub" id="cheerLater">また今度</button></div></div></div>`}
 async function copyCheer(b,ev){const sm=b.querySelector("small");let ok=false;
   try{await navigator.clipboard.writeText("C-orYP");ok=true}catch(err){try{const t=document.createElement("textarea");t.value="C-orYP";document.body.appendChild(t);t.select();ok=document.execCommand("copy");t.remove()}catch(e2){}}
   if(sm){sm.textContent=ok?"コピーしました！":"長押しでコピーしてください";setTimeout(()=>{sm.textContent="タップでコピー"},1800)}track(ev,"応援コードのコピー")}
 const cheerSet=v=>{const c=store.get("cheer",{});Object.assign(c,v);store.set("cheer",c)};
 view.addEventListener("click",e=>{const id=e.target.closest("button")?.id;if(!id)return;
   if(id==="cheerCopy"){cheerSet({last:Date.now()});copyCheer(e.target.closest("button"),"copy-cheer-code-result")}
-  else if(id==="cheerDone"){cheerSet({done:true});track("cheer-done","応援コード入力済み");const c=$("#cheerC");if(c)c.innerHTML=`<div class="ct"><b>ありがとうございます！🙏</b></div>`;setTimeout(()=>$("#cheerC")?.remove(),1600)}
-  else if(id==="cheerLater"){cheerSet({last:Date.now()});$("#cheerC")?.remove()}});
+  else if(id==="cheerDone"){cheerSet({done:true});track("cheer-done","応援コード入力済み");const c=$("#cheerC");if(c)c.innerHTML=`<div class="ct thx"><b>ありがとうございます！🙏</b></div>`;setTimeout(()=>$("#cheerM")?.remove(),1400)}
+  else if(id==="cheerLater"){cheerSet({last:Date.now()});track("cheer-later","応援のお願い：また今度");$("#cheerM")?.remove()}});
 function save(){store.set("settings",settings)}
 function getMiss(){const m=store.get("miss",{});let ch=false;const o={};
   for(const k in m){if(/^\d+$/.test(k)){ch=true;const c=CARDS[+k];if(c&&c.use>0&&m[k]>0)o[c.name]=m[k]}else o[k]=m[k]}
