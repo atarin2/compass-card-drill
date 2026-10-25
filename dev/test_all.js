@@ -49,6 +49,17 @@ await p.click('#fYes');await p.click('#fYes');await p.click('#fNo');await p.clic
 ok('カード名：表示・次へ・あとで・戻る',(await p.textContent('.hud')).startsWith('2 /'));
 await p.click('#navBtn');await p.click('#resumeDel');
 await p.click('[data-hero=""]').catch(async()=>{await p.click('#heroBox summary');await p.click('[data-hero=""]')});
+// 報告練習・ガードが切れる時刻
+for(const [btn,name] of [['#repBtn','報告練習'],['#grdBtn','ガード']]){
+  await p.click(btn);await p.waitForTimeout(150);
+  const q=await p.evaluate(()=>tgame.qs[0]);
+  ok(name+'：時刻の計算',q.ans===q.at-q.d&&q.ans>=0&&q.at<=175);
+  const v=(Math.floor(q.ans/60)+String(q.ans%60).padStart(2,'0')).replace(/^0+/,'')||'0';
+  for(const d of v)await p.click(`[data-d="${d}"]`);await p.click('[data-k="go"]');await p.waitForTimeout(100);
+  ok(name+'：正解判定',await p.$eval('.fb',e=>e.classList.contains('ok')));
+  await p.click('#navBtn');}
+ok('ガード問題はガードだけ',await p.evaluate(()=>guardCards().every(c=>c.type==='防'&&durOf(c)>0)));
+ok('音声の読み取り',await p.evaluate(()=>parseSpoken('2分4秒')===124&&parseSpoken('2:04')===124&&parseSpoken('204')===124&&parseSpoken('1分半')===90&&parseSpoken('45秒')===45));
 // カード一覧
 await p.click('#navBtn');await p.waitForTimeout(200);
 ok('カード一覧',(await p.$$('.row')).length>50);
