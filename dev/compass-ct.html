@@ -915,9 +915,9 @@ const live=()=>CARDS.filter(c=>!DEL.has(c.name));
 function saveExcl(){store.set("excl",[...EXCL])}
 const ATK=c=>"近遠周連".includes(c.type);
 // 状態異常（毒・スタン・サイレント・HS吸収・ランダム状態異常）のカードは、忠臣・アーチャーで採用されにくいので出題しない
-// 例外：エルリック兄弟（なみワキ）は両方に入れる。アーチャーではマキマ（ダメージが出る）と賢者の石（強いので採用されうる）も残す
+// 例外：エルリック兄弟（なみワキ）は両方に入れる。アーチャーではマキマ（ダメージが出る）・賢者の石（強いので採用されうる）・号令2枚・スタ連も残す
 const STATUS=c=>/毒|スタン|サイレント|HSゲージ|状態異常/.test(c.ab);
-const KEEP_BOTH=["【鋼の錬金術師FA】エルリック兄弟"], KEEP_ARCHER=KEEP_BOTH.concat(["【チェンソーマン】マキマ","【鋼の錬金術師FA】賢者の石"]);
+const KEEP_BOTH=["【鋼の錬金術師FA】エルリック兄弟"], KEEP_ARCHER=KEEP_BOTH.concat(["【チェンソーマン】マキマ","【鋼の錬金術師FA】賢者の石","【号令する歌姫】初音 ミク","∗絢爛ノ美∗ ボラ＆アルヒコ＆アペイロン","【Fate/strange Fake】造られし命達"]);
 const NEAR_STATUS=c=>c.type==="近"&&STATUS(c)&&!KEEP_BOTH.includes(c.name);
 const ARCHER_OUT=c=>STATUS(c)&&!KEEP_ARCHER.includes(c.name);
 const HEROES=[
