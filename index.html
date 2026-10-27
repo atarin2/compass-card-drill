@@ -173,6 +173,8 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 .nb{display:inline-block;font-family:var(--f-num);font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 6px;border-radius:6px;background:var(--water);color:#fff;vertical-align:1px}
 .share{display:block;text-align:center;text-decoration:none;padding:13px;border-radius:14px;background:#0f1419;color:#fff;font-weight:700;font-size:15px;border:1px solid #2f3336}
 :root[data-theme="dark"] .share{background:#fff;color:#0f1419}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .share{background:#fff;color:#0f1419}}
+.sharepre{white-space:pre-wrap;text-align:left;font-family:var(--f-body);font-size:12.5px;line-height:1.5;margin:0;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);max-height:30vh;overflow:auto;user-select:all;-webkit-user-select:all}
+#shareOpen{display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--muted)}
 .cheerm{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:color-mix(in srgb,#000 55%,transparent);animation:cin .25s ease .5s both}
 @keyframes cin{from{opacity:0}to{opacity:1}}
 .cheerc{width:min(100%,380px);display:flex;flex-direction:column;gap:14px;padding:20px 18px;border-radius:18px;border:2px solid var(--accent);background:var(--surface);text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)}
@@ -920,15 +922,23 @@ const rangeName=r=>r===-1?"画像あり":r===30?"上位30":r===60?"上位60":"�
 const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
 function shareBtn(text){const body=text+"\n#コンパスCTドリル";const u="https://x.com/intent/post?text="+encodeURIComponent(body+"\n")+"&url="+encodeURIComponent(SITE_URL);
   return `<a class="share" href="${u}" target="_blank" rel="noopener" data-share="${esc(body)}">𝕏 結果をポストする</a>`}
+// うまく開けない場面（Xアプリ内のブラウザなど）のために、文をコピーしてXに貼り付ける窓を出す
+function shareFallback(a,inApp){if($("#shareM"))return;const t=a.dataset.share+"\n"+SITE_URL;
+  document.body.insertAdjacentHTML("beforeend",`<div class="cheerm" id="shareM" role="dialog" aria-modal="true" style="animation-delay:0s"><div class="cheerc"><div class="ct">${inApp?`<b><i>アプリの中で開いているため</i><i>投稿画面が開かないことがあります</i></b><span><i>開かないときは、文をコピーして</i><i>Xの投稿に貼り付けてください</i></span>`:`<b><i>Xの投稿画面が開かないときは</i><i>文をコピーして貼り付けてください</i></b>`}</div>
+    <pre class="sharepre">${esc(t)}</pre><button type="button" class="primary" id="shareCopy">文をコピー</button><div class="cb"><a class="sub" id="shareOpen" href="${a.href}"${inApp?"":` target="_blank" rel="noopener"`}>Xで投稿する</a><button type="button" class="sub" id="shareClose">閉じる</button></div></div></div>`);
+  $("#shareCopy").onclick=async e=>{const b=e.currentTarget;let ok=false;try{await navigator.clipboard.writeText(t);ok=true}catch(err){try{const x=document.createElement("textarea");x.value=t;document.body.appendChild(x);x.select();ok=document.execCommand("copy");x.remove()}catch(e2){}}
+    b.textContent=ok?"コピーしました！Xに貼り付けてください":"長押しで文を選んでコピーしてください";track("share-copy","シェア文のコピー")};
+  $("#shareOpen").onclick=()=>track("share-open-link","コピーの窓からXを開く");
+  $("#shareClose").onclick=()=>$("#shareM")?.remove()}
 view.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("a.share");if(!a)return;
   track("share-x","結果をXでシェア");if(IN_CLAUDE)return;
-  // Xなどのアプリ内ブラウザでは新しいタブもアプリ呼び出しも効かないので、同じ画面でXの投稿画面へ移る
-  if(IN_APP){e.preventDefault();location.href=a.href;return}
-  if(!IS_IOS)return;
-  e.preventDefault();let left=false;const onHide=()=>{if(document.hidden)left=true};document.addEventListener("visibilitychange",onHide);
+  if(IN_APP){e.preventDefault();track("share-inapp","アプリ内ブラウザでシェア");shareFallback(a,true);return}
+  const watch=()=>{let left=false;const onHide=()=>{if(document.hidden)left=true};document.addEventListener("visibilitychange",onHide);return()=>{document.removeEventListener("visibilitychange",onHide);return left}};
+  if(!IS_IOS){const done=watch();setTimeout(()=>{if(!done()&&!document.hidden)shareFallback(a)},2500);return}
+  e.preventDefault();const done=watch();
   location.href="twitter://post?message="+encodeURIComponent(a.dataset.share+"\n"+SITE_URL);
-  // アプリが開かなかったとき：時間が経ってからの新しいタブは止められやすいので、同じ画面でXの投稿画面へ移る
-  setTimeout(()=>{document.removeEventListener("visibilitychange",onHide);if(!left&&!document.hidden)location.href=a.href},1500)});
+  // アプリが開かなかったとき：同じ画面でXの投稿画面へ。それでも画面が変わらなければコピーの窓を出す
+  setTimeout(()=>{if(done()||document.hidden)return;const d2=watch();location.href=a.href;setTimeout(()=>{if(!d2()&&!document.hidden)shareFallback(a)},1800)},1500)});
 // シェア文：結果の並び（🟩正解 🟥不正解 ⬜スキップ）と一言を付ける
 // 20問までは1問1マス（10マスごとに改行）。それより多いときは10マスで割合を表す（190問でも1行に収まる）
 function seqGrid(seq){if(!seq)return"";const m={o:"🟩",x:"🟥",s:"⬜"};if(seq.length<=20){const a=[...seq].map(c=>m[c]);return a.length>10?a.slice(0,10).join("")+"\n"+a.slice(10).join(""):a.join("")}
