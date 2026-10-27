@@ -921,7 +921,7 @@ const rangeName=r=>r===-1?"画像あり":r===30?"上位30":r===60?"上位60":"�
 // iPhoneはXアプリを直接開く（twitter://）。アプリが開かなかったらXの投稿画面をブラウザで開く。Android・PCはXの投稿画面（Androidはアプリで開く）
 const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
 function shareBtn(text){const body=text+"\n#コンパスCTドリル";const u="https://x.com/intent/post?text="+encodeURIComponent(body+"\n")+"&url="+encodeURIComponent(SITE_URL);
-  return `<a class="share" href="${u}" target="_blank" rel="noopener" data-share="${esc(body)}">𝕏 結果をポストする</a>`}
+  return `<a class="share" href="${u}"${IN_APP?"":` target="_blank" rel="noopener"`} data-share="${esc(body)}">𝕏 結果をポストする</a>`}
 // うまく開けない場面（Xアプリ内のブラウザなど）のために、文をコピーしてXに貼り付ける窓を出す
 function shareFallback(a,inApp){if($("#shareM"))return;const t=a.dataset.share+"\n"+SITE_URL;
   document.body.insertAdjacentHTML("beforeend",`<div class="cheerm" id="shareM" role="dialog" aria-modal="true" style="animation-delay:0s"><div class="cheerc"><div class="ct">${inApp?`<b><i>アプリの中で開いているため</i><i>投稿画面が開かないことがあります</i></b><span><i>開かないときは、文をコピーして</i><i>Xの投稿に貼り付けてください</i></span>`:`<b><i>Xの投稿画面が開かないときは</i><i>文をコピーして貼り付けてください</i></b>`}</div>
@@ -932,7 +932,8 @@ function shareFallback(a,inApp){if($("#shareM"))return;const t=a.dataset.share+"
   $("#shareClose").onclick=()=>$("#shareM")?.remove()}
 view.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("a.share");if(!a)return;
   track("share-x","結果をXでシェア");if(IN_CLAUDE)return;
-  if(IN_APP){e.preventDefault();track("share-inapp","アプリ内ブラウザでシェア");shareFallback(a,true);return}
+  // Xなどのアプリ内ブラウザ：普通のリンクとしてそのまま開く（指で押したリンクなら投稿画面が開ける）
+  if(IN_APP){track("share-inapp","アプリ内ブラウザでシェア");return}
   const watch=()=>{let left=false;const onHide=()=>{if(document.hidden)left=true};document.addEventListener("visibilitychange",onHide);return()=>{document.removeEventListener("visibilitychange",onHide);return left}};
   if(!IS_IOS){const done=watch();setTimeout(()=>{if(!done()&&!document.hidden)shareFallback(a)},2500);return}
   e.preventDefault();const done=watch();
