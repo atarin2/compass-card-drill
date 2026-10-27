@@ -515,7 +515,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
-["2026/10/27",["結果画面に「𝕏 結果をポストする」ボタンを追加（Xアプリがあればアプリで開きます。#コンパスCTドリル 付き）"]],
+["2026/10/27",["結果画面に「𝕏 結果をポストする」ボタンを追加（Xアプリがあればアプリで開きます。Xアプリ内で開いているときも投稿できます。#コンパスCTドリル 付き）"]],
 ["2026/10/26",["iPhoneのSafariでツールバーが出ているときや、iPhone SEなど小さい画面でも、スクロールなしで収まるように調整","桜華忠臣・アーチャーのモードから、採用されにくい状態異常カード（アペプ・大魔王・ワキンヤンなど）を除外","某＜なにがし＞のモードは、周・連の貫通カードだけに（近・遠は採用されにくいため）"]],
 ["2026/10/25",["結果画面に、ときどき応援コードのご案内を表示","🎤は1回押すとON、もう1回押すとOFF（問題が変わっても聞き続け、ONの間はBGMと効果音を止める）","別のアプリに切り替えたときにBGMが流れ続ける問題を修正","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChrome・Xなどのアプリ内ブラウザ・ホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
 ["2026/10/24",["超大型巨人襲来・アイアンメイデン ミリアのCTを20秒に修正","iPhoneで開いたときに音が鳴らないことがある問題を修正","アイコンをタイマーのデザインに変更","アクセス数の集計を開始し、プライバシーポリシーを更新","iPhoneのChromeなどで開いたときのホーム画面追加の案内を修正","公開"]]
@@ -761,7 +761,7 @@ function drawFlash(){
   const f=flash; if(f.i>=f.deck.length){
     const left=madaCards().length;
     view.innerHTML=`<div class="fdone"><h2>おつかれさま</h2><p>${f.total}枚を一通り見ました。<br>「あとで」を押した回数：${f.again}回</p>${cheerCard()}
-      ${shareBtn(`カード秒数ドリル【カード名を覚える】\n${f.total}枚を一通り見ました（覚えた ${f.known}枚）`)}
+      ${shareBtn(`🃏 カード秒数ドリル｜カード名を覚える\n${f.total}枚を一通りチェック、${f.known}枚覚えた！`)}
       <button class="primary" id="fAgain" type="button">もう一度</button>
       <button class="sub" id="fMada" type="button" ${left?"":"disabled"}>「あとで」のカードだけ（${left}枚）</button>
       <button class="sub" id="fHome" type="button">ホームへ</button></div>`;
@@ -834,7 +834,7 @@ function tRO(){const ro=$("#ro"),v=tgame.input.padStart(3,"0");ro.className="rea
 function tSubmit(spoken){const g=tgame,q=g.qs[g.i];if(g.done)return;let v;
   const sec=secOnly();
   if(spoken!=null)v=sec?spoken%60:spoken;else{if(!g.input)return;if(+g.input.slice(-2)>59)return;v=sec?+g.input:inSec(g.input)}
-  stopTimer();g.done=true;const ok=v===(sec?q.ans%60:q.ans),ms=performance.now()-g.t0;g.log.push({q,ok,ms,v});
+  stopTimer();g.done=true;const ok=v===(sec?q.ans%60:q.ans),ms=performance.now()-g.t0;g.log.push({q,ok,ms,v});g.seq=(g.seq||"")+(ok?"o":"x");
   if(ok)SND.ok();else SND.ng();
   const show=t=>sec?t+"秒":mmss(t);
   $("#ro").textContent=show(v);$("#ro").className="readout";
@@ -853,7 +853,7 @@ function tCalc(kind,q){const s=q.at%60,ans=q.ans%60,full=`<small class="calc">${
     return head+(s>=D?`${s} − ${D} ＝ <b>${ans}秒</b>`:`${s} − ${D} → 足りない${D-s}秒 → 60 − ${D-s} ＝ <b>${ans}秒</b>`)+full}
   const add=60-D,sum=s+add;
   return `${head}${s} ＋ ${add}（60−${D}） ＝ ${sum>=60?`${sum} − 60 ＝ `:""}<b>${ans}秒</b>`+full}
-function tNext(){const g=tgame;clearTimeout(g.auto);if(g.i>=g.qs.length-1){tResult();return}g.i++;tAsk()}
+function tNext(){const g=tgame;clearTimeout(g.auto);if(!g.done)g.seq=(g.seq||"")+"s";if(g.i>=g.qs.length-1){tResult();return}g.i++;tAsk()}
 function tResult(){stopTimer();stopMic();showMute(false);const g=tgame,L=g.log;
   $("#navBtn").textContent="📋 カード一覧";$("#navBtn").onclick=list;
   if(!L.length){home();return}
@@ -861,7 +861,7 @@ function tResult(){stopTimer();stopMic();showMute(false);const g=tgame,L=g.log;
   view.innerHTML=`<div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>
     <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>${cheerCard()}
     ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>`<div class="row" data-el="${x.q.card.el}"><i></i><div class="n">${esc(dname(x.q.card))}<small class="bad">${mmss(x.q.at)}に使用 → 正解 ${secOnly()?x.q.ans%60+"秒":mmss(x.q.ans)}（入力 ${secOnly()?x.v+"秒":mmss(x.v)}）</small></div><div class="v">${x.q.d}<small style="font-size:11px;color:var(--muted);margin-left:2px">秒</small></div></div>`).join("")}</div>`:`<p class="note">全問正解です。</p>`}
-    ${shareBtn(`カード秒数ドリル【${g.kind==="up"?"報告練習":"ガードが切れる時刻"}】\n${L.length}問中${ok.length}問正解（${pct}%）${ok.length?`\n正解の平均 ${fmt(avg)}秒`:""}`)}
+    ${shareBtn(shareText(g.kind==="up"?"📣 カード秒数ドリル｜報告練習":"🛡 カード秒数ドリル｜ガードが切れる時刻","",g.seq,L.length,ok.length,pct,avg))}
     <button class="primary" id="tAgain" type="button">もう一度</button><button class="sub" id="back" type="button">ホームへ</button>`;
   $("#tAgain").onclick=()=>startTime(g.kind);$("#back").onclick=home}
 // 音声入力（対応ブラウザのみ。「2分4秒」「2:04」「204」などを読み取る）
@@ -921,10 +921,20 @@ const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(nav
 function shareBtn(text){const body=text+"\n#コンパスCTドリル";const u="https://x.com/intent/post?text="+encodeURIComponent(body+"\n")+"&url="+encodeURIComponent(SITE_URL);
   return `<a class="share" href="${u}" target="_blank" rel="noopener" data-share="${esc(body)}">𝕏 結果をポストする</a>`}
 view.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("a.share");if(!a)return;
-  track("share-x","結果をXでシェア");if(!IS_IOS||IN_CLAUDE)return;
+  track("share-x","結果をXでシェア");if(IN_CLAUDE)return;
+  // Xなどのアプリ内ブラウザでは新しいタブもアプリ呼び出しも効かないので、同じ画面でXの投稿画面へ移る
+  if(IN_APP){e.preventDefault();location.href=a.href;return}
+  if(!IS_IOS)return;
   e.preventDefault();let left=false;const onHide=()=>{if(document.hidden)left=true};document.addEventListener("visibilitychange",onHide);
   location.href="twitter://post?message="+encodeURIComponent(a.dataset.share+"\n"+SITE_URL);
-  setTimeout(()=>{document.removeEventListener("visibilitychange",onHide);if(!left&&!document.hidden)window.open(a.href,"_blank","noopener")},1500)});
+  // アプリが開かなかったとき：時間が経ってからの新しいタブは止められやすいので、同じ画面でXの投稿画面へ移る
+  setTimeout(()=>{document.removeEventListener("visibilitychange",onHide);if(!left&&!document.hidden)location.href=a.href},1500)});
+// シェア文：結果の並び（🟩正解 🟥不正解 ⬜スキップ）と一言を付ける
+// 20問までは1問1マス（10マスごとに改行）。それより多いときは10マスで割合を表す（190問でも1行に収まる）
+function seqGrid(seq){if(!seq)return"";const m={o:"🟩",x:"🟥",s:"⬜"};if(seq.length<=20){const a=[...seq].map(c=>m[c]);return a.length>10?a.slice(0,10).join("")+"\n"+a.slice(10).join(""):a.join("")}
+  const n=seq.length,cnt=k=>[...seq].filter(c=>c===k).length;let o=Math.round(cnt("o")/n*10),x=Math.round(cnt("x")/n*10);if(o+x>10)x=10-o;const sk=10-o-x;return m.o.repeat(o)+m.x.repeat(x)+m.s.repeat(sk)}
+function cheerLine(pct){return pct===100?"🏆 CTマスター":pct>=80?"🥇 CT上級者":pct>=50?"🥈 CT中級者":"🥉 CT見習い"}
+function shareText(mode,cond,seq,n,okN,pct,avg){return `${mode}${cond?`（${cond}）`:""}\n${seqGrid(seq)}\n${okN}/${n}問正解${okN?`・平均${fmt(avg)}秒`:""}　${cheerLine(pct)}`}
 // ---- 応援コードのお願い（結果画面に控えめに。初回は出さず、閉じたら3日後、入力済みなら二度と出さない） ----
 const CHEER_GAP=3*24*3600*1000;
 function cheerCard(){if(IN_CLAUDE)return"";const c=store.get("cheer",{});c.n=(c.n||0)+1;store.set("cheer",c);
@@ -1043,21 +1053,21 @@ function submitCt(){
   finish();
 }
 const byName=n=>CARDS.find(c=>c.name===n);
-function saveQuiz(i){if(!game)return;store.set("resume",{k:"quiz",q:game.qs.map(c=>c.name),i,log:game.log.map(x=>({n:x.card.name,ok:x.ok,ms:x.ms,ansCt:x.ansCt,ansAct:x.ansAct,later:!!x.later})),w:!!game.isWeak,h:game.hero?game.hero.id:"",p:!!game.precise,key:game.key,skip:game.skip||0})}
+function saveQuiz(i){if(!game)return;store.set("resume",{k:"quiz",q:game.qs.map(c=>c.name),i,log:game.log.map(x=>({n:x.card.name,ok:x.ok,ms:x.ms,ansCt:x.ansCt,ansAct:x.ansAct,later:!!x.later})),w:!!game.isWeak,h:game.hero?game.hero.id:"",p:!!game.precise,key:game.key,skip:game.skip||0,seq:game.seq||""})}
 function saveFlash(){const f=flash;if(!f)return;store.set("resume",{k:"flash",q:f.deck.map(c=>c.name),i:f.i,known:f.known,again:f.again,total:f.total,mada:f.mada})}
 function resumeInfo(){const r=store.get("resume",null);if(!r||!r.q)return null;const qs=r.q.map(byName);if(qs.some(c=>!c)||r.i>=qs.length)return null;return Object.assign({},r,{qs})}
 function resume(){const r=resumeInfo();if(!r){home();return}SND.startBgm();showMute(true);
   if(r.k==="flash"){flash={hist:[],deck:r.qs,i:r.i,known:r.known,again:r.again,total:r.total,open:false,edit:false,mada:r.mada};$("#navBtn").textContent="やめる";$("#navBtn").onclick=home;drawFlash();return}
   const hero=HEROES.find(h=>h.id===r.h)||null;
-  game={qs:r.qs,i:r.i,log:r.log.map(x=>Object.assign({},x,{card:byName(x.n)})).filter(x=>x.card),isWeak:r.w,hero,precise:!!(hero&&r.p),key:r.key,skip:r.skip||0};
+  game={qs:r.qs,i:r.i,log:r.log.map(x=>Object.assign({},x,{card:byName(x.n)})).filter(x=>x.card),isWeak:r.w,hero,precise:!!(hero&&r.p),key:r.key,skip:r.skip||0,seq:r.seq||""};
   $("#navBtn").textContent="やめる";$("#navBtn").onclick=home;ask()}
-function skip(){stopTimer();game.skip=(game.skip||0)+1;if(game.i>=game.qs.length-1){result();return}game.i++;ask()}
+function skip(){stopTimer();game.skip=(game.skip||0)+1;game.seq=(game.seq||"")+"s";if(game.i>=game.qs.length-1){result();return}game.i++;ask()}
 function submitAct(a){game.cur.ansAct=a;if(a!==game.cur.card.act)game.cur.ok=false;finish()}
 
 function finish(){
   stopTimer();
   const c=game.cur.card; game.cur.ms=performance.now()-game.t0;
-  game.log.push(game.cur);
+  game.log.push(game.cur);game.seq=(game.seq||"")+(game.cur.ok?"o":"x");
   const miss=getMiss();
   if(game.cur.ok){if(miss[c.name])miss[c.name]=Math.max(0,miss[c.name]-1)}else miss[c.name]=(miss[c.name]||0)+1;
   if(game.cur.later)miss[c.name]=Math.max(1,miss[c.name]||0);
@@ -1097,7 +1107,7 @@ function result(){
     ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>rowHtml(x.card,true,x)).join("")}</div>`:`<p class="note">全問正解です。</p>`}
     ${slow.length?`<span class="label">時間がかかったカード</span><div class="rows">${slow.map(x=>rowHtml(x.card,false,null,fmt(x.ms)+"秒")).join("")}</div>`:""}
     ${wrong.length?`<button class="primary" id="retry" type="button">間違えた ${wrong.length} 枚をもう一度</button>`:""}
-    ${shareBtn(`カード秒数ドリル【秒数クイズ${game.hero?"・"+game.hero.name+"短縮"+(game.precise?"（小数）":""):""}・${game.isWeak?"復習":rangeName(settings.range)}】\n${L.length}問中${ok.length}問正解（${pct}%）${ok.length?`\n正解の平均 ${fmt(avg)}秒`:""}${game.skip?`\nスキップ ${game.skip}枚`:""}`)}
+    ${shareBtn(shareText("⏱ カード秒数ドリル",[game.hero?game.hero.name+"短縮"+(game.precise?"・小数":""):"",game.isWeak?"復習":rangeName(settings.range)].filter(Boolean).join("・"),game.seq,L.length,ok.length,pct,avg))}
     <button class="sub" id="again" type="button">同じ設定でもう一度</button>
     <button class="sub" id="back" type="button">ホームへ</button>`;
   if(wrong.length)$("#retry").onclick=()=>start(wrong.map(x=>x.card),true);
