@@ -863,7 +863,7 @@ function tResult(){stopTimer();stopMic();showMute(false);const g=tgame,L=g.log;
   view.innerHTML=`<div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>
     <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>${cheerCard()}
     ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>`<div class="row" data-el="${x.q.card.el}"><i></i><div class="n">${esc(dname(x.q.card))}<small class="bad">${mmss(x.q.at)}に使用 → 正解 ${secOnly()?x.q.ans%60+"秒":mmss(x.q.ans)}（入力 ${secOnly()?x.v+"秒":mmss(x.v)}）</small></div><div class="v">${x.q.d}<small style="font-size:11px;color:var(--muted);margin-left:2px">秒</small></div></div>`).join("")}</div>`:`<p class="note">全問正解です。</p>`}
-    ${shareBtn(shareText(g.kind==="up"?"📣 カード秒数ドリル｜報告練習":"🛡 カード秒数ドリル｜ガードが切れる時刻","",g.seq,L.length,ok.length,pct,avg))}
+    ${shareBtn(shareText(g.kind==="up"?"📣 カード秒数ドリル｜報告練習":"🛡 カード秒数ドリル｜ガードが切れる時刻","",g.seq,L.length,ok.length,pct,avg,true))}
     <button class="primary" id="tAgain" type="button">もう一度</button><button class="sub" id="back" type="button">ホームへ</button>`;
   $("#tAgain").onclick=()=>startTime(g.kind);$("#back").onclick=home}
 // 音声入力（対応ブラウザのみ。「2分4秒」「2:04」「204」などを読み取る）
@@ -934,18 +934,22 @@ view.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("a.
   track("share-x","結果をXでシェア");if(IN_CLAUDE)return;
   // Xなどのアプリ内ブラウザ：普通のリンクとしてそのまま開く（指で押したリンクなら投稿画面が開ける）
   if(IN_APP){track("share-inapp","アプリ内ブラウザでシェア");return}
-  const watch=()=>{let left=false;const onHide=()=>{if(document.hidden)left=true};document.addEventListener("visibilitychange",onHide);return()=>{document.removeEventListener("visibilitychange",onHide);return left}};
+  // アプリに切り替わった・確認が出た（画面が隠れた／フォーカスが外れた）ら「開けた」とみなす
+  const watch=()=>{let left=false;const onHide=()=>{if(document.hidden)left=true};const onBlur=()=>{left=true};document.addEventListener("visibilitychange",onHide);window.addEventListener("blur",onBlur);window.addEventListener("pagehide",onBlur);return()=>{document.removeEventListener("visibilitychange",onHide);window.removeEventListener("blur",onBlur);window.removeEventListener("pagehide",onBlur);return left}};
   if(!IS_IOS){const done=watch();setTimeout(()=>{if(!done()&&!document.hidden)shareFallback(a)},2500);return}
   e.preventDefault();const done=watch();
   location.href="twitter://post?message="+encodeURIComponent(a.dataset.share+"\n"+SITE_URL);
-  // アプリが開かなかったとき：同じ画面でXの投稿画面へ。それでも画面が変わらなければコピーの窓を出す
-  setTimeout(()=>{if(done()||document.hidden)return;const d2=watch();location.href=a.href;setTimeout(()=>{if(!d2()&&!document.hidden)shareFallback(a)},1800)},1500)});
-// シェア文：結果の並び（🟩正解 🟥不正解 ⬜スキップ）と一言を付ける
-// 20問までは1問1マス（10マスごとに改行）。それより多いときは10マスで割合を表す（190問でも1行に収まる）
-function seqGrid(seq){if(!seq)return"";const m={o:"🟩",x:"🟥",s:"⬜"};if(seq.length<=20){const a=[...seq].map(c=>m[c]);return a.length>10?a.slice(0,10).join("")+"\n"+a.slice(10).join(""):a.join("")}
-  const n=seq.length,cnt=k=>[...seq].filter(c=>c===k).length;let o=Math.round(cnt("o")/n*10),x=Math.round(cnt("x")/n*10);if(o+x>10)x=10-o;const sk=10-o-x;return m.o.repeat(o)+m.x.repeat(x)+m.s.repeat(sk)}
-function cheerLine(pct){return pct===100?"🏆 CTマスター":pct>=80?"🥇 CT上級者":pct>=50?"🥈 CT中級者":"🥉 CT見習い"}
-function shareText(mode,cond,seq,n,okN,pct,avg){return `${mode}${cond?`（${cond}）`:""}\n${seqGrid(seq)}\n${okN}/${n}問正解${okN?`・平均${fmt(avg)}秒`:""}　${cheerLine(pct)}`}
+  // アプリが開かなかったときだけ、サイトに留まったままコピーの窓を出す（勝手にブラウザのXへは移らない）
+  setTimeout(()=>{if(done()||document.hidden)return;shareFallback(a)},2500)});
+// シェア文：1問ずつの結果（🟢正解 🔴不正解 ⚪スキップ。20問まで、10個ごとに改行）と、それぞれの数
+function seqGrid(seq){if(!seq||seq.length>20)return"";const m={o:"🟢",x:"🔴",s:"⚪"};const a=[...seq].map(c=>m[c]);return a.length>10?a.slice(0,10).join("")+"\n"+a.slice(10).join(""):a.join("")}
+function seqCount(seq,n,okN){const c=k=>[...(seq||"")].filter(x=>x===k).length;const o=seq?c("o"):okN,x=seq?c("x"):n-okN,sk=seq?c("s"):0;
+  return [`🟢正解${o}`,x?`🔴不正解${x}`:"",sk?`⚪スキップ${sk}`:""].filter(Boolean).join("　")}
+function cheerLine(pct){return pct===100?"🏆【CTマスター】":pct>=80?"🥇【CT上級者】":pct>=50?"🥈【CT中級者】":"🥉【CT見習い】"}
+// 正解率は10マスのゲージ、速さは⚡5段階（報告・ガードは暗算があるので基準をゆるく）
+function gauge(pct){const g=Math.round(pct/10);return "🟩".repeat(g)+"⬜".repeat(10-g)}
+function bolts(avg,slow){const t=avg/1000,lim=slow?[2,3,4.5,6]:[1,1.5,2.5,3.5];const n=t<lim[0]?5:t<lim[1]?4:t<lim[2]?3:t<lim[3]?2:1;return "⚡".repeat(n)+"⬜".repeat(5-n)}
+function shareText(mode,cond,seq,n,okN,pct,avg,slow){return `${mode}${cond?`（${cond}）`:""}\n${cheerLine(pct)}\n\n正解率 ${gauge(pct)} ${pct}%${okN?`\n速さ　 ${bolts(avg,slow)} 平均${fmt(avg)}秒`:""}\n${seqCount(seq,n,okN)}`}
 // ---- 応援コードのお願い（結果画面に控えめに。初回は出さず、閉じたら3日後、入力済みなら二度と出さない） ----
 const CHEER_GAP=3*24*3600*1000;
 function cheerCard(){if(IN_CLAUDE)return"";const c=store.get("cheer",{});c.n=(c.n||0)+1;store.set("cheer",c);
