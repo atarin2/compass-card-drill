@@ -137,8 +137,8 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 @keyframes pulse{50%{opacity:.6}}
 .mode.learn .learnbtn{background:var(--water);box-shadow:0 3px 0 color-mix(in srgb,var(--water) 60%,#000);color:#fff}
 .mode .best{margin:0}
-.pad .go.wide{grid-column:1/-1}
-.pad.prec{gap:6px}.pad.prec button{padding:7px 0;font-size:21px}.pad.prec .go{font-size:17px}
+/* 小数入力：最後の段を4つに分けて、段の数をふつうのテンキーと同じにする */
+.pad.prec{grid-template-columns:repeat(12,1fr)}.pad.prec button{grid-column:span 4}.pad.prec button:nth-last-child(-n+4){grid-column:span 3}
 .hchip{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--accent);color:var(--accent-ink);margin-right:4px}
 .hbox summary{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:8px;list-style:none;cursor:pointer;padding:11px 12px;border:2px solid var(--accent);border-radius:12px;background:var(--surface)}
 .hbox summary::-webkit-details-marker{display:none}.hbox .hv{color:var(--accent);font-size:13px}.hbox[open] .hv{transform:rotate(180deg)}
@@ -253,9 +253,16 @@ h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0;text-wra
 @media (max-height:760px){.pad button{padding:9px 0;font-size:22px}.readout{font-size:38px}.screen{gap:10px}}
 /* 小さい画面（Safariのバー表示中・iPhone SEなど）でもスクロールなしで収める */
 .fcard .art{height:min(50vh,118vw,max(150px,calc(100dvh - 386px)))}
-@media (max-height:690px){.card.has-art .art{max-height:31vh}.app{padding-block:10px 12px;gap:10px}.fname{height:7.6em;margin-top:6px}}
+@media (max-height:690px){.card.has-art .art{max-height:29vh}.app{padding-block:10px 12px;gap:10px}.fname{height:7.6em;margin-top:6px}}
 @media (max-height:640px){.card.has-art .art{max-height:28vh}}
 @media (max-height:600px){.card.has-art .art{max-height:22vh}.tq{gap:1px}.tq .sm{font-size:11px;line-height:1.35}.pad{gap:6px}.pad button{padding:6px 0;font-size:20px}.acts button{padding:14px 0}.readout{font-size:32px}.screen{gap:8px}.card{padding-top:10px;padding-bottom:10px}.hud{font-size:12px}.brand{font-size:17px}.fname{height:6.6em}.fname b{font-size:20px}.tq .when{font-size:22px}.mic{padding:8px 12px}}
+@media (max-height:690px){.card.has-art .ability{font-size:11.5px;line-height:1.4}}
+@media (max-height:600px){.card.has-art .cname{font-size:15px}.card.has-art .ability{font-size:10.5px;line-height:1.3}}
+@media (max-height:500px){.app{padding-block:6px 6px;gap:6px}.screen{gap:6px}.brand small,.ask h2{display:none}.card.has-art{padding-top:6px;padding-bottom:6px}.card.has-art .art{max-height:16vh}.card.has-art .cname{font-size:13px;line-height:1.2}.card.has-art .ability{line-height:1.2}.pad{gap:4px}.pad button{padding:2px 0}.readout{font-size:28px}.tg,.skip{padding:5px 12px;font-size:14px}.mic{padding:5px 10px;font-size:14px}.tq{line-height:1.2}.tq .when{font-size:18px}.tq .sm{font-size:10px;line-height:1.2}.card.has-art{gap:3px 12px}.fcard{padding:8px}.fcard .art{height:max(120px,calc(100dvh - 330px))}.fbtns button{padding-top:9px;padding-bottom:9px}}
+/* 入力した数字の欄が右に切れないように、縮むのはボタン側にする */
+.ask .readout{flex:none;white-space:nowrap}.ask .askb{min-width:0}.mic{flex-shrink:1;line-height:1.2}
+@media (max-width:400px){.mic{min-width:0;padding:10px 10px;font-size:15px}.mic.on{font-size:12px;padding:10px 6px;letter-spacing:-.02em}.readout{min-width:2.6ch}}
+@media (max-width:350px){.tq .sm{font-size:10px!important;line-height:1.25!important}.readout{min-width:2.6ch;font-size:28px}.askb{gap:6px}.tg{min-width:0;padding:8px 14px;font-size:14px}.askb .skip{padding:8px 10px;font-size:13px}.mic{min-width:0;padding:8px 10px;font-size:13px}.mic.on{font-size:11px;padding:8px 4px;letter-spacing:-.06em}}
 .row .th{width:38px;height:52px;border-radius:5px;object-fit:cover;border:1px dashed var(--line);display:grid;place-items:center;font-size:16px;color:var(--muted);background:none;padding:0}
 .row.tap{cursor:pointer;grid-template-columns:6px auto 1fr auto auto}
 .row .ck{width:22px;height:22px;margin:0;accent-color:var(--accent,#3b82f6)}
@@ -517,6 +524,7 @@ const CARDS = [
 
 // 更新履歴（新しい日付を先頭に追加していく）
 const UPDATES=[
+["2026/11/24",["「ホーム画面に追加」の案内が練習中も残り、画面に収まらなくなる問題を修正（案内はホームだけに表示）","「あとで」を付けてスキップすると保存されない問題を修正","スキップがある回は、ベストの記録とポストの称号の対象外に（ポストには答えた数を表示）","「間違えた・あとでのカード」の枚数を、実際に出題される枚数に合わせました","復習のあとの「もう一度」で、同じカードをもう一度出すように","CT短縮で切り捨ての答えが不正解になることがある問題を修正（アーチャーの「集う者達」）","自分の音源の読み込み中に報告練習・ガードを始めると、ホームに戻される問題を修正","パソコンの結果画面でEnterキーを押すと、間違いの回数が増える問題を修正","小数で答えるテンキー・長い効果の文・🎤と入力欄が、小さい画面でも収まるように調整"]],
 ["2026/10/27",["結果画面に「𝕏 結果をポストする」ボタンを追加（Xアプリがあればアプリで開きます。Xアプリ内で開いているときも投稿できます。#コンパスCTドリル 付き）"]],
 ["2026/10/26",["iPhoneのSafariでツールバーが出ているときや、iPhone SEなど小さい画面でも、スクロールなしで収まるように調整","桜華忠臣・アーチャーのモードから、採用されにくい状態異常カード（アペプ・大魔王・ワキンヤンなど）を除外","某＜なにがし＞のモードは、周・連の貫通カードだけに（近・遠は採用されにくいため）"]],
 ["2026/10/25",["結果画面に、ときどき応援コードのご案内を表示","🎤は1回押すとON、もう1回押すとOFF（問題が変わっても聞き続け、ONの間はBGMと効果音を止める）","別のアプリに切り替えたときにBGMが流れ続ける問題を修正","🎤の反応を速くし、聞いている間のブツブツ音を対策（聞いている間はBGMを一時停止）","iPhoneのChrome・Xなどのアプリ内ブラウザ・ホーム画面のアイコンから開いたときなど、声が使えない場面では🎤ボタンを出さないように","🎤で聞いている間にBGMが大きくなることがある問題を修正","報告練習・ガードの答え合わせに、暗算しやすい式を表示（報告は「60−CTを足す」、ガードは「そのまま引く」）","「📣 報告練習」モードを追加（敵がカードを使った時刻から、次に上がる時刻を秒だけで答える）","「🛡 ガードが切れる時刻」モードを追加（すぐ報告できるよう秒だけで答える）","更新があったとき、ホームに「未確認の更新があります」とお知らせを表示","クイズ中・カード名モード中に、右上の🔊ボタンでBGMと効果音をまとめてミュートできるように","クイズやカード名モードを途中でやめても、ホームの「続きから」で再開できるように","カード名を覚えるモードで、秒数クイズで選んだキャラの対象カードしか出なかった問題を修正","秒数クイズに「スキップ」ボタンを追加（答えずに次へ。成績・復習には入りません）","奴隷狩り密売団 ケルマトのCTを32秒に修正"]],
@@ -554,13 +562,14 @@ if(!IN_CLAUDE&&/github\.io$/.test(location.hostname)){const g=document.createEle
 function applyTheme(){const t=settings.theme;if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme")}
 applyTheme();
 function home(){
-  showMute(false);
+  showMute(false); showA2hs(true);
   stopTimer(); if(tgame){clearTimeout(tgame.auto);tgame=null;stopMic()} game=null; listDraw=null; flash=null;
   $("#navBtn").textContent="📋 カード一覧"; $("#navBtn").onclick=list;
   const miss=getMiss();
-  const weak=live().filter(c=>miss[c.name]>0);
+  const hh=heroOf();
+  const weak=live().filter(c=>miss[c.name]>0&&!EXCL.has(c.name)&&(!hh||hh.f(c)));
   const best=store.get("best",{});
-  const hh=heroOf(); const bk=`${settings.mode}-${settings.range}${hh?"-"+hh.id+(settings.precise?"p":""):""}`;
+  const bk=`${settings.mode}-${settings.range}${hh?"-"+hh.id+(settings.precise?"p":""):""}`;
   const b=best[bk];
   const rs=resumeInfo();
   view.innerHTML=`
@@ -577,7 +586,7 @@ function home(){
     <div class="field"><span class="label">問題数</span>
       ${seg("count",[{v:10,t:"10問"},{v:20,t:"20問"},{v:0,t:"範囲すべて"}],settings.count)}</div>
     <button class="primary" id="start" type="button">スタート</button>
-    <button class="sub" id="weak" type="button" ${weak.length?"":"disabled"}>間違えた・あとでのカード（${weak.length}枚）</button>
+    <button class="sub" id="weak" type="button" ${weak.length?"":"disabled"}>間違えた・あとでのカード（${hh?esc(hh.name)+"の対象 ":""}${weak.length}枚）</button>
     <div class="best">
       <div><span class="label">この設定のベスト</span><b>${b?b.score+"%":"—"}</b><span class="note">${b?"平均 "+fmt(b.avg)+" 秒":"まだ記録なし"}</span></div>
     </div>
@@ -710,6 +719,8 @@ function drawMute(){const b=$("#muteBtn");b.textContent=settings.mute?"🔇":"�
 $("#muteBtn").onclick=()=>{settings.mute=settings.mute?0:1;save();drawMute();if(settings.mute)SND.stopBgm();else{SND.ensure();if(SND.started&&!SND.paused)SND.startBgm()}};
 drawMute();
 const showMute=v=>{$("#muteBtn").style.display=v?"":"none"};
+// ホーム画面追加の案内はホームだけに出す（練習中に出ると画面に収まらなくなる）
+const showA2hs=v=>{$("#a2hs").style.display=v?"":"none"};
 // iPhoneは「タップ完了（touchend/click）」の中でしか音を鳴らせないので、鳴るまで毎回試す
 const KEV=["touchend","click","keydown"];
 const kick=()=>{const c=SND.ensure();if(!c)return;
@@ -754,7 +765,7 @@ function startFlash(onlyMada){
   else{pool=poolFor(true).filter(c=>IMG[c.name]);if(!pool.length)pool=live().filter(c=>IMG[c.name]&&!EXCL.has(c.name));}
   if(!pool.length){home();return}
   SND.startBgm();
-  showMute(true);
+  showMute(true); showA2hs(false);
   flash={hist:[],deck:shuffle(pool),i:0,known:0,again:0,total:pool.length,open:false,edit:false,mada:onlyMada===true};
   $("#navBtn").textContent="やめる"; $("#navBtn").onclick=home;
   drawFlash();
@@ -808,7 +819,7 @@ function startTime(kind){
   let pool=kind==="up"?poolFor(true):guardCards(); if(!pool.length){home();return}
   let qs=shuffle(pool); if(settings.count)qs=qs.slice(0,settings.count);
   qs=qs.map(c=>{const d=kind==="up"?c.ct:durOf(c);const at=d+5+Math.floor(Math.random()*(175-d-5+1));return{card:c,d,at:Math.min(175,at),ans:Math.min(175,at)-d}});
-  SND.startBgm(); showMute(true);
+  SND.startBgm(); showMute(true); showA2hs(false);
   tgame={kind,qs,i:0,log:[]};
   $("#navBtn").textContent="やめる"; $("#navBtn").onclick=()=>{stopMic();home()};
   tAsk();
@@ -949,7 +960,8 @@ function cheerLine(pct){return pct===100?"🏆【CTマスター】":pct>=80?"�
 // 正解率は10マスのゲージ、速さは⚡5段階（報告・ガードは暗算があるので基準をゆるく）
 function gauge(pct){const g=Math.round(pct/10);return "🟩".repeat(g)+"⬜".repeat(10-g)}
 function bolts(avg,slow){const t=avg/1000,lim=slow?[2,3,4.5,6]:[1,1.5,2.5,3.5];const n=t<lim[0]?5:t<lim[1]?4:t<lim[2]?3:t<lim[3]?2:1;return "⚡".repeat(n)+"⬜".repeat(5-n)}
-function shareText(mode,cond,seq,n,okN,pct,avg,slow){return `${mode}${cond?`（${cond}）`:""}\n${cheerLine(pct)}\n\n正解率 ${gauge(pct)} ${pct}%${okN?`\n速さ　 ${bolts(avg,slow)} 平均${fmt(avg)}秒`:""}\n${seqCount(seq,n,okN)}`}
+function shareText(mode,cond,seq,n,okN,pct,avg,slow){const sk=[...(seq||"")].filter(x=>x==="s").length; // スキップがある回は称号の代わりに答えた数を出す
+  return `${mode}${cond?`（${cond}）`:""}\n${sk?`📝 ${n+sk}問中${n}問に回答`:cheerLine(pct)}\n\n${sk?"答えた中の正解率":"正解率"} ${gauge(pct)} ${pct}%${okN?`\n速さ　 ${bolts(avg,slow)} 平均${fmt(avg)}秒`:""}\n${seqCount(seq,n,okN)}`}
 // ---- 応援コードのお願い（結果画面に控えめに。初回は出さず、閉じたら3日後、入力済みなら二度と出さない） ----
 const CHEER_GAP=3*24*3600*1000;
 function cheerCard(){if(IN_CLAUDE)return"";const c=store.get("cheer",{});c.n=(c.n||0)+1;store.set("cheer",c);
@@ -995,20 +1007,24 @@ const HEROES=[
   {id:"rinne",name:"糸廻 輪廻",desc:"罠カード",m:.9,f:c=>c.type==="罠"}];
 const heroOf=()=>HEROES.find(h=>h.id===settings.hero)||null;
 const exact=c=>{const h=game&&game.hero;return h?Math.round(c.ct*h.m*10)/10:c.ct};
+// 丸める前の値（例：23×0.65＝14.95）。切り捨て・切り上げはこちらで判定する
+const rawCt=c=>{const h=game&&game.hero;return h?Math.round(c.ct*h.m*100)/100:c.ct};
 const eff=c=>exact(c);
-const isOk=(c,v)=>{const h=game&&game.hero,x=exact(c);if(!h)return v===c.ct;if(game.precise)return Math.abs(v-x)<1e-6;return v===Math.floor(x+1e-9)||v===Math.ceil(x-1e-9)};
+const isOk=(c,v)=>{const h=game&&game.hero,x=exact(c);if(!h)return v===c.ct;if(game.precise)return Math.abs(v-x)<1e-6;const w=rawCt(c);return v===Math.floor(w)||v===Math.ceil(w)};
 function poolFor(noHero){const h=noHero?null:heroOf();const ok=live().filter(c=>!EXCL.has(c.name)&&(!h||h.f(c)));if(settings.range===-1){const a=ok.filter(c=>IMG[c.name]);if(a.length)return a;settings.range=30}return ok.slice(0,settings.range)}
 
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
 
-function start(pool,isWeak){
+// same＝前の回のキャラ設定（結果画面からのやり直し用）。なければ今の設定を使う
+function start(pool,isWeak,same){
   pool=pool.filter(c=>!EXCL.has(c.name)&&!DEL.has(c.name)); if(!pool.length) return;
   let qs=shuffle(pool);
   if(settings.count&&!isWeak) qs=qs.slice(0,settings.count);
   SND.startBgm();
-  const hero=heroOf(); if(hero)qs=qs.filter(c=>hero.f(c)); if(!qs.length){home();return}
-  showMute(true);
-  game={qs,i:0,log:[],isWeak,hero,precise:!!(hero&&settings.precise),key:`${settings.mode}-${settings.range}${hero?"-"+hero.id+(settings.precise?"p":""):""}`};
+  const hero=same?same.hero:heroOf(); if(hero)qs=qs.filter(c=>hero.f(c)); if(!qs.length){home();return}
+  showMute(true); showA2hs(false);
+  const precise=!!(hero&&(same?same.precise:settings.precise));
+  game={qs,i:0,log:[],isWeak,hero,precise,key:`${settings.mode}-${settings.range}${hero?"-"+hero.id+(precise?"p":""):""}`};
   $("#navBtn").textContent="やめる"; $("#navBtn").onclick=home;
   ask();
 }
@@ -1039,7 +1055,7 @@ function render(fb){
     </article>
     ${fb||""}
     <div class="ask"><div class="askl"><h2>${prompt}</h2><div class="askb"><button type="button" id="laterTg" class="tg${game.cur.later?" on":""}" aria-pressed="${!!game.cur.later}">${game.cur.later?"☑":"☐"} あとで</button><button type="button" id="skipBtn" class="skip" aria-label="答えずに次のカードへ（記録しない）">スキップ ▶</button></div></div>${game.step==="ct"?`<div class="readout ${game.input?"":"empty"}" id="ro">${game.input||"00"}<span>秒</span></div>`:""}</div>
-    ${game.step==="ct"?`<div class="pad${game.precise?" prec":""}" id="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button type="button" data-d="${d}">${d}</button>`).join("")}<button type="button" class="del" data-k="del" aria-label="1文字消す">⌫</button><button type="button" data-d="0">0</button>${game.precise?`<button type="button" data-d=".">.</button><button type="button" class="go wide" data-k="go">決定</button>`:`<button type="button" class="go" data-k="go">決定</button>`}</div>`
+    ${game.step==="ct"?`<div class="pad${game.precise?" prec":""}" id="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button type="button" data-d="${d}">${d}</button>`).join("")}<button type="button" class="del" data-k="del" aria-label="1文字消す">⌫</button><button type="button" data-d="0">0</button>${game.precise?`<button type="button" data-d=".">.</button><button type="button" class="go" data-k="go">決定</button>`:`<button type="button" class="go" data-k="go">決定</button>`}</div>`
     :`<div class="acts" id="acts">${["無","短","長"].map(a=>`<button type="button" data-a="${a}">${a}<small>${ACT_NOTE[a]}</small></button>`).join("")}</div>`}`;
   $("#hint").onclick=()=>{$("#ab").textContent=c.ab};
   $("#skipBtn").onclick=skip;
@@ -1058,7 +1074,10 @@ function startTimer(){stopTimer();timerId=setInterval(()=>{const el=$("#clock");
 function stopTimer(){if(timerId)clearInterval(timerId);timerId=null}
 
 view.addEventListener("click",e=>{if(e.target.id==="laterTg"&&game&&!document.getElementById("next"))setLater(!game.cur.later)});
-function setLater(v){game.cur.later=v;const t=$("#laterTg");if(t){t.classList.toggle("on",v);t.setAttribute("aria-pressed",v);t.textContent=(v?"☑":"☐")+" あとで"}}
+// 「あとで」は押した時点で保存する（スキップ・やめるでも残るように）。外したら押す前の回数に戻す
+function setLater(v){const n=game.cur.card.name,m=getMiss();
+  if(v){game.cur.prevMiss=m[n]||0;m[n]=Math.max(1,game.cur.prevMiss)}else if(game.cur.prevMiss)m[n]=game.cur.prevMiss;else delete m[n];
+  store.set("miss",m);game.cur.later=v;const t=$("#laterTg");if(t){t.classList.toggle("on",v);t.setAttribute("aria-pressed",v);t.textContent=(v?"☑":"☐")+" あとで"}}
 function submitCt(){
   if(!game.input)return;
   const c=game.cur.card, v=+game.input, ok=isOk(c,v);
@@ -1071,7 +1090,7 @@ const byName=n=>CARDS.find(c=>c.name===n);
 function saveQuiz(i){if(!game)return;store.set("resume",{k:"quiz",q:game.qs.map(c=>c.name),i,log:game.log.map(x=>({n:x.card.name,ok:x.ok,ms:x.ms,ansCt:x.ansCt,ansAct:x.ansAct,later:!!x.later})),w:!!game.isWeak,h:game.hero?game.hero.id:"",p:!!game.precise,key:game.key,skip:game.skip||0,seq:game.seq||""})}
 function saveFlash(){const f=flash;if(!f)return;store.set("resume",{k:"flash",q:f.deck.map(c=>c.name),i:f.i,known:f.known,again:f.again,total:f.total,mada:f.mada})}
 function resumeInfo(){const r=store.get("resume",null);if(!r||!r.q)return null;const qs=r.q.map(byName);if(qs.some(c=>!c)||r.i>=qs.length)return null;return Object.assign({},r,{qs})}
-function resume(){const r=resumeInfo();if(!r){home();return}SND.startBgm();showMute(true);
+function resume(){const r=resumeInfo();if(!r){home();return}SND.startBgm();showMute(true);showA2hs(false);
   if(r.k==="flash"){flash={hist:[],deck:r.qs,i:r.i,known:r.known,again:r.again,total:r.total,open:false,edit:false,mada:r.mada};$("#navBtn").textContent="やめる";$("#navBtn").onclick=home;drawFlash();return}
   const hero=HEROES.find(h=>h.id===r.h)||null;
   game={qs:r.qs,i:r.i,log:r.log.map(x=>Object.assign({},x,{card:byName(x.n)})).filter(x=>x.card),isWeak:r.w,hero,precise:!!(hero&&r.p),key:r.key,skip:r.skip||0,seq:r.seq||""};
@@ -1084,11 +1103,12 @@ function finish(){
   const c=game.cur.card; game.cur.ms=performance.now()-game.t0;
   game.log.push(game.cur);game.seq=(game.seq||"")+(game.cur.ok?"o":"x");
   const miss=getMiss();
+  if(game.cur.later)miss[c.name]=game.cur.prevMiss||0;
   if(game.cur.ok){if(miss[c.name])miss[c.name]=Math.max(0,miss[c.name]-1)}else miss[c.name]=(miss[c.name]||0)+1;
   if(game.cur.later)miss[c.name]=Math.max(1,miss[c.name]||0);
   if(!miss[c.name])delete miss[c.name];
   store.set("miss",miss);
-  const parts=[]; if(settings.mode!=="act")parts.push(`CT <b>${eff(c)}</b> 秒${game.hero?`<small class="calc">（元${c.ct}秒×${game.hero.m}${!game.precise&&exact(c)%1?`／${Math.floor(exact(c))}でも${Math.ceil(exact(c))}でも正解`:""}）</small>`:""}`); if(settings.mode!=="ct")parts.push(`発動 <b>${c.act}</b>`);
+  const parts=[]; if(settings.mode!=="act")parts.push(`CT <b>${eff(c)}</b> 秒${game.hero?`<small class="calc">（元${c.ct}秒×${game.hero.m}${!game.precise&&rawCt(c)%1?`／${Math.floor(rawCt(c))}でも${Math.ceil(rawCt(c))}でも正解`:""}）</small>`:""}`); if(settings.mode!=="ct")parts.push(`発動 <b>${c.act}</b>`);
   if(game.cur.ok)SND.ok();else SND.ng();
   const fb=game.cur.ok
     ?`<div class="fb ok"><span class="big">○</span><span class="ans">${parts.join("　")}<br>${fmt(game.cur.ms)} 秒</span></div>`
@@ -1112,21 +1132,21 @@ function result(){
   if(!game.log.length){home();return}
   const L=game.log, ok=L.filter(x=>x.ok), pct=Math.round(ok.length/L.length*100);
   const avg=ok.length?ok.reduce((s,x)=>s+x.ms,0)/ok.length:0;
-  if(!game.isWeak&&ok.length){const best=store.get("best",{});const b=best[game.key];
+  if(!game.isWeak&&!game.skip&&ok.length){const best=store.get("best",{});const b=best[game.key];
     if(!b||pct>b.score||(pct===b.score&&avg<b.avg)){best[game.key]={score:pct,avg};store.set("best",best)}}
   const wrong=L.filter(x=>!x.ok), slow=ok.slice().sort((a,b)=>b.ms-a.ms).slice(0,3);
   $("#navBtn").textContent="📋 カード一覧"; $("#navBtn").onclick=list;
   view.innerHTML=`
-    <div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>${game.skip?`<p class="note">スキップ ${game.skip}枚（成績・復習には入りません）</p>`:""}
+    <div class="score"><b class="num">${pct}</b><span>% 正解（${ok.length} / ${L.length}）</span></div>${game.skip?`<p class="note">スキップ ${game.skip}枚（成績には入りません。スキップがある回はベストに記録しません）</p>`:""}
     <div class="stats"><div>正解の平均<b>${ok.length?fmt(avg):"—"}</b>秒</div><div>最速<b>${ok.length?fmt(Math.min(...ok.map(x=>x.ms))):"—"}</b>秒</div></div>${cheerCard()}
     ${wrong.length?`<span class="label">間違えたカード</span><div class="rows">${wrong.map(x=>rowHtml(x.card,true,x)).join("")}</div>`:`<p class="note">全問正解です。</p>`}
     ${slow.length?`<span class="label">時間がかかったカード</span><div class="rows">${slow.map(x=>rowHtml(x.card,false,null,fmt(x.ms)+"秒")).join("")}</div>`:""}
     ${wrong.length?`<button class="primary" id="retry" type="button">間違えた ${wrong.length} 枚をもう一度</button>`:""}
     ${shareBtn(shareText("⏱ カード秒数ドリル",[game.hero?game.hero.name+"短縮"+(game.precise?"・小数":""):"",game.isWeak?"復習":rangeName(settings.range)].filter(Boolean).join("・"),game.seq,L.length,ok.length,pct,avg))}
-    <button class="sub" id="again" type="button">同じ設定でもう一度</button>
+    <button class="sub" id="again" type="button">${game.isWeak?"同じカードでもう一度":"同じ設定でもう一度"}</button>
     <button class="sub" id="back" type="button">ホームへ</button>`;
-  if(wrong.length)$("#retry").onclick=()=>start(wrong.map(x=>x.card),true);
-  $("#again").onclick=()=>start(poolFor(),false);
+  if(wrong.length)$("#retry").onclick=()=>start(wrong.map(x=>x.card),true,game);
+  $("#again").onclick=()=>game.isWeak?start(game.qs,true,game):start(poolFor(),false);
   $("#back").onclick=home;
 }
 
@@ -1136,7 +1156,7 @@ function rowHtml(c,showAns,x,extra){
 }
 
 function list(){
-  showMute(false);
+  showMute(false); showA2hs(false);
   stopTimer(); if(tgame){clearTimeout(tgame.auto);tgame=null;stopMic()} game=null; flash=null;
   $("#navBtn").textContent="戻る"; $("#navBtn").onclick=home;
   const sort=store.get("sort","use"); const cat=store.get("cat",""), fel=store.get("fel",""), frar=store.get("frar","");
@@ -1203,7 +1223,7 @@ document.addEventListener("keydown",e=>{
   if(!game||e.target.tagName==="INPUT")return;
   const nx=document.getElementById("next");
   if(nx&&(e.key==="Enter"||e.key===" ")){e.preventDefault();nx.click();return}
-  if(nx)return;
+  if(nx||!(document.getElementById("pad")||document.getElementById("acts")))return; // 結果画面などでは何もしない
   if(game.step==="ct"){if(/^[\d.]$/.test(e.key))typeDigit(e.key);else if(e.key==="Backspace")del();else if(e.key==="Enter")submitCt()}
   else{const m={"1":"無","2":"短","3":"長",q:"無",w:"短",e:"長"}[e.key];if(m)submitAct(m)}
 });
@@ -1217,20 +1237,22 @@ const DB={
   async all(){const db=await this.open();return new Promise((res,rej)=>{const m={};const r=db.transaction("img").objectStore("img").openCursor();r.onsuccess=()=>{const c=r.result;if(c){m[c.key]=c.value;c.continue()}else res(m)};r.onerror=()=>rej(r.error)})}
 };
 function imgCount(){return live().filter(c=>IMG[c.name]).length}
-DB.all().then(m=>{for(const k in m){if(k==="__bgm__"){SND.setOwn(m[k],false);SND.ownStat="この端末に保存済みの音源を使います。";continue}IMG[k]=URL.createObjectURL(m[k])}if(game||flash)return;if(listDraw)listDraw();else home()}).catch(()=>{});
+DB.all().then(m=>{for(const k in m){if(k==="__bgm__"){SND.setOwn(m[k],false);SND.ownStat="この端末に保存済みの音源を使います。";continue}IMG[k]=URL.createObjectURL(m[k])}if(game||flash||tgame)return;if(listDraw)listDraw();else home()}).catch(()=>{});
 
 let editing=null;
+// ホームを開いているときだけ描き直す（練習中・一覧のときにホームへ戻さない）
+const refreshHome=()=>{if(!game&&!flash&&!tgame&&!listDraw)home()};
 function pickFor(card){editing={card};const f=$("#file");f.value="";f.click()}
 $("#bgmFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;
   SND.stopBgm();settings.bgmSrc="own";settings.bgm=1;save();
-  SND.ownStat="音声を取り出しています…";if(!game&&!flash)home();
+  SND.ownStat="音声を取り出しています…";refreshHome();
   let blob=f,note="";
   try{blob=await extractAudio(f);note=`音声だけを取り出しました（${(blob.size/1048576).toFixed(1)}MB）。`}catch(err){note="音声だけの取り出しはできなかったので、ファイルをそのまま使います。"}
   SND.setOwn(blob);SND.startBgm();
   let ok=false;try{await DB.put("__bgm__",blob);const back=(await DB.all())["__bgm__"];ok=!!back}catch(err){}
   try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(err){}
   SND.ownStat=ok?note+"この端末に保存したので、次からは選び直さなくて大丈夫です。":note+"⚠ この端末に保存できませんでした（容量オーバーなど）。今回だけ再生できます。短い動画で試してください。";
-  if(!game&&!flash)home()};
+  refreshHome()};
 async function extractAudio(file){
   const A=window.AudioContext||window.webkitAudioContext,ac=SND.ensure()||new A();
   const buf=await file.arrayBuffer();
@@ -1301,7 +1323,7 @@ function queueSync(){if(!syncRef)return;clearTimeout(syncTimer);syncTimer=setTim
 function applyRemote(d){
   NICK=Object.fromEntries(Array.isArray(d.nick)?d.nick:[]);EXCL=new Set(d.excl||[]);DEL=new Set(d.del||[]);if(d.mada)MADA=new Set(d.mada);
   try{localStorage.setItem("cdrill:nick",JSON.stringify(NICK));localStorage.setItem("cdrill:excl",JSON.stringify([...EXCL]));localStorage.setItem("cdrill:del",JSON.stringify([...DEL]));localStorage.setItem("cdrill:mada",JSON.stringify([...MADA]))}catch(e){}
-  if(game||flash)return; if(listDraw&&!$("#nk"))list(); else if(!listDraw)home();
+  if(game||flash||tgame)return; if(listDraw&&!$("#nk"))list(); else if(!listDraw)home();
 }
 (async()=>{try{
   if(!window.claude||!claude.use)return;
