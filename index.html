@@ -301,6 +301,23 @@ body[data-scr="play"] .toast{bottom:auto;top:58px}
 .cheerc .cb{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sharepre{white-space:pre-wrap;text-align:left;font-family:var(--f-body);font-size:13px;line-height:1.5;margin:0;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);max-height:30vh;overflow:auto;user-select:all;-webkit-user-select:all}
 #shareOpen{display:flex;align-items:center;justify-content:center;text-decoration:none;color:inherit}
+/* ご意見・不具合の報告 */
+.frate{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.frate button{min-height:46px;border:1px solid var(--line);background:var(--surface);border-radius:12px;font-family:var(--f-num);font-weight:700;font-size:20px;padding:0}
+.frate button[aria-pressed="true"]{background:var(--accent);border-color:transparent;color:var(--accent-ink)}
+.fends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:-2px}
+.fauto{display:flex;flex-direction:column;gap:2px;font-size:12px;line-height:1.45;color:var(--muted);overflow-wrap:anywhere}
+.fauto b{color:var(--ink)}
+#fbMsg:empty{display:none}
+#fbText{min-height:84px;word-break:normal}
+a.primary,a.sub{display:flex;align-items:center;justify-content:center;text-decoration:none}a.sub{color:inherit}
+.fbcard{gap:4px}.fbcard b{font-size:15px;overflow-wrap:anywhere}
+.fbthx{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:8px 0 4px}.fbthx .big{font-size:40px;line-height:1.1}
+.fbask{gap:6px;padding:8px 10px 12px 14px}
+.fbask .fq{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fbl{align-self:center}.fbr{align-self:flex-start;margin:-8px 0 -8px -6px}
+.fbtag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:0 6px;margin-right:5px;background:color-mix(in srgb,var(--ok) 16%,var(--surface));color:var(--ok)}
+@media (max-height:520px){.fauto{font-size:11px;line-height:1.35}}
 @media (prefers-reduced-motion:reduce){#fall{display:none}*{animation:none!important;transition:none!important}}
 </style>
 
@@ -552,7 +569,10 @@ const CARDS = [
 ].sort((a,b)=>b[7]-a[7]).map((c,i)=>({id:i,name:c[0],ct:c[1],act:c[2],rar:c[3],el:c[4],type:c[5],ab:c[6],use:c[7]}));
 
 // 更新履歴（新しい日付を先頭に追加していく）
+// ご意見（フィードバック）から直した項目は、文の先頭に 💬 を付ける。更新履歴で「ご意見から」の印が付き、設定の「ご意見から直した件数」にも数えられる
+const FB_MARK="💬";
 const UPDATES=[
+["2026/11/26",["「ご意見・不具合の報告」を追加：設定・ホームの下・カードのくわしい画面から、使いにくい点やCT・データの間違いをその場で送れます","入力は「使いやすさ・種類・ひとこと」だけ。状況（アプリの版・画面と練習モード・端末とブラウザの種類・ホーム画面から開いたか）は自動で付き、送る前に毎回表示します。名前・メールアドレス・成績は送りません","結果の画面で、ときどき使いやすさをお聞きします（閉じれば、しばらく出ません）","ご意見から直した項目には、この更新履歴で「ご意見から」の印を付けてお知らせします","お問い合わせとプライバシーポリシーを更新"]],
 ["2026/11/25",["画面を大きく作り直し：下のタブ（練習・カード・成績・設定）で切り替え","モードを選ぶと、そのモードの設定だけが出るように（範囲と問題数もモードごとに）","練習中のカード絵を大きくし、どの大きさの画面でもスクロールなしで収まるように","秒数クイズに「4択」「カードの種類で絞る」「苦手を多めに」を追加","「成績」を追加：カードの覚えた度、苦手なカード、連続日数、最近の結果","カード一覧：画像で並べる表示、秒数や状態での絞り込み、CTごとの見出し。検索は空白・大文字小文字・ひらがなカタカナの違いを気にせず探せます","カードを押すと、効果・キャラのCT短縮・短縮名などをまとめて見られるように","設定に「データの引っ越し」を追加（別の端末やホーム画面のアイコンへ移せます）","「続きから」を秒数クイズとカード名で別々に保存","カード名の「あとで」が、一周すると必ず消えていたのを修正","BGMは練習を始めたときだけ流し、🔊はどの画面にも表示","🎤で「ゼロ秒」も読み取れるように","結果の画面でも短縮名を表示"]],
 ["2026/11/24",["「ホーム画面に追加」の案内が練習中も残り、画面に収まらなくなる問題を修正（案内はホームだけに表示）","「あとで」を付けてスキップすると保存されない問題を修正","スキップがある回は、ベストの記録とポストの称号の対象外に（ポストには答えた数を表示）","「間違えた・あとでのカード」の枚数を、実際に出題される枚数に合わせました","復習のあとの「もう一度」で、同じカードをもう一度出すように","CT短縮で切り捨ての答えが不正解になることがある問題を修正（アーチャーの「集う者達」）","自分の音源の読み込み中に報告練習・ガードを始めると、ホームに戻される問題を修正","パソコンの結果画面でEnterキーを押すと、間違いの回数が増える問題を修正","小数で答えるテンキー・長い効果の文・🎤と入力欄が、小さい画面でも収まるように調整"]],
 ["2026/10/27",["結果画面に「𝕏 結果をポストする」ボタンを追加（Xアプリがあればアプリで開きます。Xアプリ内で開いているときも投稿できます。#コンパスCTドリル 付き）"]],
@@ -661,8 +681,10 @@ function home(){
     <button type="button" class="today" data-go="stats"><span class="tr"><span><b>${lv[3]}</b>/ ${live().length}枚 覚えた</span><span>今日 <b>${d.today}</b>問${d.streak>1?`　<b>${d.streak}</b>日連続`:""}</span></span>${meter(lv)}</button>
     ${a2hsHtml()}
     <div class="foot"><span>作った人 <a href="https://x.com/atr_d4c" target="_blank" rel="noopener" data-ev="click-x" data-evt="Xのリンク">@atr_d4c</a></span><button type="button" class="code" id="cheer">C-orYP <small>応援コードをコピー</small></button></div>
+    <button type="button" class="lnk fbl" id="fbHome">💬 ご意見・不具合の報告</button>
     <p class="note">非公式ツールです。CTはメダル補正なし。<br>データ：<a href="https://yagitools.cloudfree.jp/compas-deck/" target="_blank" rel="noopener">やぎシミュ</a>（2026/9/28 更新分）<br>使用率：<a href="https://compass-tournament.vercel.app/?view=usage" target="_blank" rel="noopener">#コンパス大会データ管理室</a>（2024/12〜2026/10）</p>`;
   $("#cheer").onclick=e=>copyCheer(e.currentTarget,"copy-cheer-code","応援コードをコピー");
+  $("#fbHome").onclick=()=>openFb({src:"home"});
   view.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setup(b.dataset.mode));
   view.querySelectorAll("[data-res]").forEach(b=>b.onclick=()=>resume(b.dataset.res));
   view.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{store.set(b.dataset.del,null);home()});
@@ -734,6 +756,7 @@ function prefs(){
       ${seg("bgmSrc",[{v:"built",t:"デフォルト音源"},{v:"own",t:"自分の音源",s:SND.ownUrl?esc(SND.ownName.slice(0,18)):"未設定"}],settings.bgmSrc)}
       <div class="two"><button class="sub" id="bgmPick" type="button">${SND.ownUrl?"音源を変更":"動画・音源を選ぶ"}</button><button class="sub" id="bgmTest" type="button">${SND.ownPlaying?"一時停止":"再生"}</button></div>
       ${SND.ownUrl?`<button class="sub danger" id="bgmDel" type="button">自分の音源を削除</button>`:""}${SND.ownStat?`<p class="note">${SND.ownStat}</p>`:""}`:""}</section>
+    <section class="panel"><h3>ご意見・不具合の報告</h3><p class="note">使いにくい所、CTやデータの間違い、ほしい機能を教えてください。「使いやすさ・種類・ひとこと」だけで送れます（名前やメールアドレスは不要です）。</p><button type="button" class="primary" id="fbOpen">ご意見を送る</button><p class="note">${fbFixed()?`これまでに、ご意見から <b>${fbFixed()}件</b> 直しました。`:""}直した内容は、下の更新履歴に「ご意見から」の印を付けてお知らせします。</p></section>
     <section class="panel"><h3>データの引っ越し</h3><p class="note">短縮名・成績・あとで・削除したカードなどを、別の端末やホーム画面のアイコンへ移せます。自分で登録した画像と音源は移せません。</p><div class="two"><button type="button" class="sub" id="bkOut">書き出す</button><button type="button" class="sub" id="bkIn">読み込む</button></div><button type="button" class="lnk danger" id="rst">成績をリセット</button></section>
     <section class="panel author"><h3>作った人</h3>
       <div class="arow"><span class="al">X</span><a href="https://x.com/atr_d4c" target="_blank" rel="noopener" data-ev="click-x" data-evt="Xのリンク">@atr_d4c</a></div>
@@ -741,9 +764,11 @@ function prefs(){
       <div class="arow"><span class="al">応援コード</span><button type="button" class="code" id="cheer">C-orYP <small>タップでコピー</small></button></div>
       <p class="note">応援してもらえると、更新を続けるモチベーションになります🙏<br>（#コンパスのホーム → コミュニティ → プレイヤー応援）</p></section>
     <section class="panel legal">
-      <details id="updBox"><summary>更新履歴（最終更新 ${UPDATES[0][0]}）</summary><div class="udl">${UPDATES.map(([d,items])=>`<div class="ud"><b>${d}</b><ul>${items.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</div></details>
+      <details id="updBox"><summary>更新履歴（最終更新 ${UPDATES[0][0]}）</summary><div class="udl">${UPDATES.map(([d,items])=>`<div class="ud"><b>${d}</b><ul>${items.map(updItem).join("")}</ul></div>`).join("")}</div></details>
       <details><summary>お問い合わせ</summary><div class="lg">
-        <p>不具合の報告やご意見は、X（<a href="https://x.com/atr_d4c" target="_blank" rel="noopener" data-ev="click-x-contact" data-evt="お問い合わせのXリンク">@atr_d4c</a>）のDMまでお願いします。</p>
+        <p>不具合の報告やご意見は、アプリの中から送れます（名前やメールアドレスは不要です）。</p>
+        <p><button type="button" class="sub" id="fbContact">ご意見・不具合の報告を開く</button></p>
+        <p>X（<a href="https://x.com/atr_d4c" target="_blank" rel="noopener" data-ev="click-x-contact" data-evt="お問い合わせのXリンク">@atr_d4c</a>）のDMでも受け付けています。アプリから送ったご意見には返信できないので、返信がほしいときはXのDMでお願いします。</p>
         <p>個人で作っているため、返信やデータの更新にはお時間をいただくことがあります。</p></div></details>
       <details><summary>利用規約・注意事項</summary><div class="lg">
         <p><b>非公式のツールです。</b>#コンパス【戦闘摂理解析システム】の運営会社とは関係ありません。運営会社へのお問い合わせはご遠慮ください。</p>
@@ -757,10 +782,12 @@ function prefs(){
         <p>自分で登録したカード画像やBGMの音源は、その端末のブラウザの中にだけ保存され、外には送られません。</p>
         <p>文字のデザイン（フォント）をGoogle Fontsから読み込んでいるため、表示するときに端末のIPアドレスなどがGoogleに送られます（<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Googleのプライバシーポリシー</a>）。</p>
         <p>「データの引っ越し」の文字は端末の中で作られ、自分で貼り付けたところ以外には送られません。</p>
+        <p>「ご意見・不具合の報告」は、自分で「送る」を押したときだけ送られます。送られるのは、<b>書いた内容</b>（使いやすさ・種類・ひとこと）と、状況を知るための<b>自動情報</b>（アプリの版、開いていた画面と練習モード、端末とブラウザの種類、画面の大きさ、ホーム画面のアイコンから開いたかどうか。カードの報告では、そのカードの名前とCTなどのデータ）です。<b>名前・メールアドレス・成績・短縮名は送りません</b>（ひとことに自分で書いた場合を除きます）。いっしょに送られる内容は、送る前に毎回表示します。送信にはGoogleフォームを使っていて、内容はGoogleのサービスを通って作った人に届きます（<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Googleのプライバシーポリシー</a>）。</p>
         <p class="env-claude">このページはclaude.ai上で公開しているため、ページの配信についてはclaude.ai（Anthropic）のプライバシーポリシーも適用されます。</p><p class="env-web">このページはGitHub Pagesで公開しているため、ページの配信についてはGitHubのプライバシーポリシーも適用されます。</p></div></details>
     </section>`;
   keep.forEach(id=>{const x=id&&document.getElementById(id);if(x)x.open=true});
   $("#cheer").onclick=e=>copyCheer(e.currentTarget,"copy-cheer-code");
+  $("#fbOpen").onclick=()=>openFb({src:"settings"});$("#fbContact").onclick=()=>openFb({src:"contact"});
   $("#updBox").ontoggle=e=>{if(e.target.open)markUpd()};
   bindSet(view,k=>{
     if(k==="theme")applyTheme();
@@ -779,7 +806,7 @@ function prefs(){
 }
 // ---- データの引っ越し（文字にして書き出し・読み込み） ----
 const BK_HEAD="CTDRILL1:";
-function backupText(){const d={};["nick","excl","del","mada","miss","best","settings","stat","days","hist","cheer"].forEach(k=>{const v=store.get(k,null);if(v!=null)d[k]=v});d.del=[...DEL];
+function backupText(){const d={};["nick","excl","del","mada","miss","best","settings","stat","days","hist","cheer","fb"].forEach(k=>{const v=store.get(k,null);if(v!=null)d[k]=v});d.del=[...DEL];
   const u=new TextEncoder().encode(JSON.stringify(d));let s="";u.forEach(b=>s+=String.fromCharCode(b));return BK_HEAD+btoa(s)}
 // 読み込んだ文字を確かめて、決まった形のものだけ取り出す（おかしなものは入れない）
 function backupRead(t){t=String(t).replace(/\s/g,"");const i=t.indexOf(BK_HEAD);if(i<0)return null;
@@ -795,6 +822,7 @@ function backupRead(t){t=String(t).replace(/\s/g,"");const i=t.indexOf(BK_HEAD);
     if(Array.isArray(raw.hist))o.hist=raw.hist.filter(h=>obj(h)&&MODES[h.m]&&num(h.t)&&num(h.pct)!=null&&num(h.n)&&num(h.o)!=null).slice(0,30).map(h=>({t:h.t,m:h.m,pct:h.pct,n:h.n,o:h.o,c:typeof h.c==="string"?h.c.slice(0,40):""}));
     if(obj(raw.settings)){o.settings=cleanSettings(raw.settings)}
     if(obj(raw.cheer)){o.cheer={n:num(raw.cheer.n)||0};if(raw.cheer.done===true)o.cheer.done=true;if(num(raw.cheer.last))o.cheer.last=raw.cheer.last}
+    if(obj(raw.fb)){o.fb={n:num(raw.fb.n)||0};if(raw.fb.done===true)o.fb.done=true;["last","x","sent","closed"].forEach(k=>{if(num(raw.fb[k]))o.fb[k]=raw.fb[k]})}
     return o}catch(e){return null}}
 async function copyText(t,ta){try{await navigator.clipboard.writeText(t);return true}catch(e){try{ta.focus();ta.select();return document.execCommand("copy")}catch(e2){return false}}}
 function backupOut(){const t=backupText();sheet("",()=>({title:"データを書き出す",body:`<p class="note">下の文字をコピーして、移したい先で「読み込む」に貼り付けてください。文字はこの端末の中で作っていて、どこにも送られません。</p><textarea class="inp" id="bkT" readonly></textarea>`,foot:`<button type="button" class="primary" id="bkC">コピー</button>`}),el=>{const ta=el.querySelector("#bkT");ta.value=t;el.querySelector("#bkC").onclick=async e=>{e.currentTarget.textContent=await copyText(t,ta)?"コピーしました":"長押しで全部選んでコピーしてください"}})}
@@ -886,17 +914,18 @@ function startFlash(onlyMada){
   if(!pool.length){home();return}
   SND.startBgm();
   flash={hist:[],deck:shuffle(pool),i:0,known:0,again:0,total:pool.length,open:false,edit:false,mada:onlyMada===true,marked:new Set()};
+  lastMode="カード名（"+(onlyMada===true?"あとで":rangeName(settings.flashRange))+"）";
   drawFlash();
 }
 function drawFlash(){
   const f=flash;
   if(f.i>=f.deck.length){
     setScr("result");store.set("resumeF",null);
-    const left=madaCards().length;
-    view.innerHTML=`<h2>おつかれさま</h2><section class="panel m-learn"><div class="kpi"><div><b>${f.total}</b>見た枚数</div><div><b>${f.total-f.marked.size}</b>すぐ分かった</div><div><b>${f.marked.size}</b>あとで</div></div></section>${cheerCard()}
+    const left=madaCards().length,ch=cheerCard(),ask=fbAskHtml(!!ch);
+    view.innerHTML=`<h2>おつかれさま</h2><section class="panel m-learn"><div class="kpi"><div><b>${f.total}</b>見た枚数</div><div><b>${f.total-f.marked.size}</b>すぐ分かった</div><div><b>${f.marked.size}</b>あとで</div></div></section>${ch}
       ${left?`<button class="primary" id="fMada" type="button">「あとで」の${left}枚をもう一度</button>`:`<p class="note">「あとで」のカードはありません。</p>`}
       <div class="two"><button class="sub" id="fAgain" type="button">はじめから</button><button class="sub" data-go="home" type="button">ホームへ</button></div>
-      ${shareBtn(`🃏 カード秒数ドリル｜カード名を覚える\n${f.total}枚を一通りチェック、${f.known}枚覚えた！`)}`;
+      ${shareBtn(`🃏 カード秒数ドリル｜カード名を覚える\n${f.total}枚を一通りチェック、${f.known}枚覚えた！`)}${ask}`;
     $("#fAgain").onclick=()=>startFlash(f.mada&&left>0);const m=$("#fMada");if(m)m.onclick=()=>startFlash(true);return}
   setScr("play");saveFlash();
   const c=f.deck[f.i];
@@ -936,6 +965,7 @@ function startTime(kind,cards){
   qs=qs.map(c=>{const d=kind==="up"?c.ct:durOf(c);const at=Math.min(175,d+5+Math.floor(Math.random()*(175-d-5+1)));return{card:c,d,at,ans:at-d}});
   SND.startBgm();
   tgame={kind,qs,i:0,log:[],seq:""};
+  lastMode=kind==="up"?"報告練習（"+(cards?"やり直し":rangeName(settings.repRange))+"）":"ガード"+(cards?"（やり直し）":"");
   tAsk();
 }
 function tAsk(){const g=tgame,q=g.qs[g.i],c=q.card,up=g.kind==="up";g.input="";g.done=false;g.t0=performance.now();
@@ -976,10 +1006,11 @@ function tResult(){stopTimer();stopMic();const g=tgame,L=g.log,up=g.kind==="up";
   setScr("result");
   const r=score(L),wrong=L.filter(x=>!x.ok),sk=L.length<g.qs.length?g.qs.length-L.length:0;
   recHist({m:g.kind,pct:r.pct,n:L.length,o:r.ok.length,c:up?rangeName(settings.repRange):""});
-  view.innerHTML=`<div class="screen ${up?"m-rep":"m-grd"}"><h2>${up?"報告練習":"ガード"}の結果</h2>${resHead(r,L.length,sk)}${cheerCard()}
+  const ch=cheerCard(),ask=fbAskHtml(!!ch);
+  view.innerHTML=`<div class="screen ${up?"m-rep":"m-grd"}"><h2>${up?"報告練習":"ガード"}の結果</h2>${resHead(r,L.length,sk)}${ch}
     ${wrong.length?`<button class="primary" id="tRetry" type="button">間違えた${wrong.length}枚をもう一度</button>`:""}
     <div class="two"><button class="sub" id="tAgain" type="button">もう一度</button><button class="sub" data-go="home" type="button">ホームへ</button></div>
-    ${shareBtn(shareText(up?"📣 カード秒数ドリル｜報告練習":"🛡 カード秒数ドリル｜ガードが切れる時刻","",g.seq,L.length,r.ok.length,r.pct,r.avg,true))}
+    ${shareBtn(shareText(up?"📣 カード秒数ドリル｜報告練習":"🛡 カード秒数ドリル｜ガードが切れる時刻","",g.seq,L.length,r.ok.length,r.pct,r.avg,true))}${ask}
     ${wrong.length?`<h3>間違えたカード</h3><div class="rows">${wrong.map(x=>rowHtml(x.q.card,`${mmss(x.q.at)}に使用 → 正解 ${x.q.ans%60}秒（あなた ${x.v}秒）`,true,x.q.d)).join("")}</div>`:""}</div>`;
   $("#tAgain").onclick=()=>startTime(g.kind);const t=$("#tRetry");if(t)t.onclick=()=>startTime(g.kind,wrong.map(x=>x.q.card))}
 // 音声入力（対応ブラウザのみ。「2分4秒」「2:04」「204」などを読み取る）
@@ -1082,6 +1113,93 @@ view.addEventListener("click",e=>{const id=e.target.closest("button")?.id;if(!id
   if(id==="cheerCopy"){cheerSet({last:Date.now()});copyCheer(e.target.closest("button"),"copy-cheer-code-result")}
   else if(id==="cheerDone"){cheerSet({done:true});track("cheer-done","応援コード入力済み");const c=$("#cheerC");if(c)c.innerHTML=`<div class="ct thx"><b>ありがとうございます！🙏</b></div>`;setTimeout(()=>$("#cheerM")?.remove(),1400)}
   else if(id==="cheerLater"){cheerSet({last:Date.now()});track("cheer-later","応援のお願い：また今度");$("#cheerM")?.remove()}});
+// ---- ご意見・不具合の報告（Googleフォームへ送る） ----
+// 送り先のフォームと、各質問の番号（entry ID）。フォームを作り直したら、ここだけ書きかえる
+// 種類（FB_TYPES）の文言は、フォームの選択肢と一字一句同じにすること（違うと、その回答は記録されない）
+const FB_FORM={id:"1FAIpQLSc0dlFDUcNPvHCIT1BpfzUvFXds1PMHiOY9mBYJAMsvyAuS2g",rate:"entry.574073944",type:"entry.1049508609",text:"entry.1849089885",auto:"entry.500397097"};
+const FB_TYPES=["不具合","CTやデータの間違い","ほしい機能","その他"];
+const FB_BASE=`https://docs.google.com/forms/d/e/${FB_FORM.id}/`;
+const FB_MAX=500; // ひとことの文字数の上限
+// この画面から直接送れるか。claude.aiの中などでは外へ送れないので、フォームを開くリンクに切り替える
+const FB_DIRECT=!IN_CLAUDE&&typeof fetch==="function";
+let lastMode=""; // 最後に練習したモード（自動情報に付ける。ページを開き直すと消える）
+const SCR_NAME={home:"練習（ホーム）",list:"カード",stats:"成績",prefs:"設定",play:"練習中",result:"結果"};
+// 更新履歴の1行。先頭に FB_MARK がある項目には「ご意見から」の印を付ける
+const updItem=t=>t.startsWith(FB_MARK)?`<li><span class="fbtag">ご意見から</span>${esc(t.slice(FB_MARK.length).trim())}</li>`:`<li>${esc(t)}</li>`;
+const fbFixed=()=>UPDATES.reduce((n,u)=>n+u[1].filter(t=>t.startsWith(FB_MARK)).length,0);
+// 端末とブラウザは、種類と版だけにまとめる（くわしい識別情報は送らない）
+function fbDevice(){const ua=navigator.userAgent;let m;const v=r=>(m=ua.match(r))?m[1]:"";
+  const os=(m=ua.match(/iPhone OS (\d+)[_.](\d+)/))?`iPhone iOS${m[1]}.${m[2]}`:(m=ua.match(/iPad; CPU OS (\d+)[_.](\d+)/))?`iPad iPadOS${m[1]}.${m[2]}`:IOS_DEV?"iPad"
+    :(m=ua.match(/Android (\d+)/))?`Android${m[1]}`:/Windows/.test(ua)?"Windows":/CrOS/.test(ua)?"Chromebook":/Mac OS X/.test(ua)?"Mac":/Linux/.test(ua)?"Linux":"不明";
+  const br=/Twitter/i.test(ua)?"Xアプリ内":/Line\//.test(ua)?"LINEアプリ内":/Instagram/.test(ua)?"Instagramアプリ内":/FBAN|FBAV/.test(ua)?"Facebookアプリ内":/TikTok|musical_ly|BytedanceWebview/i.test(ua)?"TikTokアプリ内"
+    :/EdgiOS|EdgA|Edg\//.test(ua)?"Edge"+v(/Edg(?:iOS|A)?\/(\d+)/):/CriOS/.test(ua)?"Chrome"+v(/CriOS\/(\d+)/):/FxiOS|Firefox/.test(ua)?"Firefox"+v(/(?:FxiOS|Firefox)\/(\d+)/)
+    :/OPR\/|OPiOS/.test(ua)?"Opera":/SamsungBrowser/.test(ua)?"Samsung"+v(/SamsungBrowser\/(\d+)/):/; wv\)/.test(ua)?"アプリ内ブラウザ":/Chrome\//.test(ua)?"Chrome"+v(/Chrome\/(\d+)/)
+    :/Safari\//.test(ua)?"Safari"+v(/Version\/(\d+)/):STANDALONE?"ホーム画面アイコン":IOS_DEV?"アプリ内ブラウザ":"不明";
+  return `${os}・${br}・画面${innerWidth}×${innerHeight}`}
+// 自動で付ける情報（[見出し,中身] の並び）。窓に出す内容と、送る内容は必ず同じものを使う
+function fbAuto(ctx){const a=[["版",UPD_KEY],["画面",(SCR_NAME[scr]||scr)+(ctx.card?"・カードのくわしい画面":"")],["練習モード",lastMode||"まだなし"],["端末",fbDevice()],["ホーム画面から起動",STANDALONE?"はい":"いいえ"]];
+  if(ctx.card)a.push(["カード",`${ctx.card.name}（CT${ctx.card.ct}秒・発動${ctx.card.act}・${ctx.card.type}・${ctx.card.rar}）`]);return a}
+// フォームへ送る。相手の返事は読めない仕組み（no-cors）なので、通信そのものが失敗したときだけ false になる
+async function fbSend(d){const b=new URLSearchParams();
+  if(d.rate)b.append(FB_FORM.rate,String(d.rate));if(d.type)b.append(FB_FORM.type,d.type);if(d.text)b.append(FB_FORM.text,d.text);b.append(FB_FORM.auto,d.auto);
+  const ac=typeof AbortController!=="undefined"?new AbortController():null,tm=setTimeout(()=>{if(ac)ac.abort()},12000);
+  try{await fetch(FB_BASE+"formResponse",{method:"POST",mode:"no-cors",credentials:"omit",referrerPolicy:"no-referrer",body:b,signal:ac?ac.signal:undefined});return true}catch(e){return false}finally{clearTimeout(tm)}}
+// 直接送れないとき用：書いた内容を入れた状態でフォームを開くリンク
+function fbLink(d){const p=new URLSearchParams({usp:"pp_url"});
+  if(d.rate)p.append(FB_FORM.rate,String(d.rate));if(d.type)p.append(FB_FORM.type,d.type);if(d.text)p.append(FB_FORM.text,d.text);p.append(FB_FORM.auto,d.auto);return FB_BASE+"viewform?"+p}
+let fbDraft={rate:0,type:"",text:""}; // 書きかけ（窓を閉じても残る。送ったら消す）
+const fbSet=v=>{const f=store.get("fb",{});Object.assign(f,v);store.set("fb",f);return f};
+// ctx＝{src:入口（settings/home/card/result/contact）, card:報告するカード, rate:最初に選んでおく評価, back:閉じたあとに開き直す画面}
+function openFb(ctx){
+  const card=ctx.card||null,st=card?{rate:0,type:FB_TYPES[1],text:""}:fbDraft;if(ctx.rate)st.rate=ctx.rate;
+  const auto=fbAuto(ctx);let phase="edit",busy=false,fail=false;
+  const data=()=>({rate:st.rate,type:st.type,text:st.text.trim().slice(0,FB_MAX),auto:auto.map(([k,v])=>k+": "+v).join("\n")});
+  const ready=()=>!!(card||st.rate||st.text.trim());
+  const finish=()=>{fbSet({done:true,sent:(store.get("fb",{}).sent||0)+1});if(!card)fbDraft={rate:0,type:"",text:""};track("fb-sent","ご意見の送信完了（"+ctx.src+"・"+(st.type||"種類なし")+"）");$("#fbAsk")?.remove()};
+  track("fb-open-"+ctx.src,"ご意見の窓を開く（"+ctx.src+"）");
+  sheet("fbs",()=>phase==="done"?{title:"ご意見・不具合の報告",
+      body:`<div class="fbthx" role="status"><div class="big" aria-hidden="true">🙏</div><b>送りました。ありがとうございます！</b><p class="note">返信はできませんが、すべて読みます。<br>直した内容は、更新履歴に「ご意見から」の印を付けてお知らせします。</p></div>`,
+      foot:`<button type="button" class="primary" id="fbClose">閉じる</button>`}
+    :{title:card?"カードの間違いを報告":"ご意見・不具合の報告",
+      body:(card?`<div class="panel fbcard"><span class="label">報告するカード</span><b>${esc(card.name)}</b><span class="note">今のデータ：CT ${card.ct}秒・発動 ${card.act}（${ACT_NOTE[card.act]||""}）<br>${esc(card.ab)}</span></div>`
+        :`<div class="field"><span class="label" id="fbRL">使いやすさ</span><div class="frate" role="group" aria-labelledby="fbRL">${[1,2,3,4,5].map(n=>`<button type="button" data-rate="${n}">${n}</button>`).join("")}</div><div class="fends"><span>使いにくい</span><span>使いやすい</span></div></div>
+        <div class="field"><span class="label" id="fbTL">種類</span><div class="chips" role="group" aria-labelledby="fbTL">${FB_TYPES.map(t=>`<button type="button" data-type="${esc(t)}">${esc(t)}</button>`).join("")}</div></div>`)
+        +`<div class="field"><label class="label" for="fbText">${card?"どこが違いますか？（わかる範囲で）":"ひとこと（書かなくても送れます）"}</label><textarea class="inp" id="fbText" maxlength="${FB_MAX}" rows="3" placeholder="${card?"例：CTは28秒が正しい／効果の秒数が違う":"例：○○のボタンが押しにくい／△△の機能がほしい"}"></textarea></div>`,
+      foot:`<div class="fauto"><span><b>いっしょに送られる情報：</b>${auto.map(([k,v])=>esc(k)+" "+esc(v)).join("／")}</span><span>名前・メールアドレス・成績は送りません。</span></div>
+        <p class="note danger" id="fbMsg" role="alert">${fail?"送れませんでした。電波のよい所でもう一度送るか、下のボタンからフォームを開いて送ってください（書いた内容は入っています）。":""}</p>
+        ${FB_DIRECT?`<button type="button" class="primary" id="fbSend">${fail?"もう一度送る":"送る"}</button>`:`<p class="note">この画面からは直接送れないため、Googleフォームを開きます。書いた内容は入った状態で開くので、フォームの「送信」を押してください。</p>`}
+        ${!FB_DIRECT||fail?`<a class="${FB_DIRECT?"sub":"primary"}" id="fbLink" target="_blank" rel="noopener" href="${FB_BASE}viewform">Googleフォームを開いて送る</a>`:""}`},
+  (el,redraw)=>{
+    if(phase==="done"){el.querySelector("#fbClose").onclick=closeSheet;return}
+    const ta=el.querySelector("#fbText"),send=el.querySelector("#fbSend"),link=el.querySelector("#fbLink"),msg=el.querySelector("#fbMsg");
+    // 押しても描き直さず、その場で見た目だけ変える（書いている途中の文字とキーボードを消さないため）
+    const upd=()=>{el.querySelectorAll("[data-rate]").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.rate===st.rate));
+      el.querySelectorAll("[data-type]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.type===st.type));
+      if(send)send.disabled=busy||!ready();if(link)link.href=fbLink(data())};
+    ta.value=st.text;ta.oninput=()=>{st.text=ta.value;upd()};
+    el.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{const n=+b.dataset.rate;st.rate=st.rate===n?0:n;upd()});
+    el.querySelectorAll("[data-type]").forEach(b=>b.onclick=()=>{st.type=st.type===b.dataset.type?"":b.dataset.type;upd()});
+    if(link)link.onclick=()=>{track("fb-form-link","ご意見：フォームを開いて送る");fbSet({last:Date.now(),closed:1})};
+    if(send)send.onclick=async()=>{if(busy||!ready())return; // 送信中は押せない（二重に送らない）
+      if(navigator.onLine===false){msg.textContent="インターネットにつながっていないようです。つながってから、もう一度「送る」を押してください（書いた内容は残っています）。";return}
+      busy=true;msg.textContent="";send.textContent="送信中…";upd();
+      const ok=await fbSend(data());busy=false;
+      if(ok)finish();else track("fb-fail","ご意見の送信に失敗");
+      if(!el.isConnected){if(ok)toast("ご意見を送りました。ありがとうございます");return} // 送信中に窓を閉じたとき
+      if(ok)phase="done";else fail=true;redraw()};
+    upd()},
+  ()=>{if(ctx.back)setTimeout(ctx.back,0)});
+}
+// ---- 結果の画面で、ときどき使いやすさを聞く（応援コードの案内と同じ考え方で控えめに） ----
+// 初めの2回は出さない／出したら3日は出さない／✕で閉じたら14日は出さない（3回閉じたら、もう出さない）／送った人には出さない／応援コードの案内とは同時に出さない
+const FB_GAP_SEEN=3*24*3600*1000,FB_GAP_CLOSE=14*24*3600*1000;
+function fbAskHtml(cheerShown){if(!FB_DIRECT)return"";const f=store.get("fb",{});f.n=(f.n||0)+1;
+  const show=!cheerShown&&!f.done&&f.n>=3&&(f.x||0)<3&&!(f.last&&Date.now()-f.last<(f.closed?FB_GAP_CLOSE:FB_GAP_SEEN));
+  if(show){f.last=Date.now();f.closed=0}store.set("fb",f);if(!show)return"";
+  track("fb-ask-shown","結果の画面で使いやすさを聞く");
+  return `<section class="panel fbask" id="fbAsk"><div class="fq"><h3 id="fbAskT">このアプリの使いやすさは？</h3><button type="button" class="a2x" id="fbAskX" aria-label="この質問を閉じる">✕</button></div><div class="frate" role="group" aria-labelledby="fbAskT">${[1,2,3,4,5].map(n=>`<button type="button" data-fbrate="${n}">${n}</button>`).join("")}</div><div class="fends"><span>使いにくい</span><span>使いやすい</span></div></section>`}
+view.addEventListener("click",e=>{const r=e.target.closest("[data-fbrate]");if(r){openFb({src:"result",rate:+r.dataset.fbrate});return}
+  if(e.target.closest("#fbAskX")){fbSet({x:(store.get("fb",{}).x||0)+1,closed:1,last:Date.now()});track("fb-ask-close","使いやすさの質問を閉じる");$("#fbAsk")?.remove()}});
 function save(){store.set("settings",settings)}
 function getMiss(){const m=store.get("miss",{});let ch=false;const o={};
   for(const k in m){if(/^\d+$/.test(k)){ch=true;const c=CARDS[+k];if(c&&c.use>0&&m[k]>0)o[c.name]=m[k]}else o[k]=m[k]}
@@ -1136,6 +1254,7 @@ function start(pool,isWeak,same){
   const precise=!!(hero&&!choice&&(same?same.precise:settings.precise));
   const cond=[hero?hero.name+"短縮"+(precise?"・小数":""):"",choice?"4択":"",isWeak?"復習":rangeName(settings.range)+(settings.qtype?"・"+settings.qtype:"")].filter(Boolean).join("・");
   game={qs,i:0,log:[],isWeak,hero,precise,choice,cond,key:quizKey(hero,precise,choice)};
+  lastMode="秒数クイズ"+(cond?"（"+cond+"）":"");
   ask();
 }
 function ask(){
@@ -1179,9 +1298,10 @@ function saveQuiz(i){if(!game)return;store.set("resume",{k:"quiz",q:game.qs.map(
 function saveFlash(){const f=flash;if(!f)return;store.set("resumeF",{k:"flash",q:f.deck.map(c=>c.name),i:f.i,known:f.known,again:f.again,total:f.total,mada:f.mada,marked:[...f.marked]})}
 function resumeInfo(key){const r=store.get(key,null);if(!r||!Array.isArray(r.q))return null;const qs=r.q.map(byName);if(qs.some(c=>!c)||r.i>=qs.length)return null;return Object.assign({},r,{qs})}
 function resume(key){const r=resumeInfo(key||"resume");if(!r){home();return}SND.startBgm();
-  if(r.k==="flash"){flash={hist:[],deck:r.qs,i:r.i,known:r.known,again:r.again,total:r.total,open:false,edit:false,mada:r.mada,marked:new Set(r.marked||[])};drawFlash();return}
+  if(r.k==="flash"){flash={hist:[],deck:r.qs,i:r.i,known:r.known,again:r.again,total:r.total,open:false,edit:false,mada:r.mada,marked:new Set(r.marked||[])};lastMode="カード名（続きから）";drawFlash();return}
   const hero=HEROES.find(h=>h.id===r.h)||null;
   game={qs:r.qs,i:r.i,log:(r.log||[]).map(x=>Object.assign({},x,{card:byName(x.n)})).filter(x=>x.card),isWeak:r.w,hero,precise:!!(hero&&r.p),choice:!!r.c4,cond:typeof r.cond==="string"?r.cond:r.w?"復習":"",key:r.key,skip:r.skip||0,seq:r.seq||""};
+  lastMode="秒数クイズ"+(game.cond?"（"+game.cond+"）":"");
   ask()}
 function skip(){if(game.done)return;stopTimer();game.skip=(game.skip||0)+1;game.seq=(game.seq||"")+"s";if(game.i>=game.qs.length-1){result();return}game.i++;ask()}
 
@@ -1220,11 +1340,12 @@ function result(){
   const lvUp=[...new Set(L.map(x=>x.card))].filter(c=>level(c)===3).length;
   recHist({m:"quiz",pct:r.pct,n:L.length,o:r.ok.length,c:(game.cond||"").slice(0,40)});
   const wrong=L.filter(x=>!x.ok), slow=r.ok.slice().sort((a,b)=>b.ms-a.ms).slice(0,3);
+  const ch=cheerCard(),ask=fbAskHtml(!!ch);
   view.innerHTML=`<div class="screen m-quiz"><h2>結果</h2>${game.cond?`<p class="note">${esc(game.cond)}</p>`:""}${badge?`<span class="badge">${badge}</span>`:""}
-    ${resHead(r,L.length,game.skip)}${game.skip?`<p class="note">スキップは正解率に入りません。スキップがある回はベストに記録しません。</p>`:""}${lvUp?`<p class="note">今回のカードのうち、${lvUp}枚は「覚えた」カードです。</p>`:""}${cheerCard()}
+    ${resHead(r,L.length,game.skip)}${game.skip?`<p class="note">スキップは正解率に入りません。スキップがある回はベストに記録しません。</p>`:""}${lvUp?`<p class="note">今回のカードのうち、${lvUp}枚は「覚えた」カードです。</p>`:""}${ch}
     ${wrong.length?`<button class="primary" id="retry" type="button">間違えた${wrong.length}枚をもう一度</button>`:""}
     <div class="two"><button class="${wrong.length?"sub":"primary"}" id="again" type="button">${game.isWeak?"同じカードで":"もう一度"}</button><button class="sub" data-go="home" type="button">ホームへ</button></div>
-    ${shareBtn(shareText("⏱ カード秒数ドリル",game.cond||"",game.seq,L.length,r.ok.length,r.pct,r.avg))}
+    ${shareBtn(shareText("⏱ カード秒数ドリル",game.cond||"",game.seq,L.length,r.ok.length,r.pct,r.avg))}${ask}
     ${wrong.length?`<h3>間違えたカード</h3><div class="rows">${wrong.map(x=>rowHtml(x.card,x.ansCt!=null?`あなたの答え ${x.ansCt}秒`:"",true)).join("")}</div>`:""}
     ${slow.length?`<h3>時間がかかったカード</h3><div class="rows">${slow.map(x=>rowHtml(x.card,fmt(x.ms)+"秒")).join("")}</div>`:""}</div>`;
   const g=game;
@@ -1306,6 +1427,7 @@ function cardSheet(c,seq){
     <div class="cd" data-el="${c.el}">${IMG[c.name]?`<img src="${IMG[c.name]}" alt="${esc(c.name)}">`:`<span class="noart">画像なし</span>`}
       <div class="stack" style="gap:7px">${metaChips(c)}<div class="ct">${c.ct}<small>秒</small></div><div class="note">発動：${c.act}（${ACT_NOTE[c.act]||""}）<br>${c.use?`大会使用率 ${c.use}%`:"大会使用率 データなし"}</div><div>${esc(c.ab)}</div></div></div>
     ${NICK[c.name]?`<p class="note">${esc(c.name)}</p>`:""}
+    <button type="button" class="lnk fbr" id="cdFb">このカードの間違いを報告</button>
     ${hs.length?`<div class="panel"><h3>キャラのCT短縮</h3><div class="hct">${hs.map(h=>`<span>${esc(h.name)} <small class="note">×${h.m}</small></span><b>${Math.round(c.ct*h.m*100)/100}秒</b>`).join("")}</div></div>`:""}
     <div class="panel"><h3><span class="dot l${level(c)}"></span>${LV[level(c)]}</h3><p class="note">${st?`これまで ${st.n}回答えて ${st.o}回正解${st.ms?`、前回は${fmt(st.ms)}秒`:""}`:"まだ答えていません"}</p></div>
     ${field("短縮名",`<input class="inp" id="nk" type="text" maxlength="20" placeholder="例：ガブ" value="${esc(NICK[c.name]||"")}" autocomplete="off" enterkeyhint="${seq?"next":"done"}">`)}
@@ -1318,6 +1440,7 @@ function cardSheet(c,seq){
     el.querySelector("#tEx").onchange=e=>{if(e.target.checked)EXCL.delete(c.name);else EXCL.add(c.name);saveExcl()};
     el.querySelector("#tMs").onchange=e=>{const m=getMiss();if(e.target.checked)m[c.name]=1;else delete m[c.name];store.set("miss",m)};
     const md=el.querySelector("#tMd");if(md)md.onchange=e=>{if(e.target.checked)MADA.add(c.name);else MADA.delete(c.name);saveMada()};
+    el.querySelector("#cdFb").onclick=()=>{saveNk();const cc=c;openFb({src:"card",card:cc,back:()=>cardSheet(cc,seq)})};
     el.querySelector("#pick").onclick=()=>{saveNk();pickFor(c)};
     el.querySelector("#cdDel").onclick=()=>{saveNk();if(DEL.has(c.name))DEL.delete(c.name);else{DEL.add(c.name);EXCL.delete(c.name);saveExcl()}store.set("del",[...DEL]);toast(DEL.has(c.name)?"削除しました（一覧の下から戻せます）":"一覧に戻しました");redraw()}},
   ()=>{editing=null;cardRedraw=null;if(scr==="list"&&listDraw)listDraw();else if(scr==="stats")stats()});
