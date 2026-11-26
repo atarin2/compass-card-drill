@@ -250,6 +250,12 @@ body[data-scr="play"] .screen{height:100%;min-height:0;gap:8px}
 .lbar{position:sticky;top:0;z-index:10;background:var(--bg);margin:0 -16px;padding:8px 16px;display:flex;flex-direction:column;gap:8px}
 .lrow{display:grid;grid-template-columns:1fr auto auto;gap:7px}
 .lrow .sub{padding:6px 12px;min-height:46px;white-space:nowrap}
+/* 検索欄の案内文だけ少し小さくする（入力する文字は16pxのまま。16px未満だとiPhoneで画面が拡大されるため） */
+#q::placeholder{font-size:14px}
+/* 何も入力していない間は、消すボタン（×）の場所を空けない。その分だけ案内文に使える幅が広がる（入力を始めると×は出る） */
+#q:placeholder-shown::-webkit-search-cancel-button{display:none}
+/* 幅のせまい画面では、右の2つのボタンの余白を少しつめて検索欄を広くする（「絞り込み 4」と数字が付いても案内文が切れないように） */
+@media (max-width:389px){.lrow .sub{padding:6px 9px}}
 .lrow .sub.on{border-color:var(--accent);color:var(--accent)}
 .fpanel{max-height:54vh;overflow:auto}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}
@@ -572,7 +578,7 @@ const CARDS = [
 // ご意見（フィードバック）から直した項目は、文の先頭に 💬 を付ける。更新履歴で「ご意見から」の印が付き、設定の「ご意見から直した件数」にも数えられる
 const FB_MARK="💬";
 const UPDATES=[
-["2026/11/26",["「ご意見・不具合の報告」を追加：設定・ホームの下・カードのくわしい画面から、使いにくい点やCT・データの間違いをその場で送れます","入力は「使いやすさ・種類・ひとこと」だけ。状況（アプリの版・画面と練習モード・端末とブラウザの種類・ホーム画面から開いたか）は自動で付き、送る前に毎回表示します。名前・メールアドレス・成績は送りません","結果の画面で、ときどき使いやすさをお聞きします（閉じれば、しばらく出ません）","ご意見から直した項目には、この更新履歴で「ご意見から」の印を付けてお知らせします","お問い合わせとプライバシーポリシーを更新"]],
+["2026/11/26",["「ご意見・不具合の報告」を追加：設定・ホームの下・カードのくわしい画面から、使いにくい点やCT・データの間違いをその場で送れます","入力は「使いやすさ・種類・ひとこと」だけ。状況（アプリの版・画面と練習モード・端末とブラウザの種類・ホーム画面から開いたか）は自動で付き、送る前に毎回表示します。名前・メールアドレス・成績は送りません","結果の画面で、ときどき使いやすさをお聞きします（閉じれば、しばらく出ません）","ご意見から直した項目には、この更新履歴で「ご意見から」の印を付けてお知らせします","お問い合わせとプライバシーポリシーを更新","カード一覧の検索欄の案内文が、途中で切れていたのを修正"]],
 ["2026/11/25",["画面を大きく作り直し：下のタブ（練習・カード・成績・設定）で切り替え","モードを選ぶと、そのモードの設定だけが出るように（範囲と問題数もモードごとに）","練習中のカード絵を大きくし、どの大きさの画面でもスクロールなしで収まるように","秒数クイズに「4択」「カードの種類で絞る」「苦手を多めに」を追加","「成績」を追加：カードの覚えた度、苦手なカード、連続日数、最近の結果","カード一覧：画像で並べる表示、秒数や状態での絞り込み、CTごとの見出し。検索は空白・大文字小文字・ひらがなカタカナの違いを気にせず探せます","カードを押すと、効果・キャラのCT短縮・短縮名などをまとめて見られるように","設定に「データの引っ越し」を追加（別の端末やホーム画面のアイコンへ移せます）","「続きから」を秒数クイズとカード名で別々に保存","カード名の「あとで」が、一周すると必ず消えていたのを修正","BGMは練習を始めたときだけ流し、🔊はどの画面にも表示","🎤で「ゼロ秒」も読み取れるように","結果の画面でも短縮名を表示"]],
 ["2026/11/24",["「ホーム画面に追加」の案内が練習中も残り、画面に収まらなくなる問題を修正（案内はホームだけに表示）","「あとで」を付けてスキップすると保存されない問題を修正","スキップがある回は、ベストの記録とポストの称号の対象外に（ポストには答えた数を表示）","「間違えた・あとでのカード」の枚数を、実際に出題される枚数に合わせました","復習のあとの「もう一度」で、同じカードをもう一度出すように","CT短縮で切り捨ての答えが不正解になることがある問題を修正（アーチャーの「集う者達」）","自分の音源の読み込み中に報告練習・ガードを始めると、ホームに戻される問題を修正","パソコンの結果画面でEnterキーを押すと、間違いの回数が増える問題を修正","小数で答えるテンキー・長い効果の文・🎤と入力欄が、小さい画面でも収まるように調整"]],
 ["2026/10/27",["結果画面に「𝕏 結果をポストする」ボタンを追加（Xアプリがあればアプリで開きます。Xアプリ内で開いているときも投稿できます。#コンパスCTドリル 付き）"]],
@@ -1366,7 +1372,8 @@ let fOpen=false,lEdit=false,lQuery="",lStat="";
 function list(){
   leavePlay(); setScr("list"); lEdit=false;
   const V=k=>store.get(k,""),sort=()=>store.get("sort","use"),vw=()=>store.get("lview","list");
-  view.innerHTML=`<div class="lbar" id="lbar"><div class="lrow"><input class="inp" id="q" type="search" placeholder="名前・短縮名・秒数でさがす" aria-label="カードをさがす" autocomplete="off" value="${esc(lQuery)}"><button type="button" class="sub" id="fBtn" aria-expanded="false">絞り込み</button><button type="button" class="sub" id="vBtn"></button></div><div class="fpanel" id="fp"></div></div>
+  // 検索欄の案内文は、途中で切れない長さにする（幅350未満のせまい画面では、さらに短いものにする）。短縮名でもさがせるのは今までどおり
+  view.innerHTML=`<div class="lbar" id="lbar"><div class="lrow"><input class="inp" id="q" type="search" placeholder="${innerWidth<350?"名前・秒数":"名前・秒数でさがす"}" aria-label="カードをさがす" autocomplete="off" value="${esc(lQuery)}"><button type="button" class="sub" id="fBtn" aria-expanded="false">絞り込み</button><button type="button" class="sub" id="vBtn"></button></div><div class="fpanel" id="fp"></div></div>
     <div class="foot"><span id="lcount"></span><button type="button" class="lnk" id="edBtn">出題するカードを選ぶ</button></div><div id="ebar"></div>
     <div id="rows"></div>
     <section class="panel"><h3>まとめて設定</h3><div id="nkbulk"></div><button class="sub" id="delBtn" type="button"></button><div id="delList"></div><p class="note">使用頻度が低いカードの一部は、画像がないため最初から「削除したカード」に入れています。戻すと、画像なしで出題できます。</p></section>`;
